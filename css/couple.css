@@ -175,7 +175,7 @@ html.lang-te .couple .cpl-lede {
 /* ----- front ----- */
 .couple .cpl-face--front {
   justify-content: center;
-  padding: 7cqi 7cqi 12cqi;
+  padding: 6cqi 7cqi 14cqi;   /* the bottom keeps clear of the chip that sits on the edge */
   gap: 2.6cqi;
   background:
     radial-gradient(120% 70% at 50% 0%, var(--ivory) 0%, rgba(251, 247, 240, 0) 70%),
