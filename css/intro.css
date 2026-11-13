@@ -295,6 +295,7 @@
   inset: 0;
   overflow: hidden;
   container: intro-sheet / size;
+  will-change: transform;      /* its own layer: the mask's clip animates over cached paint */
   color: var(--ink);
   background-color: var(--paper);
   background-image:
@@ -305,14 +306,14 @@
 }
 #intro .intro__sprig {
   position: absolute;
-  width: min(32%, 44cqh);
-  max-width: 160px;
+  width: min(30%, 42cqh);
+  max-width: 150px;
   height: auto;
   opacity: .45;
   pointer-events: none;
 }
 #intro .intro__sprig--tl { top: calc(var(--rd) * .1); left: -9%; transform: rotate(98deg) scaleX(-1); transform-origin: 30% 40%; }
-#intro .intro__sprig--br { bottom: calc(var(--rd) * .05); right: -9%; transform: rotate(-82deg) scaleX(-1); transform-origin: 70% 60%; }
+#intro .intro__sprig--br { bottom: calc(var(--rd) * .02); right: -10%; transform: rotate(-82deg) scaleX(-1); transform-origin: 70% 60%; }
 #intro .intro__rule {
   position: absolute;
   inset: calc(var(--rd) / 2 + 9px) 10px;
@@ -502,6 +503,7 @@ html.lang-te #intro .intro__crest text { font-style: normal; }
   right: 0;
   height: 50%;
   pointer-events: none;
+  will-change: transform;
 }
 #intro .intro__track--top { top: 0; }
 #intro .intro__track--bottom { top: 50%; }

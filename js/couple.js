@@ -84,6 +84,7 @@
     function setFlipped(card, flipped) {
       card.setAttribute("aria-pressed", String(flipped));
       card.classList.toggle("is-flipped", flipped);
+      card.classList.remove("is-peeking");
       if (!state.flippedOnce) { state.flippedOnce = true; root.classList.add("has-flipped"); }
       const target = flipped ? 180 : 0;
       if (!gsap) return;   // CSS fallback rotates the inner via [aria-pressed]
@@ -96,12 +97,12 @@
       });
     }
 
-    /* a one-off "peek" that hints the card can be turned */
+    /* a one-off "peek" that hints the card can be turned. A CSS keyframe (not a tween), so it
+       is never captured by the scene's matchMedia context and can't disturb the flip state. */
     function peek(card) {
       if (reduce || !card || card.getAttribute("aria-pressed") === "true" || state.flippedOnce) return;
-      gsap.timeline()
-        .to(card._inner, { rotationY: 28, duration: 0.45, ease: "power2.out" })
-        .to(card._inner, { rotationY: 0, duration: 1.1, ease: "elastic.out(1, 0.45)" });
+      card.classList.add("is-peeking");
+      setTimeout(() => card.classList.remove("is-peeking"), 1700);
     }
 
     /* ======================================================
@@ -243,7 +244,7 @@
       root.classList.toggle("is-linked", p > 0.7);
       if (p > 0.96 && !state.hinted) {
         state.hinted = true;
-        gsap.delayedCall(0.35, () => peek(cards[0]));
+        setTimeout(() => peek(cards[0]), 350);
       }
     }
 

@@ -155,7 +155,7 @@ html.lang-te .couple .cpl-lede {
 /* moving glare (added by JS); only transform/opacity change */
 .couple .cpl-glare {
   position: absolute; left: -50%; top: -50%; width: 200%; height: 200%;
-  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, .55), rgba(255, 255, 255, .12) 22%, rgba(255, 255, 255, 0) 40%);
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, .8), rgba(255, 255, 255, .28) 18%, rgba(255, 255, 255, 0) 36%);
   opacity: 0;
   pointer-events: none;
   will-change: transform, opacity;
@@ -379,6 +379,18 @@ html.lang-te .couple .cpl-chip { font-size: clamp(9.5px, 4.2cqi, 13px); letter-s
   .couple .cpl-card:hover .cpl-chip { background: var(--emerald-deep); }
   .couple .cpl-card[aria-pressed="true"]:hover .cpl-chip { background: var(--paper); }
 }
+
+/* one-off hint after the scene completes: the card lifts a corner, then springs back */
+.couple .cpl-card.is-peeking .cpl-card__inner { animation: cpl-peek 1.6s linear both; }
+@keyframes cpl-peek {
+  0% { transform: rotateY(0deg); }
+  26% { transform: rotateY(30deg); }
+  50% { transform: rotateY(-9deg); }
+  68% { transform: rotateY(4deg); }
+  84% { transform: rotateY(-1.5deg); }
+  100% { transform: rotateY(0deg); }
+}
+.couple .cpl-card.is-peeking .cpl-card__inner { animation-timing-function: cubic-bezier(.3, .7, .4, 1); }
 
 /* no-GSAP fallback for the flip (GSAP drives it inline when present) */
 .couple.cpl-css-flip .cpl-card__inner { transition: transform .8s var(--ease-spring); }

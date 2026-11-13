@@ -205,23 +205,23 @@
       .fromTo(el.fibersBottom, { y: 0 }, { y: 33, duration: ROLL, ease: "none" }, 0)
       // The words surface line by line, centre-out, as the paper uncovers them:
       // the names first, then the lines above and below, then the edges.
-      .fromTo(L.nameA, wipeFrom, wipeTo, 0.26)
-      .fromTo(L.amp, { opacity: 0, scale: 0.3, rotation: -25 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.55, ease: "back.out(2.2)" }, 0.46)
-      .fromTo(L.nameB, wipeFrom, { ...wipeTo, duration: 0.85 }, 0.5)
-      .fromTo(L.together, rise(), lineIn, 0.62)
-      .fromTo(L.invite, rise(-12), lineIn, 0.7)
-      .fromTo(L.orn, rise(8), { ...lineIn, duration: 0.5 }, 0.8)
-      .fromTo(L.ornPaths, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.8, ease: "power2.inOut" }, 0.8)
-      .fromTo(L.divider, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "none" }, 0.84)
-      .fromTo(L.dividerPaths, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.7, ease: "power2.inOut" }, 0.84)
-      .fromTo(L.crest, { opacity: 0, scale: 0.6, rotation: -30 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.7, ease: "back.out(1.8)" }, 0.9)
-      .fromTo(L.crestRing, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.9, ease: "power2.inOut" }, 0.9)
-      .fromTo(L.date, rise(-12), lineIn, 0.96)
-      .fromTo(L.venue, rise(-12), lineIn, 1.06)
-      .fromTo(el.glint, { x: 0, xPercent: -130 }, { x: 0, xPercent: 230, duration: 1.1, ease: "power1.inOut" }, 0.9)
+      .fromTo(L.nameA, wipeFrom, wipeTo, 0.16)
+      .fromTo(L.amp, { opacity: 0, scale: 0.3, rotation: -25 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.55, ease: "back.out(2.2)" }, 0.36)
+      .fromTo(L.nameB, wipeFrom, { ...wipeTo, duration: 0.85 }, 0.38)
+      .fromTo(L.together, rise(), lineIn, 0.5)
+      .fromTo(L.invite, rise(-12), lineIn, 0.58)
+      .fromTo(L.orn, rise(8), { ...lineIn, duration: 0.5 }, 0.7)
+      .fromTo(L.ornPaths, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.8, ease: "power2.inOut" }, 0.7)
+      .fromTo(L.divider, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "none" }, 0.76)
+      .fromTo(L.dividerPaths, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.7, ease: "power2.inOut" }, 0.76)
+      .fromTo(L.crest, { opacity: 0, scale: 0.6, rotation: -30 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.7, ease: "back.out(1.8)" }, 0.84)
+      .fromTo(L.crestRing, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.9, ease: "power2.inOut" }, 0.84)
+      .fromTo(L.date, rise(-12), lineIn, 0.9)
+      .fromTo(L.venue, rise(-12), lineIn, 1.0)
+      .fromTo(el.glint, { x: 0, xPercent: -130 }, { x: 0, xPercent: 230, duration: 1.1, ease: "power1.inOut" }, 0.85)
       // the last line has landed: offer the button while the foil glint finishes its sweep
       // (a hand pull only reaches ROLL, so this fires only once the scroll is finishing on its own)
-      .call(() => unrolled(), null, 1.56);
+      .call(() => unrolled(), null, 1.5);
     const D = tl.duration();
 
     /* ---------------- idle motion (float, tilt, magnetic seal) ---------------- */
