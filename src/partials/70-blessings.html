@@ -1,0 +1,131 @@
+<section id="blessings" class="blessings" data-nav="Blessings" data-te-nav="ఆశీస్సులు" aria-labelledby="blessings-title">
+  <svg class="blessings__defs" width="0" height="0" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="bl-foil" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#a8874a"/>
+        <stop offset=".3" stop-color="#e4d2a6"/>
+        <stop offset=".55" stop-color="#c8a96a"/>
+        <stop offset=".8" stop-color="#f3e1da"/>
+        <stop offset="1" stop-color="#a8874a"/>
+      </linearGradient>
+      <linearGradient id="bl-heart" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#f3e1da"/>
+        <stop offset=".55" stop-color="#e8c4b8"/>
+        <stop offset="1" stop-color="#c8a96a"/>
+      </linearGradient>
+      <clipPath id="bl-heart-clip"><rect class="love__fill" x="0" y="0" width="32" height="32" transform="translate(0 32)"/></clipPath>
+      <symbol id="bl-heart-path" viewBox="0 0 32 32"><path d="M16 28.5C6 21.5 2 15.5 2 10.5 2 6 5.4 3 9.4 3c3 0 5.4 1.8 6.6 4.3C17.2 4.8 19.6 3 22.6 3 26.6 3 30 6 30 10.5c0 5-4 11-14 18z"/></symbol>
+      <symbol id="bl-wa" viewBox="0 0 24 24"><path d="M3.6 20.4l1.2-4a8.45 8.45 0 1 1 3.3 3.1z"/><path fill="currentColor" stroke="none" d="M9.3 8.3c.3-.4.6-.4.9-.4h.4c.2 0 .4.1.5.4l.7 1.6c.1.3 0 .5-.1.7l-.5.6c-.1.1-.1.3 0 .5.6 1 1.4 1.8 2.4 2.3.2.1.4.1.5 0l.6-.7c.2-.2.4-.2.6-.1l1.5.8c.2.1.3.3.3.5v.3c0 .4-.2.8-.6 1-.6.3-1.4.4-2.3.1a7.9 7.9 0 0 1-4.9-4.9c-.3-.9-.2-1.8.2-2.4z"/></symbol>
+    </defs>
+  </svg>
+
+  <div class="blessings__wrap">
+    <header class="blessings__head">
+      <span class="eyebrow blessings__eyebrow" data-te="ఆశీస్సులు & శుభాకాంక్షలు">Blessings &amp; wishes</span>
+      <h2 class="display blessings__title" id="blessings-title" data-te="మీ ఆశీస్సులు అందించండి">Shower your blessings</h2>
+      <p class="blessings__lead" data-te="హృదయాన్ని నొక్కి పట్టుకుని మీ ప్రేమను పంపండి, లేదా వధూవరులకు ఒక చిన్న శుభాకాంక్ష రాయండి.">Hold the heart to send your love, or leave a little wish for the couple.</p>
+    </header>
+
+    <div class="blessings__row">
+      <!-- hold-to-send -->
+      <div class="love">
+        <button class="love__btn" type="button" aria-describedby="bl-love-count">
+          <span class="love__stage" aria-hidden="true">
+            <span class="love__glow"></span>
+            <span class="love__wave"></span>
+            <span class="love__wave love__wave--2"></span>
+            <svg class="love__ring" viewBox="0 0 120 120" focusable="false">
+              <g class="love__orbit"><g class="love__orbit-js"><circle class="love__dots" cx="60" cy="60" r="58" pathLength="120"/></g></g>
+              <circle class="love__track" cx="60" cy="60" r="52.5"/>
+              <circle class="love__progress" cx="60" cy="60" r="52.5" pathLength="1" transform="rotate(-90 60 60)"/>
+            </svg>
+            <span class="love__disc">
+              <svg class="love__heart" viewBox="0 0 32 32" focusable="false">
+                <use href="#bl-heart-path" class="love__heart-base"/>
+                <g clip-path="url(#bl-heart-clip)"><use href="#bl-heart-path" class="love__heart-full"/></g>
+                <use href="#bl-heart-path" class="love__heart-line"/>
+              </svg>
+            </span>
+          </span>
+          <span class="love__label">Hold to send love</span>
+        </button>
+        <p class="love__count" id="bl-love-count" aria-live="polite"><span class="love__num">0</span> <span class="love__count-label">blessings sent</span></p>
+      </div>
+
+      <!-- wish form -->
+      <form class="wish-form" novalidate>
+        <h3 class="wish-form__title" data-te="మీ శుభాకాంక్ష తెలియజేయండి">Leave a wish</h3>
+        <div class="wish-form__field">
+          <label class="wish-form__label" for="bl-wish-text" data-te="మీ శుభాకాంక్ష">Your wish</label>
+          <textarea class="wish-form__input wish-form__textarea" id="bl-wish-text" name="wish" rows="3" maxlength="140" required
+            placeholder="A few words of love for the couple…" data-te-placeholder="వధూవరుల కోసం ప్రేమతో కొన్ని మాటలు…"
+            aria-describedby="bl-wish-count"></textarea>
+          <span class="wish-form__count" id="bl-wish-count"><span class="wish-form__count-n">0</span>/140</span>
+        </div>
+        <div class="wish-form__field">
+          <label class="wish-form__label" for="bl-wish-name" data-te="మీ పేరు">Your name</label>
+          <input class="wish-form__input" id="bl-wish-name" name="name" type="text" maxlength="40" autocomplete="name"
+            placeholder="Your name" data-te-placeholder="మీ పేరు" />
+        </div>
+        <div class="wish-form__actions">
+          <button class="btn btn--solid wish-form__send" type="submit">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3 10.5 13.5M21 3l-6.5 18-4-7.5L3 9.5z"/></svg>
+            <span data-te="శుభాకాంక్ష పంపండి">Send wish</span>
+          </button>
+          <a class="btn btn--ghost wish-form__wa" href="https://wa.me/" target="_blank" rel="noopener">
+            <svg class="icon" aria-hidden="true"><use href="#bl-wa"/></svg>
+            <span data-te="వాట్సాప్‌లో కుటుంబానికి పంపండి">Send to the family on WhatsApp</span>
+          </a>
+        </div>
+        <p class="wish-form__note">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg>
+          <span data-te="శుభాకాంక్షలు ఈ పరికరంలోనే భద్రమవుతాయి">Wishes are saved on this device</span>
+        </p>
+      </form>
+    </div>
+
+    <!-- wish wall -->
+    <div class="wish-wall">
+      <div class="wish-wall__head">
+        <span class="wish-wall__rule" aria-hidden="true"></span>
+        <h3 class="eyebrow wish-wall__title" data-te="శుభాకాంక్షలు">Wishes</h3>
+        <span class="wish-wall__rule" aria-hidden="true"></span>
+      </div>
+      <div class="wish-wall__empty">
+        <svg class="wish-wall__envelope" viewBox="0 0 64 48" aria-hidden="true"><rect x="3" y="7" width="58" height="38" rx="4"/><path d="M4 9l28 21L60 9"/><path class="wish-wall__envelope-heart" d="M32 25.5c-4.6-3.2-6.4-5.9-6.4-8.2 0-2 1.6-3.4 3.4-3.4 1.4 0 2.5.8 3 1.9.5-1.1 1.6-1.9 3-1.9 1.8 0 3.4 1.4 3.4 3.4 0 2.3-1.8 5-6.4 8.2z"/></svg>
+        <p class="wish-wall__empty-text" data-te="మొదటి శుభాకాంక్ష మీదే కావాలి">Be the first to leave a wish</p>
+      </div>
+      <ul class="wish-wall__list" role="list"></ul>
+    </div>
+
+    <!-- share -->
+    <div class="share-card">
+      <span class="eyebrow share-card__eyebrow" data-te="ఆనందాన్ని పంచుకోండి">Spread the joy</span>
+      <div class="share-card__actions">
+        <button class="btn btn--solid share-card__btn share-card__native" type="button">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7.5 7.5 12 3l4.5 4.5"/><path d="M8 11H6.5A1.5 1.5 0 0 0 5 12.5v7A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5v-7a1.5 1.5 0 0 0-1.5-1.5H16"/></svg>
+          <span data-te="ఈ ఆహ్వానాన్ని షేర్ చేయండి">Share this invitation</span>
+        </button>
+        <a class="btn btn--ghost share-card__btn share-card__wa" href="https://wa.me/" target="_blank" rel="noopener">
+          <svg class="icon" aria-hidden="true"><use href="#bl-wa"/></svg>
+          <span data-te="వాట్సాప్‌లో పంపండి">Send on WhatsApp</span>
+        </a>
+        <button class="btn btn--ghost share-card__btn share-card__copy" type="button">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4.5 4.5 0 0 0 6.4.4l3-3a4.5 4.5 0 0 0-6.4-6.4l-1.2 1.2"/><path d="M14 10a4.5 4.5 0 0 0-6.4-.4l-3 3a4.5 4.5 0 0 0 6.4 6.4l1.2-1.2"/></svg>
+          <span data-te="లింక్ కాపీ చేయండి">Copy link</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- closing -->
+    <div class="closing">
+      <div class="closing__branch closing__branch--l" aria-hidden="true"><img src="assets/branch.svg" alt="" width="360" height="500" loading="lazy" decoding="async" draggable="false" /></div>
+      <div class="closing__branch closing__branch--r" aria-hidden="true"><img src="assets/branch.svg" alt="" width="360" height="500" loading="lazy" decoding="async" draggable="false" /></div>
+      <svg class="ornament closing__ornament" viewBox="0 0 220 24" aria-hidden="true"><path d="M0 12h86M134 12h86"/><path d="M96 12c4-7 10-7 14 0 4 7 10 7 14 0"/><path d="M96 12c4 7 10 7 14 0 4-7 10-7 14 0"/><circle class="fill" cx="110" cy="12" r="2.2"/><circle class="fill" cx="90" cy="12" r="1.3"/><circle class="fill" cx="130" cy="12" r="1.3"/></svg>
+      <p class="closing__quote" data-te="మీ రాకే మాకు గొప్ప కానుక, మీ ఆశీస్సులే మాకు ఆత్మీయ స్వాగతం.">Your presence is the greatest gift, and your blessings the warmest welcome.</p>
+      <p class="closing__with" data-te="ప్రేమతో,">With love,</p>
+      <p class="closing__families script" data-te="పిల్లి & తప్పెట్ల కుటుంబాలు">the Pilli &amp; Tappetla families</p>
+      <p class="closing__tag">#AkhilWedsAlekhya</p>
+    </div>
+  </div>
+</section>

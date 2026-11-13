@@ -1,0 +1,485 @@
+/* ==========================================================
+   couple.css — "The Couple": intro line, the coming-together scene,
+   3D flip cards for the groom and bride, interlocking rings.
+   Every selector is scoped under .couple (or uses the cpl- prefix).
+   Default styles are the FINAL state, so the section reads correctly
+   with reduced motion, without JS, or if an animation never finishes.
+   ========================================================== */
+.couple {
+  position: relative;
+  padding-top: var(--section-pad);
+  background:
+    radial-gradient(90% 55% at 50% 58%, rgba(232, 196, 184, .30), transparent 72%),
+    linear-gradient(180deg, transparent 0%, rgba(243, 225, 218, .55) 22%, rgba(243, 225, 218, .55) 80%, transparent 100%);
+  overflow-x: clip;
+}
+.couple .cpl-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+/* ---------------- intro line ---------------- */
+.couple .cpl-intro {
+  max-width: min(48rem, 100%);
+  margin: 0 auto;
+  padding: 0 var(--gutter) clamp(1.5rem, 5vh, 3rem);
+  text-align: center;
+}
+.couple .cpl-eyebrow { margin-bottom: .9rem; }
+.couple .cpl-intro__orn { width: 150px; height: 19px; margin: 0 auto clamp(1.2rem, 3vw, 1.8rem); color: var(--gold); }
+.couple .cpl-lede {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.2rem, .95rem + 1.25vw, 2.05rem);
+  line-height: 1.5;
+  color: var(--emerald);
+  text-wrap: balance;
+}
+.couple .cpl-lede .cpl-word { display: inline-block; will-change: transform, opacity; }
+html.lang-te .couple .cpl-lede {
+  font-size: clamp(1.05rem, .92rem + .85vw, 1.6rem);
+  line-height: 1.85;
+}
+
+/* ---------------- the stage (pinned by JS) ---------------- */
+.couple .cpl-stage {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: clamp(1.1rem, 3.2vh, 2.4rem);
+  padding:
+    max(60px, calc(env(safe-area-inset-top) + 48px))
+    max(var(--gutter), env(safe-area-inset-right))
+    max(44px, calc(env(safe-area-inset-bottom) + 24px))
+    max(var(--gutter), env(safe-area-inset-left));
+  overflow: hidden;
+  overflow: clip;
+}
+.couple .cpl-halo {
+  --hs: min(150vmin, 1300px);
+  position: absolute;
+  left: calc(50% - var(--hs) / 2); top: calc(50% - var(--hs) / 2);
+  width: var(--hs); height: var(--hs);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(243, 225, 218, .95), rgba(232, 196, 184, .35) 55%, rgba(232, 196, 184, 0) 100%);
+  pointer-events: none;
+}
+
+/* ---------------- scene layout ----------------
+   Narrow (phones, tablets): rings on top, the two cards side by side (~44vw each).
+   Wide or short-landscape: groom | rings | bride in one row.  --cw = card width. */
+.couple .cpl-scene {
+  --cw: min(43.5vw, 300px, calc((100svh - 330px) / 1.4));
+  --gap: clamp(10px, 3vw, 28px);
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--cw) var(--cw);
+  grid-template-areas: "rings rings" "groom bride";
+  column-gap: var(--gap);
+  row-gap: clamp(10px, 2.4vh, 24px);
+  justify-content: center;
+  align-items: center;
+}
+.couple .cpl-slot { position: relative; z-index: 2; container-type: inline-size; width: var(--cw); }
+.couple .cpl-slot--groom { grid-area: groom; }
+.couple .cpl-slot--bride { grid-area: bride; }
+
+@media (min-width: 900px) and (min-height: 501px), (max-height: 500px) and (min-width: 560px) {
+  .couple .cpl-scene {
+    --cw: min(28vw, 400px, calc((100svh - 240px) / 1.4));
+    --rw: calc(var(--cw) * .8);
+    --gap: clamp(14px, 2.6vw, 44px);
+    grid-template-columns: var(--cw) var(--rw) var(--cw);
+    grid-template-areas: "groom rings bride";
+  }
+}
+/* landscape phones: one row that fits the short viewport, no pin (see js/couple.js) */
+@media (max-height: 500px) {
+  .couple .cpl-stage {
+    min-height: 0;
+    gap: 14px;
+    padding-top: 28px; padding-bottom: 36px;
+  }
+  .couple .cpl-scene { --cw: min(30vw, 300px, calc((100svh - 118px) / 1.4)); }
+}
+
+/* ---------------- the card ---------------- */
+.couple .cpl-fan {
+  position: relative;
+  perspective: 1100px;
+  rotate: -2.5deg;
+  transform-origin: 50% 100%;
+}
+.couple .cpl-slot--bride .cpl-fan { rotate: 2.5deg; }
+/* soft contact shadow on the "table" (does not flip) */
+.couple .cpl-fan::before {
+  content: ""; position: absolute; left: 8%; right: 8%; bottom: -5%; height: 14%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(15, 32, 28, .28), rgba(15, 32, 28, 0));
+  pointer-events: none;
+}
+
+.couple .cpl-card {
+  --r: clamp(10px, 6cqi, 22px);
+  position: relative; display: block;
+  width: 100%; aspect-ratio: 5 / 7;
+  border-radius: var(--r);
+  transform-style: preserve-3d;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  text-align: center;
+  cursor: pointer;
+}
+.couple .cpl-card:focus-visible { outline: none; }
+.couple .cpl-card:focus-visible .cpl-face { outline: 2px solid var(--gold); outline-offset: 4px; }
+.couple .cpl-card__inner {
+  position: absolute; inset: 0;
+  display: block;
+  transform-style: preserve-3d;
+}
+.couple .cpl-face {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center;
+  border-radius: var(--r);
+  overflow: hidden;
+  -webkit-backface-visibility: hidden; backface-visibility: hidden;
+  box-shadow: 0 2px 0 rgba(255, 255, 255, .5) inset, 0 28px 50px -26px rgba(15, 32, 28, .55), 0 6px 16px -10px rgba(15, 32, 28, .35);
+}
+/* hairline inner frame on both faces */
+.couple .cpl-face::before {
+  content: ""; position: absolute; inset: 3.4cqi;
+  border-radius: calc(var(--r) - 3cqi);
+  border: 1px solid rgba(200, 169, 106, .5);
+  pointer-events: none;
+}
+
+/* moving glare (added by JS); only transform/opacity change */
+.couple .cpl-glare {
+  position: absolute; left: -50%; top: -50%; width: 200%; height: 200%;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, .55), rgba(255, 255, 255, .12) 22%, rgba(255, 255, 255, 0) 40%);
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+.couple .cpl-face--back .cpl-glare {
+  background: radial-gradient(circle at 50% 50%, rgba(244, 231, 196, .32), rgba(244, 231, 196, .08) 22%, rgba(244, 231, 196, 0) 40%);
+}
+
+/* ----- front ----- */
+.couple .cpl-face--front {
+  padding: 8cqi 7cqi 12cqi;
+  gap: 2.6cqi;
+  background:
+    radial-gradient(120% 70% at 50% 0%, var(--ivory) 0%, rgba(251, 247, 240, 0) 70%),
+    linear-gradient(180deg, var(--ivory), var(--paper) 62%, var(--paper-deep));
+  border: 1px solid rgba(200, 169, 106, .6);
+}
+/* a small gold rule with a dot under the name (larger cards only) */
+.couple .cpl-face--front::after {
+  content: ""; display: none; flex: none;
+  width: 30%; height: 8px; margin-top: 1.5cqi;
+  background:
+    radial-gradient(circle, var(--gold) 0 2.4px, rgba(200, 169, 106, 0) 2.9px) center / 8px 8px no-repeat,
+    linear-gradient(90deg, rgba(200, 169, 106, 0), var(--gold) 40%, rgba(200, 169, 106, 0) 40% 60%, var(--gold) 60%, rgba(200, 169, 106, 0)) center / 100% 1px no-repeat;
+}
+@container (min-width: 230px) {
+  .couple .cpl-card { aspect-ratio: 5 / 6.8; }
+  .couple .cpl-face--front { justify-content: center; padding: 5cqi 7cqi 9cqi; }
+  .couple .cpl-face--front::after { display: block; }
+  .couple .cpl-face .cpl-arch { width: 68%; }
+}
+.couple .cpl-arch {
+  position: relative; flex: none;
+  width: 66%; aspect-ratio: 3 / 3.75;
+  display: grid; place-items: center;
+  border-radius: 999px 999px 3cqi 3cqi;
+  background:
+    radial-gradient(90% 55% at 50% 100%, rgba(139, 168, 136, .32), rgba(139, 168, 136, 0) 72%),
+    radial-gradient(80% 60% at 50% 18%, rgba(251, 247, 240, .9), rgba(251, 247, 240, 0) 70%),
+    linear-gradient(180deg, var(--blush-soft), var(--blush) 140%);
+  border: 1px solid var(--gold);
+  outline: 1px solid rgba(200, 169, 106, .45);
+  outline-offset: 2.2cqi;
+  overflow: hidden;
+  margin-top: 2.2cqi;
+}
+.couple .cpl-arch img,
+.couple .cpl-arch .cpl-photo {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: 50% 25%;
+}
+.couple .cpl-arch:has(img) .cpl-initial,
+.couple .cpl-arch:has(img) .cpl-sprig { display: none; }
+.couple .cpl-initial {
+  font-family: var(--script);
+  font-size: 38cqi;
+  line-height: 1;
+  padding: .12em .2em 0;
+  margin-top: -6cqi;
+  background: linear-gradient(165deg, var(--gold-soft) 0%, var(--gold) 28%, var(--gold-deep) 60%, var(--gold) 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 1px 0 rgba(251, 247, 240, .8));
+}
+html.lang-te .couple .cpl-initial { font-size: 27cqi; margin-top: -2cqi; padding-top: .2em; }
+.couple .cpl-sprig {
+  position: absolute; left: 50%; bottom: 5%;
+  width: 78%; height: auto;
+  translate: -50% 0;
+  color: var(--sage);
+  opacity: .9;
+}
+.couple .cpl-role {
+  display: block;
+  margin-top: 1.4cqi;
+  font-family: var(--sans);
+  font-size: clamp(8.5px, 3.9cqi, 13px);
+  font-weight: 600;
+  letter-spacing: .3em;
+  text-indent: .3em;
+  text-transform: uppercase;
+  line-height: 1.3;
+  color: var(--gold-deep);
+}
+.couple .cpl-name {
+  display: block;
+  max-width: 100%;
+  font-family: var(--script);
+  font-size: var(--name-size, 15.5cqi);
+  line-height: 1.12;
+  color: var(--emerald);
+  white-space: nowrap;
+}
+.couple .cpl-slot--bride .cpl-name { --name-size: 13.4cqi; }
+html.lang-te .couple .cpl-role { font-size: clamp(10px, 5cqi, 16px); text-indent: 0; line-height: 1.5; margin-top: .6cqi; }
+html.lang-te .couple .cpl-name { --name-size: 12cqi; line-height: 1.5; }
+html.lang-te .couple .cpl-slot--bride .cpl-name { --name-size: 11cqi; }
+
+/* ----- back ----- */
+.couple .cpl-face--back {
+  transform: rotateY(180deg);
+  justify-content: center;
+  gap: 4.2cqi;
+  padding: 10cqi 8.5cqi 13cqi;
+  color: var(--ivory);
+  background:
+    radial-gradient(110% 60% at 50% 0%, rgba(200, 169, 106, .24), rgba(200, 169, 106, 0) 65%),
+    linear-gradient(180deg, var(--emerald), var(--emerald-deep));
+  border: 1px solid rgba(200, 169, 106, .65);
+}
+/* a faint branch, reused from assets/branch.svg */
+.couple .cpl-face--back::after {
+  content: ""; position: absolute; right: -14%; bottom: -10%;
+  width: 62%; aspect-ratio: 360 / 500;
+  background: url("../assets/branch.svg") center / contain no-repeat;
+  opacity: .13;
+  rotate: 18deg;
+  pointer-events: none;
+}
+.couple .cpl-flourish { width: 46%; height: auto; flex: none; color: var(--gold); }
+.couple .cpl-lineage {
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 2.6cqi;
+}
+.couple .cpl-relation {
+  display: block;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(11px, 6.6cqi, 22px);
+  line-height: 1.25;
+  color: var(--gold-soft);
+}
+.couple .cpl-parents {
+  display: block;
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(12px, 7.8cqi, 27px);
+  line-height: 1.22;
+  color: var(--ivory);
+}
+/* each parent on a line of their own, joined by an italic ampersand */
+.couple .cpl-pname { display: block; text-wrap: balance; }
+.couple .cpl-amp {
+  display: block;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.15em;
+  line-height: 1.05;
+  margin: .04em 0 .08em;
+  color: var(--gold);
+}
+html.lang-te .couple .cpl-amp { font-style: normal; font-size: 1em; line-height: 1.2; }
+.couple .cpl-rule {
+  display: block; width: 22%; height: 1px; flex: none;
+  background: linear-gradient(90deg, rgba(200, 169, 106, 0), var(--gold), rgba(200, 169, 106, 0));
+}
+.couple .cpl-family {
+  position: relative; z-index: 1;
+  display: block;
+  font-family: var(--sans);
+  font-size: clamp(8px, 3.5cqi, 12.5px);
+  font-weight: 600;
+  letter-spacing: .26em;
+  text-indent: .26em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  color: var(--gold-soft);
+}
+/* Telugu: parents come first, then the relation; never italic */
+html.lang-te .couple .cpl-relation { font-style: normal; font-size: clamp(11px, 6.4cqi, 21px); line-height: 1.6; }
+html.lang-te .couple .cpl-parents { font-weight: 400; font-size: clamp(11.5px, 7cqi, 24px); line-height: 1.55; }
+html.lang-te .couple .cpl-family { font-size: clamp(10px, 4.8cqi, 15px); text-indent: 0; font-weight: 500; }
+html.lang-te .couple .cpl-face--back { gap: 3.2cqi; }
+
+/* ----- "Tap to flip" chip (part of the button, stays in front while the card turns) ----- */
+.couple .cpl-chip {
+  position: absolute; left: 50%; bottom: 0;
+  transform: translate(-50%, 50%) translateZ(34px);
+  display: inline-flex; align-items: center; gap: .45em;
+  padding: .55em 1em .55em .85em;
+  border-radius: 999px;
+  font-family: var(--sans);
+  font-size: clamp(8.5px, 3.6cqi, 12px);
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--gold-soft);
+  background: var(--emerald);
+  border: 1px solid rgba(200, 169, 106, .7);
+  box-shadow: 0 10px 22px -12px rgba(15, 32, 28, .7);
+  transition: background-color .4s ease, color .4s ease;
+}
+.couple .cpl-chip__icon {
+  width: 1.35em; height: 1.35em; flex: none;
+  fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+  transition: transform .6s var(--ease-spring);
+}
+.couple .cpl-card[aria-pressed="true"] .cpl-chip { background: var(--ivory); color: var(--emerald); }
+.couple .cpl-card[aria-pressed="true"] .cpl-chip__icon { transform: rotate(180deg); }
+html.lang-te .couple .cpl-chip { font-size: clamp(9.5px, 4.2cqi, 13px); letter-spacing: 0; padding-top: .62em; padding-bottom: .48em; }
+/* gentle pulse that invites the first tap; runs only while the section is on screen */
+.couple .cpl-chip::after {
+  content: ""; position: absolute; inset: -1px;
+  border-radius: inherit;
+  border: 1px solid var(--gold);
+  opacity: 0;
+  animation: cpl-pulse 2.4s var(--ease-out) infinite;
+  animation-play-state: paused;
+  pointer-events: none;
+}
+.couple.is-live .cpl-chip::after { animation-play-state: running; }
+.couple.has-flipped .cpl-chip::after { animation: none; opacity: 0; }
+@keyframes cpl-pulse {
+  0% { transform: scale(1); opacity: .85; }
+  70%, 100% { transform: scale(1.32, 1.6); opacity: 0; }
+}
+@media (hover: hover) and (pointer: fine) {
+  .couple .cpl-card:hover .cpl-chip { background: var(--emerald-deep); }
+  .couple .cpl-card[aria-pressed="true"]:hover .cpl-chip { background: var(--paper); }
+}
+
+/* no-GSAP fallback for the flip (GSAP drives it inline when present) */
+.couple.cpl-css-flip .cpl-card__inner { transition: transform .8s var(--ease-spring); }
+.couple.cpl-css-flip .cpl-card[aria-pressed="true"] .cpl-card__inner { transform: rotateY(180deg); }
+
+/* ---------------- the rings ---------------- */
+.couple .cpl-rings {
+  grid-area: rings;
+  position: relative; z-index: 1;
+  justify-self: center;
+  width: min(62vw, 290px, 26svh * 1.6);
+  aspect-ratio: 240 / 150;
+  container-type: inline-size;
+  pointer-events: none;
+}
+/* the "&" between the two names, which becomes the rings as the scene plays */
+.couple .cpl-and {
+  position: absolute; left: 0; right: 0; top: 50%;
+  margin-top: -.6em;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 52cqi;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--gold);
+  opacity: 0;   /* final state; the timeline starts it visible */
+}
+html.lang-te .couple .cpl-and { font-style: normal; font-size: 44cqi; }
+@media (min-width: 900px) and (min-height: 501px), (max-height: 500px) and (min-width: 560px) {
+  .couple .cpl-rings { width: var(--rw); }
+}
+.couple .cpl-bloom {
+  position: absolute; left: -45%; right: -45%; top: -70%; bottom: -70%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(244, 231, 196, .95), rgba(232, 196, 184, .4) 48%, rgba(232, 196, 184, 0) 100%);
+  opacity: .75;
+}
+/* ring boxes, positioned in the shared 240x150 space (ring A centre 96,78; ring B centre 144,78) */
+.couple .cpl-sparks,
+.couple .cpl-ring { position: absolute; overflow: visible; }
+.couple .cpl-sparks { inset: 0; width: 100%; height: 100%; }
+.couple .cpl-ring { top: 14.6667%; width: 36.6667%; height: 74.6667%; transform-origin: 50% 50%; }
+.couple .cpl-ring--a { left: 21.6667%; }
+.couple .cpl-ring--b { left: 41.6667%; }
+.couple .cpl-ring--over .cpl-ring__inner { stroke-dasharray: none; }
+.couple .cpl-ring__band { fill: none; stroke-width: 7; stroke-dasharray: 100; stroke-dashoffset: 0; }
+.couple .cpl-ring--over .cpl-ring__band { stroke-dasharray: none; }
+.couple .cpl-ring__inner { fill: none; stroke: var(--gold-deep); stroke-width: .9; stroke-opacity: .6; stroke-dasharray: 100; stroke-dashoffset: 0; }
+.couple .cpl-ring__shine {
+  fill: none; stroke: var(--ivory); stroke-width: 1.5; stroke-linecap: round;
+  stroke-dasharray: 12 88; stroke-dashoffset: 43;
+  opacity: .9;
+}
+.couple .cpl-gem__set { fill: none; stroke: var(--gold-deep); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.couple .cpl-gem__stone { stroke: var(--gold-deep); stroke-width: .8; stroke-linejoin: round; }
+.couple .cpl-gem__facet { fill: none; stroke: var(--gold); stroke-width: .6; stroke-opacity: .9; }
+.couple .cpl-gem,
+.couple .cpl-spark { transform-box: fill-box; transform-origin: 50% 50%; }
+.couple .cpl-gem { transform-origin: 50% 100%; }
+.couple .cpl-spark { fill: var(--gold); opacity: .85; }
+.couple .cpl-spark:nth-child(2n) { fill: var(--gold-deep); }
+/* idle twinkle once the rings have locked (paused off screen) */
+.couple.is-linked.is-live .cpl-spark { animation: cpl-twinkle 2.8s ease-in-out infinite; }
+.couple.is-linked.is-live .cpl-spark:nth-child(2) { animation-delay: -.5s; }
+.couple.is-linked.is-live .cpl-spark:nth-child(3) { animation-delay: -1.1s; }
+.couple.is-linked.is-live .cpl-spark:nth-child(4) { animation-delay: -1.7s; }
+.couple.is-linked.is-live .cpl-spark:nth-child(5) { animation-delay: -2.2s; }
+.couple.is-linked.is-live .cpl-spark:nth-child(6) { animation-delay: -.8s; }
+@keyframes cpl-twinkle {
+  0%, 100% { scale: 1; }
+  50% { scale: .45; }
+}
+
+/* ---------------- caption ---------------- */
+.couple .cpl-caption {
+  position: relative; z-index: 2;
+  display: flex; align-items: center; justify-content: center;
+  gap: clamp(.7rem, 2vw, 1.2rem);
+  max-width: 100%;
+  text-align: center;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(1.1rem, .85rem + 1.2vw, 1.95rem);
+  line-height: 1.3;
+  color: var(--emerald);
+}
+.couple .cpl-caption__text { display: block; }
+.couple .cpl-caption__line {
+  display: block; flex: none;
+  width: clamp(22px, 7vw, 96px); height: 1px;
+  background: linear-gradient(90deg, rgba(200, 169, 106, 0), var(--gold));
+  transform-origin: 100% 50%;
+}
+.couple .cpl-caption__line:last-child {
+  background: linear-gradient(270deg, rgba(200, 169, 106, 0), var(--gold));
+  transform-origin: 0 50%;
+}
+html.lang-te .couple .cpl-caption { font-size: clamp(1rem, .85rem + .9vw, 1.6rem); line-height: 1.7; }
+
+@media (prefers-reduced-motion: reduce) {
+  .couple .cpl-chip::after,
+  .couple .cpl-spark { animation: none !important; }
+}

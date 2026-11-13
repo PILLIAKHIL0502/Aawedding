@@ -1,0 +1,332 @@
+/* ==========================================================
+   countdown.css — "Counting down to forever" split-flap clock (#countdown).
+   Each unit is one two-digit flap card: two static halves plus two leaves
+   that rotate on the hinge (rotateX) when the value changes. Gold foil
+   numerals on deep emerald, a hairline split, labels below.
+   Everything is scoped to #countdown / .countdown__*.
+   ========================================================== */
+#countdown.countdown {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  padding: var(--section-pad) max(var(--gutter), env(safe-area-inset-right)) var(--section-pad) max(var(--gutter), env(safe-area-inset-left));
+  text-align: center;
+}
+#countdown .countdown__halo {
+  position: absolute;
+  left: 50%;
+  top: 55%;
+  z-index: -1;
+  width: min(150vw, 1100px);
+  aspect-ratio: 1;
+  margin: calc(min(150vw, 1100px) / -2) 0 0 calc(min(150vw, 1100px) / -2);
+  border-radius: 50%;
+  background:
+    radial-gradient(closest-side, rgba(200, 169, 106, .16), rgba(200, 169, 106, .04) 55%, rgba(200, 169, 106, 0)),
+    repeating-conic-gradient(from 0deg, rgba(228, 210, 166, .07) 0 .35deg, rgba(228, 210, 166, 0) .35deg 6deg);
+  -webkit-mask-image: radial-gradient(closest-side, #000 40%, transparent 100%);
+  mask-image: radial-gradient(closest-side, #000 40%, transparent 100%);
+  pointer-events: none;
+  animation: countdown-turn 240s linear infinite;
+}
+@keyframes countdown-turn { to { transform: rotate(360deg); } }
+#countdown.is-offscreen .countdown__halo { animation-play-state: paused; }
+
+#countdown .countdown__inner { max-width: var(--maxw); margin: 0 auto; }
+
+/* ---------------- heading ---------------- */
+#countdown .countdown__head { margin-bottom: clamp(2rem, 6vw, 3.75rem); }
+#countdown .countdown__eyebrow { display: block; margin-bottom: .6rem; }
+#countdown .countdown__title {
+  display: inline-block;
+  max-width: 100%;
+  padding: 0 .12em .1em;
+  font-family: var(--script);
+  font-weight: 400;
+  font-size: clamp(2.6rem, 9.6vw, 5.2rem);
+  line-height: 1.1;
+  text-wrap: balance;
+  color: var(--gold-soft);
+  background: var(--foil);
+  background-size: 160% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+html.lang-te #countdown .countdown__title { font-size: clamp(1.9rem, 7.4vw, 3.7rem); line-height: 1.45; }
+
+/* ---------------- the clock ---------------- */
+#countdown .countdown__clock {
+  container-type: inline-size;
+  position: relative;
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
+}
+#countdown .countdown__clock-grid {
+  /* card width: a quarter of the row, capped for big screens and for short (landscape) screens */
+  --fw: min(20.5cqi, 184px, 27svh);
+  --fh: calc(var(--fw) * 1.14);
+  --gap: min(4.2cqi, 46px);
+  --r: calc(var(--fw) * .09);
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  justify-content: center;
+  gap: clamp(.9rem, 3cqi, 1.4rem) var(--gap);
+}
+@container (max-width: 330px) {
+  #countdown .countdown__clock-grid {
+    --fw: min(39cqi, 150px, 27svh);
+    --gap: 7cqi;
+    grid-template-columns: repeat(2, auto);
+  }
+  #countdown .countdown__unit:not(:last-of-type)::after { display: none; }
+}
+
+#countdown .countdown__unit {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(.55rem, 2cqi, .95rem);
+}
+/* the two blinking dots between units */
+#countdown .countdown__unit:not(:last-of-type)::after {
+  content: "";
+  position: absolute;
+  top: calc(var(--fh) / 2);
+  right: calc(var(--gap) / -2);
+  width: max(4px, calc(var(--fw) * .045));
+  height: calc(var(--fh) * .26);
+  transform: translate(50%, -50%);
+  background:
+    radial-gradient(circle closest-side, var(--gold) 92%, transparent) top / 100% calc(var(--fw) * .045) no-repeat,
+    radial-gradient(circle closest-side, var(--gold) 92%, transparent) bottom / 100% calc(var(--fw) * .045) no-repeat;
+  opacity: .7;
+}
+
+/* ---------------- one flap card ---------------- */
+#countdown .countdown__flap {
+  position: relative;
+  width: var(--fw);
+  height: var(--fh);
+  perspective: calc(var(--fh) * 3.4);
+  border-radius: var(--r);
+  background: var(--emerald-ink);   /* shows through the 1px gap as the hairline split */
+  box-shadow:
+    0 calc(var(--fh) * .14) calc(var(--fh) * .22) calc(var(--fh) * -.1) rgba(5, 14, 12, .75),
+    0 0 0 1px rgba(200, 169, 106, .22);
+}
+#countdown .countdown__unit[data-digits="3"] .countdown__flap { width: calc(var(--fw) * 1.42); }
+
+#countdown .countdown__half,
+#countdown .countdown__leaf {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: calc(50% - .5px);   /* the 1px gap between the halves is the hairline split */
+  overflow: hidden;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+#countdown .countdown__half--top,
+#countdown .countdown__leaf--top {
+  top: 0;
+  border-radius: var(--r) var(--r) 0 0;
+  transform-origin: 50% calc(100% + .5px);
+  background:
+    linear-gradient(180deg, rgba(244, 231, 196, .07), rgba(244, 231, 196, 0) 40%),
+    linear-gradient(180deg, var(--emerald) 0%, var(--emerald-deep) 100%);
+  box-shadow: inset 0 1px 0 rgba(244, 231, 196, .16);
+}
+#countdown .countdown__half--bottom,
+#countdown .countdown__leaf--bottom {
+  bottom: 0;
+  border-radius: 0 0 var(--r) var(--r);
+  transform-origin: 50% -.5px;
+  background: linear-gradient(180deg, var(--emerald-deep) 0%, var(--emerald-ink) 100%);
+  box-shadow: inset 0 1px 0 rgba(244, 231, 196, .08), inset 0 -1px 0 rgba(200, 169, 106, .14);
+}
+#countdown .countdown__leaf { z-index: 2; visibility: hidden; will-change: transform; }
+#countdown .countdown__leaf--bottom { transform: rotateX(90deg); }
+/* side hinges where the halves meet */
+#countdown .countdown__flap::before,
+#countdown .countdown__flap::after {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  width: max(3px, calc(var(--fw) * .035));
+  height: calc(var(--fh) * .12);
+  transform: translateY(-50%);
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--gold-deep), var(--gold-soft) 50%, var(--gold-deep));
+  opacity: .8;
+}
+#countdown .countdown__flap::before { left: 0; border-radius: 0 2px 2px 0; }
+#countdown .countdown__flap::after { right: 0; border-radius: 2px 0 0 2px; }
+
+#countdown .countdown__num {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: calc(200% + 1px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: calc(var(--fh) * .66);
+  line-height: 1;
+  letter-spacing: .01em;
+  font-variant-numeric: lining-nums tabular-nums;
+  color: var(--gold);
+  background: linear-gradient(180deg, #f4e7c4 0%, var(--gold-soft) 30%, var(--gold) 52%, var(--gold-deep) 78%, var(--gold-soft) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  padding-top: .02em;
+}
+#countdown .countdown__half--top .countdown__num,
+#countdown .countdown__leaf--top .countdown__num { top: 0; }
+#countdown .countdown__half--bottom .countdown__num,
+#countdown .countdown__leaf--bottom .countdown__num { bottom: 0; }
+html.lang-te #countdown .countdown__num { font-size: calc(var(--fh) * .62); padding-top: .1em; }
+
+/* shading that deepens as a leaf turns away from the light */
+#countdown .countdown__shade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: var(--emerald-ink);
+  opacity: 0;
+  pointer-events: none;
+}
+
+#countdown .countdown__label {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: clamp(9.5px, 2.4cqi, 13px);
+  letter-spacing: .26em;
+  padding-left: .26em;
+  text-transform: uppercase;
+  line-height: 1.3;
+  color: var(--gold-soft);
+  opacity: .85;
+  white-space: nowrap;
+}
+html.lang-te #countdown .countdown__label { font-size: clamp(12px, 3cqi, 16px); font-weight: 500; padding-left: 0; line-height: 1.5; }
+
+/* the day itself, and after: the clock rests at zero */
+#countdown.is-done .countdown__flap { opacity: .55; }
+#countdown .countdown__status {
+  margin: clamp(1.4rem, 4vw, 2.25rem) auto 0;
+  max-width: 22ch;
+  font-family: var(--script);
+  font-size: clamp(2rem, 7vw, 3.4rem);
+  line-height: 1.15;
+  text-wrap: balance;
+}
+#countdown .countdown__status span {
+  display: inline-block;
+  padding: 0 .12em .1em;
+  background: var(--foil);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: var(--gold-soft);
+}
+#countdown .countdown__status[hidden] { display: none; }
+html.lang-te #countdown .countdown__status { font-size: clamp(1.5rem, 5.6vw, 2.4rem); line-height: 1.5; max-width: 26ch; }
+
+/* ---------------- the slim progress line ---------------- */
+#countdown .countdown__progress {
+  --p: 0;
+  width: min(100%, 520px);
+  margin: clamp(2rem, 6vw, 3.25rem) auto 0;
+}
+#countdown .countdown__track {
+  position: relative;
+  height: 2px;
+  margin-right: 26px;   /* room for the ring at the end of the line */
+  border-radius: 2px;
+  background: rgba(200, 169, 106, .2);
+}
+#countdown .countdown__fill {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--foil);
+  transform-origin: 0 50%;
+  transform: scaleX(var(--p));
+  transition: transform 1.2s var(--ease-out);
+}
+/* the spark rides a full-width carrier, so its position is a pure transform */
+#countdown .countdown__spark {
+  position: absolute;
+  inset: 0;
+  transform: translateX(calc(var(--p) * 100%));
+  transition: transform 1.2s var(--ease-out);
+  pointer-events: none;
+}
+#countdown .countdown__spark::before {
+  content: "";
+  position: absolute;
+  left: -5px;
+  top: -4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fffaf0 0 25%, var(--gold-soft) 45%, rgba(228, 210, 166, 0) 72%);
+  animation: countdown-pulse 2.4s ease-in-out infinite;
+}
+@keyframes countdown-pulse {
+  0%, 100% { transform: scale(.8); opacity: .75; }
+  50%      { transform: scale(1.5); opacity: 1; }
+}
+#countdown.is-offscreen .countdown__spark::before { animation-play-state: paused; }
+#countdown .countdown__goal {
+  position: absolute;
+  right: -26px;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  transform: translateY(-58%);
+  fill: none;
+  stroke: var(--gold-soft);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+#countdown .countdown__goal path { fill: var(--gold-soft); stroke: none; }
+#countdown .countdown__togo {
+  margin-top: .9rem;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(1.05rem, 2.6vw, 1.3rem);
+  letter-spacing: .02em;
+  color: rgba(251, 247, 240, .82);
+}
+html.lang-te #countdown .countdown__togo { font-style: normal; font-size: clamp(1.05rem, 3.4vw, 1.25rem); line-height: 1.6; }
+#countdown.is-done .countdown__togo { display: none; }
+
+/* ---------------- short landscape screens ---------------- */
+@media (max-height: 520px) and (orientation: landscape) {
+  #countdown.countdown {
+    padding-top: max(2rem, env(safe-area-inset-top));
+    padding-bottom: max(2rem, env(safe-area-inset-bottom));
+  }
+  #countdown .countdown__head { margin-bottom: 1.1rem; }
+  #countdown .countdown__eyebrow { margin-bottom: .2rem; }
+  #countdown .countdown__title { font-size: clamp(2rem, 6vw, 2.9rem); }
+  html.lang-te #countdown .countdown__title { font-size: clamp(1.6rem, 4.4vw, 2.2rem); line-height: 1.35; }
+  #countdown .countdown__progress { margin-top: 1.1rem; }
+  #countdown .countdown__togo { margin-top: .5rem; }
+  #countdown .countdown__status { margin-top: .9rem; font-size: clamp(1.7rem, 4.6vw, 2.4rem); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #countdown .countdown__halo { animation: none; }
+  #countdown .countdown__spark::before { animation: none; }
+  #countdown .countdown__fill,
+  #countdown .countdown__spark { transition: none; }
+}

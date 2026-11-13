@@ -1,0 +1,102 @@
+<div id="player" class="player" data-state="paused" data-mode="file">
+  <div class="player__panel">
+    <!-- the surface: a gold hairline + emerald fill, clipped from the capsule to the card -->
+    <div class="player__frame" aria-hidden="true"><div class="player__bg"></div></div>
+
+    <!-- the record: a capsule button when collapsed, the card's centrepiece when expanded -->
+    <div class="player__rec">
+      <button class="player__record" type="button" aria-expanded="false" aria-controls="player-card" aria-label="Show music player">
+        <span class="player__disc" aria-hidden="true">
+          <svg viewBox="0 0 100 100" focusable="false">
+            <defs>
+              <radialGradient id="player-vinyl" cx=".5" cy=".5" r=".5">
+                <stop offset=".3" stop-color="#1f3d36"/>
+                <stop offset=".72" stop-color="#152b26"/>
+                <stop offset="1" stop-color="#0f201c"/>
+              </radialGradient>
+              <linearGradient id="player-label" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#a8874a"/>
+                <stop offset=".3" stop-color="#e9d5a4"/>
+                <stop offset=".55" stop-color="#c8a96a"/>
+                <stop offset=".8" stop-color="#f4e7c4"/>
+                <stop offset="1" stop-color="#b8955a"/>
+              </linearGradient>
+            </defs>
+            <circle cx="50" cy="50" r="49.5" fill="url(#player-vinyl)"/>
+            <g fill="none" stroke="#e4d2a6" stroke-width=".55">
+              <circle cx="50" cy="50" r="45.5" stroke-opacity=".16"/>
+              <circle cx="50" cy="50" r="42" stroke-opacity=".07"/>
+              <circle cx="50" cy="50" r="38.5" stroke-opacity=".13"/>
+              <circle cx="50" cy="50" r="35" stroke-opacity=".06"/>
+              <circle cx="50" cy="50" r="31.5" stroke-opacity=".12"/>
+              <circle cx="50" cy="50" r="28" stroke-opacity=".07"/>
+              <circle cx="50" cy="50" r="24.5" stroke-opacity=".18"/>
+            </g>
+            <circle cx="50" cy="50" r="20" fill="url(#player-label)"/>
+            <circle cx="50" cy="50" r="17.6" fill="none" stroke="#152b26" stroke-opacity=".38" stroke-width=".5"/>
+            <text class="player__mono" x="50" y="54.4" text-anchor="middle">A&amp;A</text>
+            <path d="M50 33.6l1 2-1 2-1-2zM50 62.4l1 2-1 2-1-2z" fill="#152b26" fill-opacity=".55"/>
+            <circle cx="50" cy="50" r="1.9" fill="#fbf7f0"/>
+          </svg>
+        </span>
+        <!-- light on the record: stays still while the disc turns underneath -->
+        <svg class="player__sheen" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+          <path d="M50 50L19 6A53 53 0 0 1 50 0.5Z M50 50L81 94A53 53 0 0 1 50 99.5Z" fill="#fbf7f0" fill-opacity=".07"/>
+          <path d="M50 50L8 22A51 51 0 0 1 16 12Z M50 50L92 78A51 51 0 0 1 84 88Z" fill="#fbf7f0" fill-opacity=".05"/>
+          <circle cx="50" cy="50" r="49" fill="none" stroke="#e4d2a6" stroke-opacity=".35" stroke-width=".8"/>
+        </svg>
+        <!-- tonearm: swings onto the record while it plays (card view only) -->
+        <svg class="player__arm" viewBox="0 0 40 64" aria-hidden="true" focusable="false">
+          <circle cx="30" cy="8" r="6.2" fill="#152b26" stroke="#c8a96a" stroke-width="1.2"/>
+          <circle cx="30" cy="8" r="2.2" fill="#e4d2a6"/>
+          <path d="M30 9.5L28.5 42 18 54" fill="none" stroke="#e4d2a6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="12" y="51" width="9" height="6" rx="1.2" transform="rotate(-40 16.5 54)" fill="#c8a96a"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="player__body" id="player-card" role="region" aria-label="Music player" data-te-aria-label="సంగీత ప్లేయర్">
+      <div class="player__head">
+        <span class="player__rec-space" aria-hidden="true"></span>
+        <div class="player__info">
+          <p class="player__eyebrow"><span class="player__live" aria-hidden="true"></span><span class="player__status">Now playing</span></p>
+          <p class="player__title">In The Wild</p>
+          <p class="player__artist">National Sweetheart</p>
+        </div>
+        <button class="player__close" type="button" aria-label="Hide music player">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6.5 9.5L12 15l5.5-5.5"/></svg>
+        </button>
+      </div>
+      <div class="player__progress" aria-hidden="true">
+        <span class="player__time player__time--now">0:00</span>
+        <span class="player__track"><span class="player__fill"></span></span>
+        <span class="player__time player__time--end">1:30</span>
+      </div>
+      <p class="player__credit" data-te="సంగీతం: In The Wild · National Sweetheart">Music: In The Wild · National Sweetheart</p>
+    </div>
+
+    <div class="player__dock">
+      <p class="player__meta" aria-hidden="true">
+        <span class="player__meta-title">In The Wild</span>
+        <span class="player__meta-artist">National Sweetheart</span>
+      </p>
+      <div class="player__vol">
+        <svg class="player__vol-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path class="player__spk" d="M4.5 9.5h3l4-3.5v12l-4-3.5h-3z"/>
+          <path class="player__wave1" d="M15 9.2a4 4 0 0 1 0 5.6"/>
+          <path class="player__wave2" d="M17.6 6.8a7.4 7.4 0 0 1 0 10.4"/>
+        </svg>
+        <input class="player__range" type="range" min="0" max="100" step="1" value="75" aria-label="Volume" data-te-aria-label="శబ్ద స్థాయి" />
+      </div>
+      <div class="player__bars" aria-hidden="true">
+        <span class="player__bar"></span><span class="player__bar"></span><span class="player__bar"></span><span class="player__bar"></span><span class="player__bar"></span><span class="player__bar"></span><span class="player__bar"></span>
+      </div>
+      <button class="player__play" type="button" aria-pressed="false" aria-label="Play music">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path class="player__icon-a" d="M8 5.5L13 8.75L13 15.25L8 18.5Z"/>
+          <path class="player__icon-b" d="M13 8.75L18 12L18 12L13 15.25Z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>

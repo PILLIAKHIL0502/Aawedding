@@ -1,0 +1,478 @@
+/* ==========================================================
+   day.css — "The Day": a pinned horizontal story in four panels
+   (Sunday · the date · the time · the venue).
+
+   Default (no JS / reduced motion): the panels stack vertically.
+   js/day.js adds .day--h to pin the section and slide the track sideways.
+   ========================================================== */
+.day {
+  --day-pad-t: max(68px, calc(env(safe-area-inset-top) + 52px));
+  --day-pad-b: max(84px, calc(env(safe-area-inset-bottom) + 72px));
+  --day-pad-x: max(var(--gutter), env(safe-area-inset-left), env(safe-area-inset-right));
+  --day-hair: rgba(200, 169, 106, .4);
+  /* visual sizes (portrait first; landscape and short screens override below) */
+  --day-word: min(27vw, 34svh);
+  --cal-w: min(84vw, 430px, 50svh);
+  --clock-w: min(72vw, 40svh, 440px);
+  --garden-w: min(88vw, 42svh, 520px);
+
+  position: relative;
+  overflow: hidden;             /* the track never widens the page */
+  color: var(--ink);
+  background-color: var(--ivory);
+}
+
+/* ---------- track + panels ---------- */
+.day__track { position: relative; }
+.day__panel {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: clamp(3.5rem, 10vw, 6rem) var(--day-pad-x);
+  overflow: hidden;
+}
+.day__panel--sunday { background: radial-gradient(60% 55% at 50% 48%, rgba(228, 210, 166, .3), transparent 72%); }
+.day__panel--cal    { background: radial-gradient(55% 60% at 68% 52%, rgba(243, 225, 218, .7), transparent 72%); }
+.day__panel--clock  { background: radial-gradient(50% 60% at 32% 50%, rgba(201, 214, 198, .38), transparent 72%); }
+.day__panel--venue  { background: radial-gradient(60% 60% at 32% 52%, rgba(228, 210, 166, .32), transparent 72%); }
+
+/* pinned horizontal mode */
+.day.day--h { height: 100svh; }
+.day--h .day__track {
+  display: flex;
+  height: 100%;
+  will-change: transform;
+}
+.day--h .day__panel {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  padding: var(--day-pad-t) var(--day-pad-x) var(--day-pad-b);
+}
+/* a gold hairline between chapters */
+.day--h .day__panel + .day__panel::before {
+  content: ""; position: absolute; left: 0; top: 14%; bottom: 14%; width: 1px;
+  background: linear-gradient(180deg, transparent, var(--day-hair), transparent);
+}
+
+.day__inner { position: relative; z-index: 1; width: 100%; max-width: var(--maxw); }
+
+/* ---------- shared type ---------- */
+.day__eyebrow {
+  display: inline-flex; align-items: center; gap: .7rem;
+  font-family: var(--sans); font-size: .7rem; font-weight: 600;
+  letter-spacing: .32em; text-transform: uppercase; color: var(--sage);
+}
+.day__eyebrow-n { color: var(--gold-deep); letter-spacing: .12em; }
+.day__eyebrow-rule { width: 28px; height: 1px; background: var(--gold); opacity: .7; }
+
+.day__title, .day__venue {
+  font-family: var(--script); font-weight: 400; color: var(--emerald);
+  line-height: 1.12; text-wrap: balance;
+}
+.day__title { font-size: clamp(2.5rem, min(11vw, 7.4svh), 5.2rem); }
+.day__venue { font-size: clamp(2.3rem, min(10.5vw, 7svh), 4.9rem); }
+.day__sub {
+  font-family: var(--serif); font-size: clamp(1.08rem, .9rem + .9vw, 1.55rem);
+  color: var(--ink-soft); line-height: 1.4;
+}
+.day__sub--italic { font-style: italic; color: var(--emerald); }
+.day__note {
+  font-family: var(--sans); font-size: .66rem; font-weight: 500;
+  letter-spacing: .26em; text-transform: uppercase; color: var(--ink-soft);
+}
+
+.day__copy {
+  display: flex; flex-direction: column; align-items: center;
+  gap: clamp(.55rem, 1.6svh, 1.1rem);
+}
+
+/* ---------- 01 · Sunday ---------- */
+.day__sunday {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  gap: clamp(.4rem, 1.4svh, 1rem);
+  perspective: 1200px;
+}
+.day__sunday::after {
+  content: ""; width: 1px; height: clamp(18px, 7svh, 72px);
+  margin-top: clamp(.2rem, 1.5svh, 1rem);
+  background: linear-gradient(0deg, transparent, var(--gold));
+}
+.day__sunmark {
+  width: clamp(40px, 7svh, 64px); height: auto; margin-bottom: clamp(.1rem, 1.2svh, .8rem);
+  fill: none; stroke: var(--gold-deep); stroke-width: 1.3; stroke-linecap: round;
+}
+.day__sunmark circle { fill: rgba(228, 210, 166, .35); }
+.day__word {
+  position: relative; display: inline-block; margin: 0;
+  font-family: var(--serif); font-style: italic; font-weight: 500;
+  font-size: var(--day-word); line-height: 1; letter-spacing: -.01em;
+  white-space: nowrap;
+}
+.day__word-outline, .day__word-fill { display: block; padding: .04em .14em .16em; }
+.day__word-outline {
+  color: transparent;
+  -webkit-text-stroke: clamp(1px, .08vw + .5px, 1.8px) var(--gold-deep);
+}
+.day__word-mask { position: absolute; inset: 0; overflow: hidden; }
+.day__word-fill {
+  color: transparent;
+  background: var(--foil); background-size: 200% 100%;
+  -webkit-background-clip: text; background-clip: text;
+}
+.day__date {
+  font-family: var(--serif); font-style: italic;
+  font-size: clamp(1.15rem, .8rem + 1.5vw, 2rem); color: var(--emerald);
+}
+.day__hint {
+  display: none; align-items: center; gap: .65rem;
+  margin-top: clamp(.6rem, 3svh, 2.2rem);
+  font-family: var(--sans); font-size: .66rem; font-weight: 600;
+  letter-spacing: .32em; text-transform: uppercase; color: var(--ink-soft);
+}
+.day--h .day__hint { display: inline-flex; }
+.day__hint svg {
+  width: 36px; height: 12px; fill: none; stroke: var(--gold-deep); stroke-width: 1.3;
+  stroke-linecap: round; stroke-linejoin: round;
+  animation: day-nudge 1.8s var(--ease-in-out) infinite;
+}
+@keyframes day-nudge { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(7px); } }
+
+.day__branch {
+  position: absolute; z-index: 0; width: clamp(120px, 22vw, 300px); height: auto;
+  opacity: .5; pointer-events: none; user-select: none;
+}
+.day__branch--a { left: -3%; bottom: -10%; transform: rotate(-6deg); }
+.day__branch--b { right: -3%; top: -12%; transform: rotate(174deg); }
+
+/* ---------- shared split layout (panels 2-4) ---------- */
+.day__split {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: clamp(1.1rem, 3.4svh, 2.4rem); text-align: center;
+}
+.day__stage { display: grid; place-items: center; }
+
+/* ---------- 02 · calendar ---------- */
+.day__tap {
+  display: inline-flex; align-items: center; gap: .5rem;
+  font-family: var(--sans); font-size: .64rem; font-weight: 600;
+  letter-spacing: .26em; text-transform: uppercase; color: var(--gold-deep);
+}
+.day__tap svg { width: 14px; height: 14px; fill: var(--blush); stroke: var(--gold-deep); stroke-width: 1.2; }
+
+.day__cal { width: var(--cal-w); perspective: 1100px; }
+.day__cal-card {
+  --p: calc(var(--cal-w) * .075);
+  position: relative;
+  padding: calc(var(--p) * .9) var(--p) calc(var(--p) * .8);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, var(--ivory), var(--paper));
+  border: 1px solid rgba(200, 169, 106, .6);
+  box-shadow: var(--shadow-soft), 0 2px 0 rgba(255, 255, 255, .6) inset;
+  transform-style: preserve-3d;
+}
+.day__cal-card::before {
+  content: ""; position: absolute; inset: 6px; pointer-events: none;
+  border: 1px solid rgba(200, 169, 106, .3); border-radius: calc(var(--radius) - 6px);
+}
+.day__cal-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  padding-bottom: calc(var(--cal-w) * .03);
+  margin-bottom: calc(var(--cal-w) * .03);
+  border-bottom: 1px solid rgba(200, 169, 106, .4);
+}
+.day__cal-month {
+  font-family: var(--script); color: var(--emerald);
+  font-size: calc(var(--cal-w) * .12); line-height: 1.15;
+}
+.day__cal-year {
+  font-family: var(--sans); font-weight: 600; color: var(--gold-deep);
+  font-size: max(.62rem, calc(var(--cal-w) * .03)); letter-spacing: .3em;
+}
+.day__cal-dow, .day__cal-days {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(7, 1fr); text-align: center;
+}
+.day__cal-dow li {
+  padding: calc(var(--cal-w) * .012) 0 calc(var(--cal-w) * .02);
+  font-family: var(--sans); font-weight: 600; color: var(--sage);
+  font-size: max(.56rem, calc(var(--cal-w) * .026)); letter-spacing: .1em; text-transform: uppercase;
+  white-space: nowrap;
+}
+.day__cal-dow li:first-child { color: var(--gold-deep); }
+.day__cal-days li {
+  display: grid; place-items: center; aspect-ratio: 1 / .92;
+  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  font-size: max(.9rem, calc(var(--cal-w) * .05));
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.day__cal-days li:nth-child(7n + 1) { color: var(--gold-deep); }
+.day__cal-days .day__cal-the { position: relative; z-index: 1; }
+.day__d29 {
+  position: relative; display: grid; place-items: center;
+  width: 100%; height: 100%; border-radius: 50%;
+  font: inherit; color: var(--emerald); font-weight: 600;
+  touch-action: manipulation;
+}
+.day__d29::after { content: ""; position: absolute; inset: -6px; border-radius: 50%; }   /* bigger hit area */
+.day__d29-num { position: relative; z-index: 1; display: inline-block; }
+.day__ring {
+  position: absolute; inset: -24% -30%; width: 160%; height: 148%; max-width: none;
+  overflow: visible; pointer-events: none;
+  fill: none; stroke: var(--gold); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round;
+}
+.day__heart {
+  position: absolute; top: -26%; right: -22%; width: 42%; height: 42%;
+  fill: var(--blush); stroke: var(--gold-deep); stroke-width: 1.3; pointer-events: none;
+}
+.day__cal-foot {
+  display: flex; align-items: center; gap: .8rem;
+  margin-top: calc(var(--cal-w) * .02);
+  font-family: var(--serif); font-style: italic; color: var(--gold-deep);
+  font-size: max(.78rem, calc(var(--cal-w) * .034)); white-space: nowrap;
+}
+.day__cal-foot::before, .day__cal-foot::after { content: ""; flex: 1; height: 1px; background: rgba(200, 169, 106, .45); }
+
+/* tap the 29th: little hearts float up */
+.day__spark { position: absolute; z-index: 3; width: 16px; height: 16px; margin: -8px 0 0 -8px; pointer-events: none; }
+.day__spark svg { width: 100%; height: 100%; fill: var(--blush); stroke: var(--gold-deep); stroke-width: 1.2; }
+
+/* ---------- 03 · clock ---------- */
+.day__stage--clock { perspective: 1100px; }
+.day__clock {
+  position: relative; width: var(--clock-w); aspect-ratio: 1; border-radius: 50%;
+  box-shadow: var(--shadow-soft), 0 0 0 10px rgba(228, 210, 166, .16);
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.day__clock-svg { width: 100%; height: 100%; overflow: visible; }
+.day__clock-bezel { fill: var(--paper-deep); stroke: var(--gold); stroke-width: 2; }
+.day__clock-face { stroke: rgba(200, 169, 106, .55); stroke-width: 1; }
+.day__clock-min {
+  fill: none; stroke: var(--ink-soft); stroke-opacity: .5; stroke-width: 6;
+  stroke-dasharray: 1 17.2212; stroke-dashoffset: .5;
+}
+.day__clock-hr {
+  fill: none; stroke: var(--gold-deep); stroke-width: 12;
+  stroke-dasharray: 2.6 87.459; stroke-dashoffset: 1.3;
+}
+.day__clock-nums text {
+  font-family: var(--serif); font-size: 23px; font-weight: 500; fill: var(--emerald);
+  text-anchor: middle; dominant-baseline: central;
+}
+.day__clock-win { fill: var(--ivory); stroke: var(--gold); stroke-width: 1.2; }
+.day__clock-wintxt {
+  font-family: var(--serif); font-size: 17px; font-weight: 600; fill: var(--emerald);
+  text-anchor: middle; dominant-baseline: central;
+}
+.day__clock-year {
+  font-family: var(--sans); font-size: 10px; font-weight: 600; letter-spacing: 4px;
+  fill: var(--gold-deep); text-anchor: middle;
+}
+.day__hand--h path { fill: var(--emerald); }
+.day__hand--m path { fill: var(--emerald-deep); }
+.day__hand--s line { stroke: var(--gold-deep); stroke-width: 1.4; stroke-linecap: round; }
+.day__hand--s circle { fill: var(--gold-deep); }
+.day__clock-cap { fill: var(--gold); }
+.day__clock-pin { fill: var(--emerald-deep); }
+
+.day__time {
+  font-family: var(--serif); font-weight: 500; color: var(--emerald);
+  font-size: clamp(3.4rem, min(17vw, 11svh), 8rem); line-height: 1;
+  font-variant-numeric: lining-nums;
+  white-space: nowrap;
+}
+.day__time small {
+  font-family: var(--sans); font-size: .3em; font-weight: 600; letter-spacing: .18em;
+  color: var(--gold-deep); vertical-align: .9em; margin-left: .15em;
+}
+
+/* ---------- 04 · venue ---------- */
+.day__garden { width: var(--garden-w); height: auto; overflow: visible; }
+.day__ink path { fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.day__ink--sage { stroke: var(--sage); }
+.day__ink--gold { stroke: var(--gold-deep); }
+.day__ink--emerald { stroke: var(--emerald); }
+.day__leaves use { fill: var(--sage); }
+.day__leaves g:nth-child(3n) use { fill: var(--sage-soft); }
+.day__blooms circle { fill: var(--blush); stroke: var(--gold-deep); stroke-width: .8; }
+.day__lights circle { fill: var(--gold); }
+.day__panel.is-on .day__lights circle { animation: day-twinkle 2.6s ease-in-out infinite; }
+.day__lights circle:nth-child(2n) { animation-delay: -.9s; }
+.day__lights circle:nth-child(3n) { animation-delay: -1.7s; }
+@keyframes day-twinkle { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+.day__pin { cursor: pointer; }
+.day__pin-body { fill: var(--emerald); stroke: var(--gold); stroke-width: 1.4; }
+.day__pin-dot { fill: var(--gold-soft); }
+.day__pin-shadow { fill: var(--emerald-ink); opacity: .22; }
+.day__pin-ping { fill: none; stroke: var(--gold); stroke-width: 1.2; opacity: 0; }
+.day__pin-hit { fill: transparent; }
+
+.day__addr {
+  display: flex; flex-direction: column; gap: .15rem; text-wrap: balance;
+  font-family: var(--serif); font-size: clamp(1rem, .85rem + .6vw, 1.3rem);
+  color: var(--ink-soft); line-height: 1.4;
+}
+.day__cta { margin-top: clamp(.2rem, 1svh, .8rem); }
+
+/* ---------- progress (pinned mode only) ---------- */
+.day__progress { display: none; }
+.day--h .day__progress {
+  position: absolute; z-index: 5;
+  left: 50%; bottom: max(14px, calc(env(safe-area-inset-bottom) + 6px));
+  display: flex; align-items: center; gap: 16px;
+  height: 44px; padding: 0 22px 0 18px; border-radius: 999px;
+  background: rgba(251, 247, 240, .78);
+  border: 1px solid rgba(200, 169, 106, .38);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  box-shadow: 0 10px 30px -18px rgba(31, 61, 54, .5);
+  transform: translate(-50%, 10px); opacity: 0; pointer-events: none;
+  transition: opacity .45s ease, transform .6s var(--ease-out);
+}
+.day--h.is-pinned .day__progress { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+.day__count {
+  display: inline-flex; align-items: center; gap: .3em;
+  font-family: var(--sans); font-size: .72rem; font-weight: 600; letter-spacing: .14em;
+  color: var(--emerald); font-variant-numeric: tabular-nums;
+}
+.day__count-win { display: inline-block; overflow: hidden; height: 1.3em; line-height: 1.3em; }
+.day__count-cur { display: inline-block; }
+.day__count-sep { color: var(--gold-deep); }
+.day__bar { position: relative; display: block; width: clamp(92px, 16vw, 168px); height: 44px; }
+.day__bar::before, .day__bar-fill {
+  content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; margin-top: -.5px;
+  background: rgba(200, 169, 106, .45);
+}
+.day__bar-fill { height: 2px; margin-top: -1px; background: var(--gold-deep); transform-origin: 0 50%; transform: scaleX(0); }
+.day__dot {
+  position: absolute; top: 50%; width: 32px; height: 44px; margin: -22px 0 0 -16px;
+  border-radius: 50%;
+}
+.day__dot[data-i="0"] { left: 0; }
+.day__dot[data-i="1"] { left: 33.333%; }
+.day__dot[data-i="2"] { left: 66.667%; }
+.day__dot[data-i="3"] { left: 100%; }
+.day__dot::before {
+  content: ""; position: absolute; left: 50%; top: 50%; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px;
+  border-radius: 50%; background: var(--ivory); border: 1px solid var(--gold-deep);
+  transition: transform .35s var(--ease-spring), background-color .3s ease;
+}
+.day__dot.is-past::before { background: var(--gold); }
+.day__dot.is-active::before { background: var(--emerald); border-color: var(--emerald); transform: scale(1.35); }
+.day__dot:focus-visible { outline: none; }
+.day__dot:focus-visible::before { box-shadow: 0 0 0 3px var(--gold-soft); }
+.day__plabels { display: grid; min-width: 4.6em; }
+.day__plabels > span {
+  grid-area: 1 / 1; white-space: nowrap;
+  font-family: var(--serif); font-style: italic; font-size: 1rem; color: var(--emerald);
+  opacity: 0; transform: translateY(5px);
+  transition: opacity .35s ease, transform .45s var(--ease-out);
+}
+.day__plabels > span.is-active { opacity: 1; transform: none; }
+
+/* ==========================================================
+   Responsive
+   ========================================================== */
+
+/* wide screens (laptop, desktop, tablet + phone landscape): visual and copy side by side */
+@media (min-aspect-ratio: 5/4) {
+  .day {
+    --cal-w: min(38vw, calc((100svh - var(--day-pad-t) - var(--day-pad-b)) * .86), 500px);
+    --clock-w: min(38vw, calc(100svh - var(--day-pad-t) - var(--day-pad-b) - 16px), 540px);
+    --garden-w: min(46vw, calc((100svh - var(--day-pad-t) - var(--day-pad-b)) * 1.2), 640px);
+    --day-word: min(24vw, 40svh);
+  }
+  .day__split { flex-direction: row; text-align: left; gap: clamp(2rem, 7vw, 7.5rem); }
+  .day__split .day__copy { align-items: flex-start; flex: 0 1 30rem; }
+  .day__panel--cal .day__copy { flex-basis: 26rem; }
+}
+
+/* short portrait phones (e.g. 320x568) */
+@media (max-height: 700px) and (max-aspect-ratio: 5/4) {
+  .day { --day-pad-t: max(52px, calc(env(safe-area-inset-top) + 44px)); --day-pad-b: max(70px, calc(env(safe-area-inset-bottom) + 64px)); }
+  .day__panel--cal .day__sub { display: none; }
+  .day__split { gap: clamp(.8rem, 2.4svh, 1.4rem); }
+  .day { --garden-w: min(86vw, 36svh, 520px); --clock-w: min(70vw, 38svh, 440px); }
+}
+
+/* landscape phones and other very short screens */
+@media (max-height: 500px) {
+  .day {
+    --day-pad-t: max(44px, calc(env(safe-area-inset-top) + 34px));
+    --day-pad-b: max(64px, calc(env(safe-area-inset-bottom) + 58px));
+  }
+  .day__title { font-size: clamp(2rem, 9svh, 3rem); }
+  .day__venue { font-size: clamp(1.9rem, 9svh, 3rem); }
+  .day__time { font-size: clamp(2.6rem, 15svh, 4.4rem); }
+  .day__sub { font-size: 1rem; }
+  .day__addr { font-size: .95rem; }
+  .day__copy { gap: .45rem; }
+  .day__cta { margin-top: .2rem; }
+  .day__cta .btn { min-height: 44px; padding: .7rem 1.25rem; }
+  .day__hint { margin-top: .4rem; }
+  .day__sunday::after { display: none; }
+  .day { --day-word: min(24vw, 28svh); }
+  .day__sunmark { width: 34px; margin-bottom: 0; }
+  .day__date { font-size: clamp(1.05rem, 5.4svh, 1.5rem); }
+  .day--h .day__progress { bottom: max(8px, env(safe-area-inset-bottom)); }
+}
+
+/* phones: the pill moves to the bottom-left so it never meets the music player (bottom-right) */
+@media (max-width: 767px) {
+  .day--h .day__progress {
+    left: max(12px, calc(env(safe-area-inset-left) + 8px));
+    transform: translateY(10px);
+    gap: 10px; padding: 0 16px 0 14px;
+  }
+  .day--h.is-pinned .day__progress { transform: none; }
+  .day__bar { width: clamp(64px, calc(100vw - 280px), 110px); }
+  .day__count { font-size: .68rem; letter-spacing: .1em; }
+}
+@media (max-width: 559px) {
+  .day__plabels { display: none; }
+}
+@media (max-width: 359px) {
+  .day--h .day__progress { gap: 8px; padding: 0 12px; }
+  .day__bar { width: 56px; }
+}
+
+/* large screens: a wider stage, bigger visuals, titles on fewer lines */
+@media (min-width: 1600px) and (min-height: 900px) and (min-aspect-ratio: 5/4) {
+  .day {
+    --cal-w: min(34vw, calc((100svh - var(--day-pad-t) - var(--day-pad-b)) * .86), 600px);
+    --clock-w: min(34vw, calc(100svh - var(--day-pad-t) - var(--day-pad-b) - 16px), 660px);
+    --garden-w: min(40vw, calc((100svh - var(--day-pad-t) - var(--day-pad-b)) * 1.2), 780px);
+  }
+  .day__split { max-width: min(88vw, 1480px); }
+  .day__split .day__copy { flex-basis: 38rem; }
+  .day__panel--cal .day__copy { flex-basis: 34rem; }
+  .day__title { font-size: 5.8rem; }
+  .day__venue { font-size: 5.2rem; }
+  .day__time { font-size: 9.5rem; }
+}
+
+/* ---------- Telugu (తెలుగు) ---------- */
+html.lang-te .day { --day-word: min(23vw, 28svh); }
+@media (min-aspect-ratio: 5/4) { html.lang-te .day { --day-word: min(17vw, 30svh); } }
+html.lang-te .day__word { font-weight: 400; letter-spacing: 0; }
+html.lang-te .day__word-outline, html.lang-te .day__word-fill { padding: .14em .12em .2em; }
+html.lang-te .day__date { font-size: clamp(1.2rem, .9rem + 1.4vw, 2rem); }
+html.lang-te .day__title { font-size: clamp(1.9rem, min(8.4vw, 5.8svh), 3.8rem); line-height: 1.4; }
+html.lang-te .day__venue { font-size: clamp(1.9rem, min(8.6vw, 5.8svh), 3.8rem); line-height: 1.4; }
+html.lang-te .day__time small { font-family: var(--serif); font-size: .42em; letter-spacing: 0; vertical-align: .2em; margin: 0 .12em 0 0; color: var(--gold-deep); }
+html.lang-te .day__sub { line-height: 1.6; }
+html.lang-te .day__addr { line-height: 1.6; font-size: clamp(.98rem, .85rem + .5vw, 1.2rem); }
+html.lang-te .day__cal-month { font-size: calc(var(--cal-w) * .085); line-height: 1.5; }
+html.lang-te .day__cal-dow li { font-size: clamp(.55rem, calc(var(--cal-w) * .036), .95rem); letter-spacing: 0; }
+html.lang-te .day__cal-foot { font-size: max(.8rem, calc(var(--cal-w) * .034)); }
+html.lang-te .day__plabels > span { font-size: .95rem; }
+html.lang-te .day__eyebrow { font-size: .86rem; letter-spacing: .04em; }
+html.lang-te .day__tap, html.lang-te .day__hint, html.lang-te .day__note { font-size: .78rem; }
+@media (max-height: 500px) {
+  html.lang-te .day__title, html.lang-te .day__venue { font-size: clamp(1.6rem, 8svh, 2.4rem); }
+  html.lang-te .day { --day-word: min(17vw, 21svh); }
+}
+
+/* ---------- reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .day__hint svg, .day__panel.is-on .day__lights circle { animation: none; }
+}

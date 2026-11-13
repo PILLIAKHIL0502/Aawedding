@@ -432,7 +432,12 @@
   // The burst API exists from script load, so the intro can use it before "open".
   const api = {
     burst,
-    petals: { start: startAmbient, stop: stopAmbient, get on() { return ambientOn; } },
+    petals: {
+      start: startAmbient, stop: stopAmbient,
+      get on() { return ambientOn; },
+      get count() { return petals.length; },
+      get scrollVelocity() { return scrollV; },
+    },
     get particleCount() { return alive.length; },
   };
   function attach() {

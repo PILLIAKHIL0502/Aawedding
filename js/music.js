@@ -114,7 +114,7 @@
     masterRamp = Ramp(master.gain, 0);
     analyser = ctx.createAnalyser();
     analyser.fftSize = 128;
-    analyser.smoothingTimeConstant = 0.8;
+    analyser.smoothingTimeConstant = 0.6;
     analyser.minDecibels = -92;
     analyser.maxDecibels = -22;
     master.connect(analyser);
@@ -464,4 +464,217 @@
     get _active() { return cur; },
     get _ctx() { return ctx; },
   };
+})();
+
+/* ==========================================================
+   PLAYER UI — the floating capsule / card (#player)
+   ========================================================== */
+(function () {
+  const App = window.App;
+  if (!App) return;
+
+  App.module("player", (App) => {
+    const root = document.getElementById("player");
+    if (!root) return;
+    const M = App.music;
+    const $ = (s) => root.querySelector(s);
+    const recBtn = $(".player__record");
+    const playBtn = $(".player__play");
+    const closeBtn = $(".player__close");
+    const bars = Array.from(root.querySelectorAll(".player__bar"));
+    const fill = $(".player__fill");
+    const tNow = $(".player__time--now");
+    const tEnd = $(".player__time--end");
+    const statusEl = $(".player__status");
+    const titleEl = $(".player__title");
+    const artistEl = $(".player__artist");
+    const metaTitle = $(".player__meta-title");
+    const metaArtist = $(".player__meta-artist");
+    const range = $(".player__range");
+    const iconA = $(".player__icon-a");
+    const iconB = $(".player__icon-b");
+    const gsap = window.gsap;
+    const reduce = App.reduceMotion;
+
+    let expanded = false, shown = false, raf = 0, everPlayed = false, lastSec = -1, lastEnd = "";
+
+    /* ---- play ⇄ pause icon: the two halves of the triangle become the two bars ---- */
+    const ICON = {
+      play: ["M8 5.5L13 8.75L13 15.25L8 18.5Z", "M13 8.75L18 12L18 12L13 15.25Z"],
+      pause: ["M7.5 5.5L10.5 5.5L10.5 18.5L7.5 18.5Z", "M13.5 5.5L16.5 5.5L16.5 18.5L13.5 18.5Z"],
+    };
+    let iconState = "play";
+    function setIcon(state) {
+      if (state === iconState) return;
+      iconState = state;
+      const [a, b] = ICON[state];
+      if (gsap && !reduce) {
+        gsap.to(iconA, { attr: { d: a }, duration: 0.42, ease: "power3.inOut", overwrite: true });
+        gsap.to(iconB, { attr: { d: b }, duration: 0.42, ease: "power3.inOut", overwrite: true });
+        gsap.fromTo(playBtn.querySelector("svg"), { rotate: state === "pause" ? -90 : 90 },
+          { rotate: 0, duration: 0.5, ease: "power3.out", transformOrigin: "50% 50%", overwrite: true });
+      } else {
+        iconA.setAttribute("d", a);
+        iconB.setAttribute("d", b);
+      }
+    }
+
+    /* ---- labels (re-rendered on every state or language change) ---- */
+    const fmt = (s) => {
+      s = Math.max(0, Math.floor(s || 0));
+      return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+    };
+    function render() {
+      const playing = M.playing;
+      const synth = M.mode === "synth";
+      root.dataset.state = playing ? "playing" : "paused";
+      root.dataset.mode = synth ? "synth" : "file";
+      root.classList.toggle("is-hint", !everPlayed && !playing);
+      setIcon(playing ? "pause" : "play");
+      playBtn.setAttribute("aria-pressed", String(playing));
+      playBtn.setAttribute("aria-label", playing
+        ? App.t("Pause music", "సంగీతం ఆపండి")
+        : App.t("Play music", "సంగీతం ప్లే చేయండి"));
+      const recLabel = expanded
+        ? App.t("Hide music player", "సంగీత ప్లేయర్‌ను దాచండి")
+        : App.t("Show music player", "సంగీత ప్లేయర్‌ను చూపించండి");
+      recBtn.setAttribute("aria-label", recLabel);
+      recBtn.setAttribute("aria-expanded", String(expanded));
+      closeBtn.setAttribute("aria-label", App.t("Hide music player", "సంగీత ప్లేయర్‌ను దాచండి"));
+      statusEl.textContent = playing
+        ? App.t("Now playing", "ఇప్పుడు వినిపిస్తోంది")
+        : App.t("Paused", "ఆపివేయబడింది");
+      const title = synth ? App.t("Music box", "మ్యూజిక్ బాక్స్") : M.title;
+      const artist = synth ? App.t("An original melody", "ఒక స్వంత బాణీ") : M.artist;
+      titleEl.textContent = metaTitle.textContent = title;
+      artistEl.textContent = metaArtist.textContent = artist;
+      updateProgress(true);
+    }
+
+    function updateProgress(force) {
+      if (!expanded && !force) return;
+      const d = M.duration, t = M.currentTime;
+      fill.style.transform = "scaleX(" + (d ? Math.min(1, t / d) : 0).toFixed(4) + ")";
+      const sec = Math.floor(t);
+      if (sec !== lastSec || force) { lastSec = sec; tNow.textContent = fmt(t); }
+      const end = d ? fmt(d) : "1:30";
+      if (end !== lastEnd) { lastEnd = end; tEnd.textContent = end; }
+    }
+
+    /* ---- live visualiser (only while playing, visible, and motion is welcome) ---- */
+    // Bands over the spectrum (fftSize 128 → 64 bins of ~350 Hz), low to high.
+    const BANDS = [[0, 1], [2, 3], [4, 6], [7, 10], [11, 16], [17, 26], [27, 42]];
+    const SHAPE = [0.42, 0.62, 0.5, 0.7, 0.54, 0.64, 0.4];   // the bars' resting silhouette while music plays
+    const LIVELY = [3.4, 3.1, 2.5, 2, 1.35, 1.05, 0.8];        // low bands vary less, so amplify them more
+    const level = new Float32Array(bars.length);
+    const slow = new Float32Array(bars.length);
+    let data = null;
+    function frame() {
+      raf = 0;
+      if (!M.playing || document.hidden) { stopLoop(); return; }
+      const an = M.analyser;
+      if (an && !reduce) {
+        if (!data || data.length !== an.frequencyBinCount) data = new Uint8Array(an.frequencyBinCount);
+        an.getByteFrequencyData(data);
+        for (let i = 0; i < bars.length; i++) {
+          const [lo, hi] = BANDS[i];
+          let sum = 0;
+          for (let k = lo; k <= hi; k++) sum += data[k] || 0;
+          const r = sum / ((hi - lo + 1) * 255);
+          // A calm track has a steady spectrum, so show how each band moves against its own recent average.
+          slow[i] = slow[i] ? slow[i] + (r - slow[i]) * 0.035 : r;
+          const dev = (r - slow[i]) / Math.max(0.06, slow[i]);
+          const loud = Math.min(1, r * 2.2);
+          const v = Math.min(1, Math.max(0.1, SHAPE[i] * (0.3 + 0.7 * loud) + dev * LIVELY[i]));
+          level[i] = v > level[i] ? level[i] * 0.3 + v * 0.7 : level[i] * 0.82 + v * 0.18;   // fast attack, soft release
+          bars[i].style.transform = "scaleY(" + level[i].toFixed(3) + ")";
+        }
+      }
+      updateProgress(false);
+      raf = requestAnimationFrame(frame);
+    }
+    function startLoop() {
+      if (raf || !M.playing || document.hidden) return;
+      if (reduce && !expanded) return;
+      if (!reduce) root.classList.add("is-live");
+      raf = requestAnimationFrame(frame);
+    }
+    function stopLoop() {
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0;
+      root.classList.remove("is-live");
+      level.fill(0);
+      slow.fill(0);
+      bars.forEach((b) => (b.style.transform = ""));
+    }
+
+    /* ---- show (after the invitation opens, or as soon as music plays on an open page) ---- */
+    function show(delay) {
+      if (shown) return;
+      shown = true;
+      setTimeout(() => {
+        root.classList.add("is-shown");
+        setTimeout(() => root.classList.add("is-ready"), 1400);
+      }, delay || 0);
+    }
+    const introGone = () => App.state.opened || !document.getElementById("intro");
+
+    /* ---- expand / collapse ---- */
+    function setExpanded(v, { focusRecord = false } = {}) {
+      v = !!v;
+      if (v === expanded) return;
+      expanded = v;
+      root.classList.toggle("is-expanded", v);
+      render();
+      if (v) startLoop();
+      else if (reduce) stopLoop();
+      if (focusRecord) recBtn.focus({ preventScroll: true });
+    }
+
+    recBtn.addEventListener("click", () => { App.haptic(6); setExpanded(!expanded); });
+    closeBtn.addEventListener("click", () => setExpanded(false, { focusRecord: true }));
+    playBtn.addEventListener("click", () => {
+      App.haptic(10);
+      M.toggle();            // runs inside the tap, so it can unlock audio when the intro was skipped
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && expanded) setExpanded(false, { focusRecord: root.contains(document.activeElement) });
+    });
+    document.addEventListener("pointerdown", (e) => {
+      if (expanded && !root.contains(e.target)) setExpanded(false);
+    }, true);
+
+    /* ---- volume ---- */
+    function paintVolume(v) {
+      range.style.setProperty("--val", Math.round(v * 100) + "%");
+      root.dataset.vol = v === 0 ? "mute" : v < 0.45 ? "low" : "high";
+    }
+    range.value = String(Math.round(M.volume * 100));
+    paintVolume(M.volume);
+    range.addEventListener("input", () => {
+      const v = Number(range.value) / 100;
+      paintVolume(v);
+      M.setVolume(v);
+    });
+
+    /* ---- engine events ---- */
+    App.on("music:play", () => {
+      everPlayed = true;
+      if (introGone()) show(0);
+      render();
+      startLoop();
+    });
+    App.on("music:pause", (d) => {
+      if (d && d.reason === "blocked") everPlayed = false;   // the browser refused: invite a tap
+      stopLoop();
+      render();
+    });
+    App.on("lang", render);
+    App.on("open", () => show(App.skipIntro ? 350 : 750));
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) startLoop(); });
+
+    render();
+    if (App.state.opened) show(350);
+    if (M.playing) { everPlayed = true; render(); startLoop(); }
+  });
 })();

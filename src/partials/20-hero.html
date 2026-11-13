@@ -8,15 +8,17 @@
     <div class="hero__layer hero__layer--rings">
       <div class="hero__depth" data-depth="12">
         <svg class="hero__rings" viewBox="0 0 600 600" focusable="false">
-          <circle class="hero__ring hero__ring--outer" cx="300" cy="300" r="296" pathLength="1" />
-          <circle class="hero__ring hero__ring--main" cx="300" cy="300" r="270" pathLength="1" />
-          <g class="hero__ring-spin"><circle class="hero__ring hero__ring--dash" cx="300" cy="300" r="252" /></g>
-          <circle class="hero__ring hero__ring--inner" cx="300" cy="300" r="214" pathLength="1" />
+          <g transform="rotate(-90 300 300)">
+            <circle class="hero__ring hero__ring--outer" cx="300" cy="300" r="296" pathLength="1" />
+            <circle class="hero__ring hero__ring--main" cx="300" cy="300" r="270" pathLength="1" />
+            <circle class="hero__ring hero__ring--inner" cx="300" cy="300" r="214" pathLength="1" />
+          </g>
           <g class="hero__ring-gems">
             <path d="M300 23l5 7-5 7-5-7z" /><path d="M300 563l5 7-5 7-5-7z" />
             <path d="M23 300l7-5 7 5-7 5z" /><path d="M563 300l7-5 7 5-7 5z" />
           </g>
         </svg>
+        <div class="hero__spin"><svg class="hero__rings hero__rings--dash" viewBox="0 0 600 600" focusable="false"><circle class="hero__ring hero__ring--dash" cx="300" cy="300" r="252" /></svg></div>
       </div>
     </div>
 
@@ -62,7 +64,7 @@
       </div>
     </div>
 
-    <button class="hero__cue" type="button" data-cursor="">
+    <button class="hero__cue" type="button" data-magnetic="0.35">
       <span class="hero__cue-in">
         <span class="hero__cue-label" data-te="కిందికి జరపండి">Scroll</span>
         <span class="hero__cue-line" aria-hidden="true"><i></i></span>

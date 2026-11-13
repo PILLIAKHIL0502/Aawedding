@@ -80,6 +80,8 @@ html.lang-te #reveal .reveal-date__title { font-size: clamp(2.2rem, 8.4vw, 3.9re
   z-index: 1;
   container-type: inline-size;
   aspect-ratio: 4 / 3;
+  -webkit-user-select: none;   /* a playful drag across the card should never select text */
+  user-select: none;
   border-radius: clamp(14px, 4vw, 22px);
   overflow: hidden;
   background:
@@ -258,8 +260,8 @@ html.lang-te #reveal .reveal-date__time { font-size: 6.4cqi; line-height: 1.5; }
 /* the coin that demonstrates the gesture until the first touch */
 #reveal .reveal-date__hint {
   position: absolute;
-  left: 16%;
-  top: 44%;
+  left: 17%;
+  top: 56%;
   width: 11cqi;
   height: 11cqi;
   pointer-events: none;
@@ -273,9 +275,9 @@ html.lang-te #reveal .reveal-date__time { font-size: 6.4cqi; line-height: 1.5; }
 @keyframes reveal-date-hint {
   0%   { opacity: 0; transform: translate(0, 0) rotate(-14deg); }
   10%  { opacity: 1; }
-  30%  { transform: translate(15cqi, -9cqi) rotate(6deg); }
-  50%  { transform: translate(29cqi, 6cqi) rotate(-8deg); }
-  70%  { transform: translate(44cqi, -8cqi) rotate(8deg); }
+  30%  { transform: translate(15cqi, -4cqi) rotate(6deg); }
+  50%  { transform: translate(29cqi, 4cqi) rotate(-8deg); }
+  70%  { transform: translate(44cqi, -4cqi) rotate(8deg); }
   86%  { opacity: 1; }
   100% { opacity: 0; transform: translate(56cqi, 3cqi) rotate(-4deg); }
 }
@@ -336,7 +338,8 @@ html.lang-te #reveal .reveal-date__msg { font-size: clamp(1.7rem, 6.4vw, 2.4rem)
 /* ---------------- landscape phones: title and button beside the ticket ---------------- */
 @media (max-height: 520px) and (orientation: landscape) {
   #reveal.reveal-date {
-    --card-w: min(50vw, 420px, calc((100svh - 3rem) * 4 / 3));
+    /* leaves ~56px above and below, clear of the fixed language toggle and music player */
+    --card-w: min(50vw, 420px, calc((100svh - 7rem) * 4 / 3));
     --notch: 11px;
     display: grid;
     align-items: center;

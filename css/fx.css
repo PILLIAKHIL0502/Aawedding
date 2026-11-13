@@ -1,0 +1,277 @@
+/* ==========================================================
+   fx.css — app-wide effects. Every class is prefixed fx-.
+   Layer: z-index 65 (above content and particles, below player/intro/toggle/toast).
+   ========================================================== */
+.fx-root {
+  position: fixed;
+  inset: 0;
+  z-index: 65;
+  pointer-events: none;
+  overflow: hidden;
+  contain: strict;
+}
+
+/* ---------------- scroll progress ---------------- */
+.fx-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  transition: opacity .6s ease;
+}
+.fx-progress__bar {
+  height: 100%;
+  background: var(--foil);
+  background-size: 100% 100%;
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  box-shadow: 0 0 10px rgba(228, 210, 166, .55);
+}
+html:not(.is-open) .fx-progress { opacity: 0; }
+
+/* ---------------- sparkle burst ---------------- */
+.fx-spark {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 6px rgba(228, 210, 166, .9);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+.fx-spark--star {
+  border-radius: 0;
+  box-shadow: none;
+  background: var(--gold);
+  clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
+}
+.fx-spark--dark { background: var(--gold-soft); }
+
+/* ---------------- touch ripple ---------------- */
+.fx-ripple {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 1.5px solid var(--gold);
+  box-shadow: 0 0 14px rgba(200, 169, 106, .35), inset 0 0 10px rgba(200, 169, 106, .25);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+.fx-ripple--dark { border-color: var(--gold-soft); }
+
+/* ---------------- custom cursor (fine pointers) ---------------- */
+.fx-pointer {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+.fx-pointer.is-on { opacity: 1; }
+.fx-pointer.is-native { opacity: 0; }
+.fx-pointer__dot,
+.fx-pointer__ring {
+  position: absolute;
+  left: 0;
+  top: 0;
+  will-change: transform;
+}
+.fx-pointer__dot { width: 6px; height: 6px; }
+.fx-pointer__dot i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--gold-deep);
+  transition: transform .3s var(--ease-out), background-color .3s ease;
+}
+.fx-pointer__ring {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+}
+.fx-pointer__ring-in {
+  grid-area: 1 / 1;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 1px solid rgba(168, 135, 74, .65);
+  transition: transform .5s var(--ease-out), background-color .35s ease, border-color .35s ease, opacity .3s ease;
+}
+.fx-pointer__label {
+  grid-area: 1 / 1;
+  font-family: var(--sans);
+  font-size: .6rem;
+  font-weight: 600;
+  letter-spacing: .18em;
+  padding-left: .18em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--emerald-deep);
+  opacity: 0;
+  transform: scale(.6);
+  transition: opacity .25s ease, transform .4s var(--ease-out);
+}
+html[lang="te"] .fx-pointer__label { letter-spacing: 0; padding-left: 0; font-size: .74rem; text-transform: none; }
+
+.fx-pointer.is-hover .fx-pointer__ring-in {
+  transform: scale(1.7);
+  background-color: rgba(200, 169, 106, .14);
+  border-color: var(--gold);
+}
+.fx-pointer.is-hover .fx-pointer__dot i { transform: scale(.6); }
+.fx-pointer.has-label .fx-pointer__ring-in {
+  transform: scale(2.35);
+  background-color: var(--gold-soft);
+  border-color: var(--gold);
+}
+.fx-pointer.has-label .fx-pointer__label { opacity: 1; transform: none; }
+.fx-pointer.has-label .fx-pointer__dot i { transform: scale(0); }
+.fx-pointer.is-down .fx-pointer__ring-in { transform: scale(.78); }
+.fx-pointer.is-hover.is-down .fx-pointer__ring-in { transform: scale(1.45); }
+.fx-pointer.is-text .fx-pointer__dot i { transform: scale(0); }
+.fx-pointer.is-text .fx-pointer__ring-in { opacity: .35; transform: scale(.7); }
+
+/* on dark sections */
+.fx-pointer.is-dark .fx-pointer__dot i { background: var(--gold-soft); }
+.fx-pointer.is-dark .fx-pointer__ring-in { border-color: rgba(228, 210, 166, .7); }
+.fx-pointer.is-dark.is-hover .fx-pointer__ring-in { background-color: rgba(228, 210, 166, .14); border-color: var(--gold-soft); }
+.fx-pointer.is-dark.has-label .fx-pointer__ring-in { background-color: var(--gold-soft); }
+
+/* The native cursor is hidden only while the custom one is live, and never over text fields
+   or layers stacked above the cursor (player, toggle, toast, intro). */
+html.fx-cursor:not(.fx-native),
+html.fx-cursor:not(.fx-native) * { cursor: none !important; }
+html.fx-cursor:not(.fx-native) input,
+html.fx-cursor:not(.fx-native) textarea,
+html.fx-cursor:not(.fx-native) [contenteditable]:not([contenteditable="false"]) { cursor: text !important; }
+html.fx-cursor:not(.fx-native) select,
+html.fx-cursor:not(.fx-native) iframe,
+html.fx-cursor:not(.fx-native) input[type="checkbox"],
+html.fx-cursor:not(.fx-native) input[type="radio"],
+html.fx-cursor:not(.fx-native) input[type="range"],
+html.fx-cursor:not(.fx-native) input[type="color"],
+html.fx-cursor:not(.fx-native) input[type="file"],
+html.fx-cursor:not(.fx-native) input[type="button"],
+html.fx-cursor:not(.fx-native) input[type="submit"] { cursor: auto !important; }
+
+/* ---------------- side dot navigation ---------------- */
+.fx-nav {
+  position: fixed;
+  z-index: 65;
+  top: 50%;
+  right: max(10px, env(safe-area-inset-right, 0px));
+  transform: translateY(-50%);
+  transition: opacity .6s ease;
+}
+html:not(.is-open) .fx-nav { opacity: 0; pointer-events: none; }
+.fx-nav__list {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+/* the hairline the dots sit on */
+.fx-nav__list::before {
+  content: "";
+  position: absolute;
+  top: 15px;
+  bottom: 15px;
+  right: 14.5px;
+  width: 1px;
+  background: linear-gradient(rgba(200, 169, 106, 0), rgba(200, 169, 106, .5) 15%, rgba(200, 169, 106, .5) 85%, rgba(200, 169, 106, 0));
+}
+.fx-nav__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+.fx-nav__dot {
+  position: relative;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1px solid var(--gold-deep);
+  background: var(--ivory);
+  transition: transform .45s var(--ease-spring), background-color .3s ease, border-color .3s ease;
+}
+.fx-nav__item:hover .fx-nav__dot { transform: scale(1.35); }
+.fx-nav__item.is-active .fx-nav__dot {
+  background: var(--gold-deep);
+  border-color: var(--gold-deep);
+  transform: scale(1.5);
+  box-shadow: 0 0 0 3px rgba(200, 169, 106, .18);
+}
+.fx-nav__label {
+  position: absolute;
+  right: 34px;
+  top: 50%;
+  margin-top: -.95em;
+  padding: .45em .9em .4em 1.08em;
+  border-radius: 999px;
+  font-family: var(--sans);
+  font-size: .6rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--emerald);
+  background: rgba(251, 247, 240, .9);
+  border: 1px solid rgba(200, 169, 106, .45);
+  box-shadow: 0 8px 20px -12px rgba(15, 32, 28, .4);
+  opacity: 0;
+  transform: translateX(8px);
+  transition: opacity .25s ease, transform .4s var(--ease-out);
+  pointer-events: none;
+}
+html[lang="te"] .fx-nav__label { letter-spacing: 0; text-transform: none; font-size: .78rem; padding: .35em .9em .25em; margin-top: -1em; }
+.fx-nav__item:hover .fx-nav__label,
+.fx-nav__item:focus-visible .fx-nav__label { opacity: 1; transform: none; }
+.fx-nav__item:focus-visible { outline: 2px solid var(--gold); outline-offset: 0; }
+
+/* recolour over dark sections */
+html.fx-on-dark .fx-nav__dot { border-color: var(--gold-soft); background: var(--emerald-deep); }
+html.fx-on-dark .fx-nav__item.is-active .fx-nav__dot { background: var(--gold-soft); border-color: var(--gold-soft); box-shadow: 0 0 0 3px rgba(228, 210, 166, .16); }
+html.fx-on-dark .fx-nav__label { color: var(--gold-soft); background: rgba(21, 43, 38, .88); border-color: rgba(200, 169, 106, .5); }
+html.fx-on-dark .fx-progress__bar { box-shadow: 0 0 12px rgba(228, 210, 166, .8); }
+
+/* touch: a slim indicator rail that wakes while scrolling */
+.fx-nav--rail {
+  right: max(5px, env(safe-area-inset-right, 0px));
+  pointer-events: none;
+  opacity: 0;
+}
+.fx-nav--rail.is-awake { opacity: 1; }
+html:not(.is-open) .fx-nav--rail.is-awake { opacity: 0; }
+.fx-nav--rail .fx-nav__list::before { display: none; }
+.fx-nav--rail .fx-nav__item { width: 8px; height: 13px; border-radius: 0; }
+.fx-nav--rail .fx-nav__dot { width: 4px; height: 4px; border: 0; background: rgba(168, 135, 74, .55); }
+.fx-nav--rail .fx-nav__item.is-active .fx-nav__dot { background: var(--gold-deep); transform: scaleY(2.6); border-radius: 2px; box-shadow: none; }
+.fx-nav--rail .fx-nav__label { display: none; }
+html.fx-on-dark .fx-nav--rail .fx-nav__dot { background: rgba(228, 210, 166, .5); }
+html.fx-on-dark .fx-nav--rail .fx-nav__item.is-active .fx-nav__dot { background: var(--gold-soft); }
+
+/* phones and short landscape screens: no gutter for a side nav (it would sit on cards);
+   the top progress bar is enough there */
+@media (max-width: 600px), (max-height: 500px) {
+  .fx-nav { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-nav__dot, .fx-nav__label { transition: none; }
+}

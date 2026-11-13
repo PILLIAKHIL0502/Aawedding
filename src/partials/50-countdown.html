@@ -1,0 +1,45 @@
+<section id="countdown" class="countdown" data-nav="Countdown" data-te-nav="కౌంట్‌డౌన్" data-theme="dark" aria-labelledby="countdown-title">
+  <div class="countdown__halo" aria-hidden="true"></div>
+
+  <div class="countdown__inner">
+    <header class="countdown__head">
+      <span class="eyebrow countdown__eyebrow" data-te="ఆదివారం, 29 నవంబర్ 2026">Sunday, 29 November 2026</span>
+      <h2 class="countdown__title" id="countdown-title" data-te="కొత్త జీవితానికి కౌంట్‌డౌన్">Counting down to forever</h2>
+    </header>
+
+    <!-- split-flap clock: the flaps are built and flipped by js/countdown.js -->
+    <div class="countdown__clock" role="timer" aria-live="off">
+      <div class="countdown__clock-grid" aria-hidden="true">
+        <div class="countdown__unit" data-unit="days">
+          <div class="countdown__flap"></div>
+          <span class="countdown__label" data-te="రోజులు">Days</span>
+        </div>
+        <div class="countdown__unit" data-unit="hours">
+          <div class="countdown__flap"></div>
+          <span class="countdown__label" data-te="గంటలు">Hours</span>
+        </div>
+        <div class="countdown__unit" data-unit="minutes">
+          <div class="countdown__flap"></div>
+          <span class="countdown__label" data-te="నిమిషాలు">Minutes</span>
+        </div>
+        <div class="countdown__unit" data-unit="seconds">
+          <div class="countdown__flap"></div>
+          <span class="countdown__label" data-te="సెకన్లు">Seconds</span>
+        </div>
+      </div>
+      <p class="countdown__sr sr-only"></p>
+    </div>
+
+    <!-- shown on the day, and after it -->
+    <p class="countdown__status" aria-live="polite" hidden></p>
+
+    <div class="countdown__progress">
+      <div class="countdown__track" aria-hidden="true">
+        <span class="countdown__fill"></span>
+        <span class="countdown__spark"></span>
+        <svg class="countdown__goal" viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="13.5" r="6.5"/><path d="M9.2 4.2h5.6L12 7.4z"/></svg>
+      </div>
+      <p class="countdown__togo"></p>
+    </div>
+  </div>
+</section>
