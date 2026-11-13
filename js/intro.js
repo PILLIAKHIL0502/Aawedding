@@ -432,6 +432,7 @@
     function leave() {
       if (state !== "unrolled") return;
       setState("leaving");
+      if (App.beginOpen) App.beginOpen();   // pay the unlock re-layout now, on a still frame
       if (!App.music.playing) gesture();
       App.haptic(12);
       offTilt();

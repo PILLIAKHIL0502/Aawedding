@@ -16,6 +16,21 @@ Royal Regency Gardens, Opp. Indian Oil Petrol Pump, Mehdipatnam Road, Asif Nagar
 4. Click **Deploy**. Every `git push` after that redeploys automatically.
 5. If your production branch isn't the one with this code, open **Settings → Git → Production Branch** and set it.
 
+## What guests get
+
+| Section | What happens |
+|---|---|
+| **Intro** | A rolled parchment tied with a ribbon and an A&A wax seal. Tap the seal (or pull the roller down): it cracks, the scroll unrolls, the music starts |
+| **Music** | "In The Wild" by National Sweetheart, looping with a seamless crossfade. A spinning-record player that shrinks to a disc while scrolling |
+| **Welcome** | The names write themselves in. Gold rings, leaves and sparkles drift with phone tilt or the mouse |
+| **The couple** | Two cards slide together while gold rings roll in and interlock. Tap a card to flip it and see the parents |
+| **Save the date** | A gold-foil scratch card reveals the date (sideways strokes scratch, vertical swipes scroll) |
+| **The Day** | A sideways story you scroll or swipe through: Sunday → the calendar → a clock sweeping to 9:05 → the venue gate |
+| **Countdown** | A flip clock counting down to 9:05 AM IST |
+| **When & Where** | Google Maps, directions, Apple Maps, copy address, share location, add to calendar, and a map |
+| **Blessings** | Hold the heart to send love, leave a wish on the wall, share on WhatsApp. Falling petals react to scrolling |
+| **Everywhere** | An EN / తె toggle (`?lang=te` opens in Telugu); works from 320px phones to 2560px monitors |
+
 ## Run locally
 
 ```bash
@@ -50,7 +65,7 @@ The Telugu versions live in **`js/i18n.js` → `WEDDING.te`**, and each section 
 
 ## Customise
 
-- **Your own song:** add `assets/music.mp3` and it replaces the built-in original composition automatically.
-  Only use a track you have the rights to.
+- **Song:** `assets/music.mp3` ("In The Wild" by National Sweetheart). Replace the file to change it. If it ever fails to
+  load, a built-in music-box melody plays instead.
 - **Photos:** each arch frame in `src/partials/30-couple.html` has a comment showing where an `<img>` goes.
 - **Colours:** change the tokens at the top of `css/base.css`.

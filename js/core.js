@@ -81,12 +81,14 @@
      The guest is reading, the page behind is hidden, so the ~50-190 ms refresh is invisible here
      instead of stalling the curtain lift or the hero entrance. */
   let prerefreshed = false;
+  let prerefreshHeight = 0;
   const prerefresh = () => {
     if (prerefreshed || App.state.opened || !ScrollTrigger) return;
     const html = document.documentElement;
     const t0 = performance.now();
     html.classList.remove("is-locked");
     ScrollTrigger.refresh();
+    prerefreshHeight = document.documentElement.scrollHeight;
     html.classList.add("is-locked");
     prerefreshed = true;
     if (App.params.has("debugperf")) console.log(`[perf] prerefresh ${(performance.now() - t0).toFixed(1)}ms`);
@@ -207,6 +209,14 @@
     },
 
     /* Called by intro (or by core when the intro is skipped). */
+    /* Called by the intro the instant the guest taps "Open", before anything moves. Unlocking
+       re-lays-out the whole document (~100-200 ms on a slow phone); doing it here, on a still
+       frame, keeps that cost out of the curtain animation. open() later skips it. */
+    beginOpen() {
+      if (App.state.opened) return;
+      App.unlock({ refresh: false });
+    },
+
     /* Called by the intro mid-way through its curtain lift (or by core when the intro is skipped).
        Every module sets up its entrance on "open"; running them all in one frame stalled the
        curtain animation on phones (~140 ms, ~400 ms on slow CPUs). So listeners run one per
@@ -229,9 +239,13 @@
           ScrollTrigger && ScrollTrigger.refresh();
           if (App.params.has("debugperf")) console.log(`[perf] refresh ${(performance.now() - t0).toFixed(1)}ms @${t0.toFixed(0)}`);
         };
-        if (!prerefreshed) go();
-        else if ("requestIdleCallback" in window) requestIdleCallback(go, { timeout: 6000 });
-        else setTimeout(go, 4000);
+        if (!prerefreshed) return go();
+        // Only re-measure if something actually changed the page height since the pre-measure.
+        const goIfChanged = () => {
+          if (Math.abs(document.documentElement.scrollHeight - prerefreshHeight) > 2) go();
+        };
+        if ("requestIdleCallback" in window) requestIdleCallback(goIfChanged, { timeout: 6000 });
+        else setTimeout(goIfChanged, 4000);
       })));
     },
 
