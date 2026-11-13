@@ -7,8 +7,15 @@
      canvas  the visible layer = foil + moving sheen + glitter, cut by the mask,
              with gold flakes falling on top. Repainted only while on screen.
    Coverage is measured by sampling the mask on a small grid (throttled).
-   At 50% the rest of the foil fades away, confetti bursts, and the state is
-   remembered for the session.
+   At 50% (35% on touch screens, where strokes run side to side) the rest of
+   the foil fades away, confetti bursts, and the state is remembered for the
+   session.
+
+   Touch: the foil allows vertical panning (touch-action: pan-y), so a thumb
+   that swipes up or down over the card scrolls the page. A touch stroke only
+   marks the foil once it is clearly sideways (or is a tap); if the browser
+   takes the gesture for a scroll it sends pointercancel and the held points
+   are dropped, so a scroll never leaves a stray mark.
    ========================================================== */
 (function () {
   const App = window.App;
@@ -28,7 +35,10 @@
     const reduce = App.reduceMotion;
     const KEY = "aa-date-revealed";
     const THRESHOLD = 0.5;
-    const BRUSH = 32;                        // CSS px diameter
+    const THRESHOLD_TOUCH = 0.35;            // side-to-side strokes cover less of the card
+    const BRUSH = 32, BRUSH_TOUCH = 36;      // CSS px diameter (a fingertip is wider than a cursor)
+    const COMMIT_X = 14;                     // px sideways before a touch stroke counts as a scratch
+    const COMMIT_ANY = 30;                   // ...or this far in any direction without a cancel
     const DPR = Math.min(2, window.devicePixelRatio || 1);
     const SAMPLE_W = 48, SAMPLE_H = 36;      // downscaled grid for coverage
 
@@ -59,8 +69,23 @@
     let cleared = 0;
     let lastMilestone = 0;
     let drawing = false, pid = null, last = null;
+    let held = null, start = null;    // an unconfirmed touch stroke: its points, and where it began
+    let ripe = false, ripeT = 0;      // it looks like a scratch; drawn on the next event unless cancelled
+    let brush = BRUSH, usedTouch = false;
     let lastCheck = 0, checkT = 0;
     const t0 = performance.now();
+
+    /* ---------- visibility: CSS loops and the foil only animate while on screen ----------
+       (set up before the early return below, so the glow pauses offscreen after a reveal too) */
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver((entries) => {
+        visible = entries[entries.length - 1].isIntersecting;
+        root.classList.toggle("is-offscreen", !visible);
+        if (visible) { dirty = true; kick(); }
+      }, { rootMargin: "80px 0px" }).observe(root);
+    } else {
+      visible = true;
+    }
 
     /* ---------- already revealed this session: show the date, skip the foil ---------- */
     if (session.get() || !ctx) {
@@ -72,7 +97,11 @@
     /* ---------- fonts for the engraved label ---------- */
     const serifStack = () =>
       getComputedStyle(document.documentElement).getPropertyValue("--serif").trim() || "serif";
-    const labelText = () => App.t("Scratch here", "ఇక్కడ గీకండి");
+    // on touch screens the engraving says how to scratch: side to side (vertical swipes scroll)
+    const touchUI = App.isTouch;
+    const labelText = () => (touchUI
+      ? App.t("Scratch side to side", "అటూ ఇటూ గీకండి")
+      : App.t("Scratch here", "ఇక్కడ గీకండి"));
     const labelFont = (px) => (App.lang === "te" ? `400 ${px}px ${serifStack()}` : `italic 500 ${px}px ${serifStack()}`);
     function loadLabelFont() {
       if (!document.fonts || !document.fonts.load) return Promise.resolve();
@@ -222,21 +251,28 @@
         c.stroke();
       }, s * 0.8, "rgba(150, 118, 58, .55)");
 
-      // the engraved label: "Scratch here ✦"
-      const fontPx = Math.max(18, Math.min(42, W * 0.085));
-      c.font = labelFont(fontPx * s);
+      // the engraved label: "Scratch here ✦" ("Scratch side to side ✦" on touch screens)
+      let fontPx = Math.max(18, Math.min(42, W * 0.085));
       c.textAlign = "left";
       c.textBaseline = "middle";
       const text = labelText();
-      const tw = c.measureText(text).width;
+      c.font = labelFont(fontPx * s);
+      let tw = c.measureText(text).width;
+      const room = w * 0.76;   // stay well inside the engraved frame
+      const full = tw + fontPx * s * 1.02;
+      if (full > room) {
+        fontPx = Math.max(16, fontPx * room / full);
+        c.font = labelFont(fontPx * s);
+        tw = c.measureText(text).width;
+      }
       const starR = fontPx * s * 0.3;
       const gap = fontPx * s * 0.42;
       const total = tw + gap + starR * 2;
       const x0 = (w - total) / 2;
       const cy = h * 0.47 + (App.lang === "te" ? fontPx * s * 0.06 : 0);
       const faceGrad = c.createLinearGradient(0, cy - fontPx * s, 0, cy + fontPx * s);
-      faceGrad.addColorStop(0, "#9c7c40");
-      faceGrad.addColorStop(1, "#7d602b");
+      faceGrad.addColorStop(0, "#6e5324");
+      faceGrad.addColorStop(1, "#5a421a");
       engrave(c, (col) => {
         c.fillStyle = col;
         c.fillText(text, x0, cy);
@@ -253,6 +289,11 @@
           c.beginPath();
           c.moveTo(w / 2 - ow / 2, oy); c.lineTo(w / 2 - 6 * s, oy);
           c.moveTo(w / 2 + 6 * s, oy); c.lineTo(w / 2 + ow / 2, oy);
+          if (touchUI) {   // arrowheads: side to side
+            const a = 4 * s;
+            c.moveTo(w / 2 - ow / 2 + a, oy - a); c.lineTo(w / 2 - ow / 2, oy); c.lineTo(w / 2 - ow / 2 + a, oy + a);
+            c.moveTo(w / 2 + ow / 2 - a, oy - a); c.lineTo(w / 2 + ow / 2, oy); c.lineTo(w / 2 + ow / 2 - a, oy + a);
+          }
           c.stroke();
           star(c, w / 2, oy, 3.2 * s);
           c.fill();
@@ -367,7 +408,7 @@
 
     function scratch(a, b) {
       if (!mctx) return;
-      const lw = BRUSH * DPR;
+      const lw = brush * DPR;
       mctx.globalCompositeOperation = "destination-out";
       mctx.lineCap = "round";
       mctx.lineJoin = "round";
@@ -431,7 +472,7 @@
         lastMilestone = step;
         if (App.isTouch && step < 5) App.haptic(6);
       }
-      if (cleared >= THRESHOLD) finish({ animate: true, celebrate: true });
+      if (cleared >= (touchUI || usedTouch ? THRESHOLD_TOUCH : THRESHOLD)) finish({ animate: true, celebrate: true });
     }
     function scheduleCheck() {
       const since = performance.now() - lastCheck;
@@ -443,13 +484,44 @@
       if (!root.classList.contains("is-touched")) root.classList.add("is-touched");
     }
 
+    const localPoints = (e) => {
+      const list = (e.getCoalescedEvents && e.getCoalescedEvents()) || [];
+      return (list.length ? list : [e]).map(toLocal);
+    };
+    function stroke(points) {
+      points.forEach((p) => { scratch(last, p); last = p; });
+    }
+    // a held touch stroke turned out to be a scratch (sideways, or a tap): draw it now
+    function commit() {
+      clearTimeout(ripeT);
+      ripe = false;
+      const pts = held;
+      held = null;
+      if (!pts || !pts.length) return;
+      touched();
+      last = pts[0];
+      scratch(last, last);
+      stroke(pts.slice(1));
+      scheduleCheck();
+    }
+
     canvas.addEventListener("pointerdown", (e) => {
       if (revealed) return;
+      if (drawing && e.pointerType === "touch" && e.pointerId !== pid) return;   // one finger at a time
       if (e.pointerType === "mouse" && e.button !== 0) return;
-      e.preventDefault();
       drawing = true;
       pid = e.pointerId;
       try { canvas.setPointerCapture(pid); } catch (_) {}
+      if (e.pointerType !== "mouse") {
+        // finger or pen: wait, this may be a swipe scrolling the page
+        if (e.pointerType === "touch") usedTouch = true;
+        brush = e.pointerType === "touch" ? BRUSH_TOUCH : BRUSH;
+        held = [toLocal(e)];
+        start = { x: e.clientX, y: e.clientY };
+        return;
+      }
+      e.preventDefault();
+      brush = BRUSH;
       touched();
       last = toLocal(e);
       scratch(last, last);
@@ -457,39 +529,46 @@
     });
     canvas.addEventListener("pointermove", (e) => {
       if (!drawing || e.pointerId !== pid) return;
-      const list = (e.getCoalescedEvents && e.getCoalescedEvents()) || [];
-      (list.length ? list : [e]).forEach((ev) => {
-        const p = toLocal(ev);
-        scratch(last, p);
-        last = p;
-      });
+      const pts = localPoints(e);
+      if (held) {
+        held.push(...pts);
+        // The browser delivers the move that crosses its touch slop and only then sends pointercancel
+        // if it starts scrolling. So the decision waits one more event (or a moment): a stroke still
+        // alive by then was not taken for a scroll, and is drawn in full.
+        if (ripe) { commit(); return; }
+        const dx = Math.abs(e.clientX - start.x), dy = Math.abs(e.clientY - start.y);
+        if ((dx >= COMMIT_X && dx > dy) || Math.hypot(dx, dy) >= COMMIT_ANY) {
+          ripe = true;
+          ripeT = setTimeout(() => { if (held && drawing) commit(); }, 90);
+        }
+        return;
+      }
+      stroke(pts);
       scheduleCheck();
     });
-    const end = (e) => {
+    // pointerup: a held touch was a tap, so it marks the foil. pointercancel: the browser took the
+    // gesture (a scroll), so held points are dropped; strokes already drawn stay where they are.
+    const end = (e, keepHeld) => {
       if (!drawing || (e && e.pointerId !== pid)) return;
+      if (held && keepHeld) commit();
+      clearTimeout(ripeT);
+      ripe = false;
+      held = null;
+      start = null;
       drawing = false;
       pid = null;
       check();
     };
-    canvas.addEventListener("pointerup", end);
-    canvas.addEventListener("pointercancel", end);
-    canvas.addEventListener("lostpointercapture", end);
+    canvas.addEventListener("pointerup", (e) => end(e, true));
+    canvas.addEventListener("pointercancel", (e) => end(e, false));
+    canvas.addEventListener("lostpointercapture", (e) => end(e, false));
     // no text selection from a mouse drag, no long-press menu / magnifier on the card
     canvas.addEventListener("mousedown", (e) => e.preventDefault());
     canvas.addEventListener("contextmenu", (e) => e.preventDefault());
 
     if (button) button.addEventListener("click", () => finish({ animate: true, celebrate: true }));
 
-    /* ---------- visibility: only animate while on screen ---------- */
-    if ("IntersectionObserver" in window) {
-      new IntersectionObserver((entries) => {
-        visible = entries[entries.length - 1].isIntersecting;
-        root.classList.toggle("is-offscreen", !visible);
-        if (visible) { dirty = true; kick(); }
-      }, { rootMargin: "80px 0px" }).observe(ticket);
-    } else {
-      visible = true;
-    }
+    /* ---------- tab visibility ---------- */
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) { cancelAnimationFrame(raf); raf = 0; }
       else { dirty = true; kick(); }
@@ -539,13 +618,25 @@
       if (revealed) return;
       revealed = true;
       drawing = false;
+      held = null;
       session.set();
       if (raf) { cancelAnimationFrame(raf); raf = 0; }
       clearTimeout(checkT);
 
       const hadFocus = button && document.activeElement === button;
       root.classList.add("is-revealed", "is-touched");
-      if (hadFocus && msg) msg.focus({ preventScroll: true });
+      // keyboard users keep their place: focus moves to the message once it turns visible (after a
+      // .3s delay, later on a busy frame), unless they have moved focus somewhere else meanwhile
+      if (hadFocus && msg) {
+        let tries = 0;
+        const focusMsg = () => {
+          const a = document.activeElement;
+          if (a && a !== document.body && a !== button) return;
+          msg.focus({ preventScroll: true });
+          if (document.activeElement !== msg && ++tries < 15) setTimeout(focusMsg, 80);
+        };
+        setTimeout(focusMsg, 320);
+      }
 
       const done = () => {
         canvas.style.visibility = "hidden";

@@ -50,12 +50,14 @@
     const love = setupLove();
     const wishes = setupWishes();
     const share = setupShare();
-    setupReveals();
+    const reveals = setupReveals();
+    pauseOffscreen([root.querySelector(".love"), root.querySelector(".wish-wall__empty"), root.querySelector(".closing")]);
 
     App.on("lang", () => {
       love && love.relabel();
       wishes && wishes.relabel();
       share && share.relabel();
+      reveals && reveals.relang();
     });
 
     /* ======================================================
@@ -619,91 +621,159 @@
     }
 
     /* ======================================================
-       Entrance animations (after "open", once per element)
+       Entrance animations
+       "open" only arms a cheap observer. The tweens, ScrollTriggers and SplitText are
+       built when the section comes within ~400px of the viewport, one group per frame.
        ====================================================== */
     function setupReveals() {
       const ST = App.ScrollTrigger;
-      if (!anim || !ST) return;
-      const run = () => {
-        const st = (trigger, start = "top 86%") => ({ trigger, start, once: true });
-        const rise = (targets, trigger, extra = {}) => {
-          const els = (Array.isArray(targets) ? targets : [targets]).filter(Boolean);
-          if (!els.length) return;
-          gsap.fromTo(els, { y: 34, opacity: 0 }, {
-            y: 0, opacity: 1, duration: 1.15, ease: "expo.out", stagger: 0.1,
-            clearProps: "transform,opacity", ...extra, scrollTrigger: st(trigger || els[0]),
+      if (!anim || !ST) return null;
+      const $ = (s) => root.querySelector(s);
+      const $$ = (s) => Array.from(root.querySelectorAll(s));
+      const pending = [];   // tweens whose trigger hasn't fired yet: { tween, els, from }
+      const splits = [];    // word reveals, see splitReveal()
+      let built = false;
+
+      const st = (trigger, start = "top 86%", onEnter) => ({ trigger, start, once: true, onEnter });
+      const played = (tw) => !!tw && (tw.progress() > 0 || !tw.paused());
+
+      function reveal(els, from, to, trigger, start) {
+        els = (Array.isArray(els) ? els : [els]).filter(Boolean);
+        if (!els.length) return;
+        const tween = gsap.fromTo(els, from, { ...to, scrollTrigger: st(trigger || els[0], start) });
+        pending.push({ tween, els, from });
+      }
+      function rise(targets, trigger, extra = {}) {
+        reveal(targets, { y: 34, opacity: 0 }, {
+          y: 0, opacity: 1, duration: 1.15, ease: "expo.out", stagger: 0.1, clearProps: "transform,opacity", ...extra,
+        }, trigger);
+      }
+
+      /* Words rise (never split Telugu into characters). The split waits for the current
+         language's fonts. If the language changes before the reveal plays, i18n reverts the
+         split, so it is rebuilt for the new text; once it has played, the new text just stays. */
+      function splitReveal(el, trigger, start, from, to) {
+        if (!el) return;
+        if (!window.SplitText) { rise(el, trigger); return; }
+        const entry = { tween: null, fired: false, gen: 0 };
+        const arm = () => {
+          const split = new window.SplitText(el, { type: "words", wordsClass: "split-word" });
+          el._split = split;   // lets the language switch revert it
+          entry.tween = gsap.fromTo(split.words, from, {
+            ...to, scrollTrigger: st(trigger, start, () => { entry.fired = true; }),
           });
         };
-        const $ = (s) => root.querySelector(s);
-        const $$ = (s) => Array.from(root.querySelectorAll(s));
+        const schedule = () => {
+          const gen = entry.gen;
+          App.fontsReady().then(() => {
+            if (gen !== entry.gen || entry.fired || !el.isConnected) return;
+            arm();
+          }, () => {});
+        };
+        entry.relang = () => {
+          entry.gen++;
+          if (played(entry.tween)) entry.fired = true;
+          if (entry.tween) { entry.tween.kill(); entry.tween = null; }   // it targets detached words now
+          if (!entry.fired) schedule();
+        };
+        splits.push(entry);
+        schedule();
+      }
 
-        // heading: words rise (never split Telugu into characters)
-        const head = $(".blessings__head");
-        const title = $(".blessings__title");
-        rise($(".blessings__eyebrow"), head);
-        if (title && window.SplitText) {
-          const split = new window.SplitText(title, { type: "words", wordsClass: "split-word" });
-          title._split = split;   // lets the language switch revert it
-          gsap.fromTo(split.words, { yPercent: 80, opacity: 0, rotate: 5 }, {
-            yPercent: 0, opacity: 1, rotate: 0, duration: 1.25, ease: "expo.out", stagger: 0.09, delay: 0.1,
-            scrollTrigger: st(head),
-          });
-        } else rise(title, head);
-        rise($(".blessings__lead"), head, { delay: 0.35 });
-
-        // love button
-        const stage = $(".love__stage");
-        if (stage) {
-          gsap.fromTo(stage, { scale: 0.6, opacity: 0, rotate: -12 }, {
+      const groups = [
+        () => {   // heading
+          const head = $(".blessings__head");
+          rise($(".blessings__eyebrow"), head);
+          splitReveal($(".blessings__title"), head, "top 86%",
+            { yPercent: 80, opacity: 0, rotate: 5 },
+            { yPercent: 0, opacity: 1, rotate: 0, duration: 1.25, ease: "expo.out", stagger: 0.09, delay: 0.1 });
+          rise($(".blessings__lead"), head, { delay: 0.35 });
+        },
+        () => {   // love button
+          reveal($(".love__stage"), { scale: 0.6, opacity: 0, rotate: -12 }, {
             scale: 1, opacity: 1, rotate: 0, duration: 1.4, ease: "elastic.out(1, 0.6)", clearProps: "transform,opacity",
-            scrollTrigger: st($(".love")),
-          });
-        }
-        rise([$(".love__label"), $(".love__count")], $(".love"), { delay: 0.25 });
+          }, $(".love"));
+          rise([$(".love__label"), $(".love__count")], $(".love"), { delay: 0.25 });
+        },
+        () => {   // form + wall
+          rise($(".wish-form"), $(".wish-form"), { duration: 1.3 });
+          rise($(".wish-wall__head"), $(".wish-wall"));
+          reveal($$(".wish-wall__list .wish__inner"), { y: 46, opacity: 0 }, {
+            y: 0, opacity: 1, duration: 1.1, ease: "expo.out", stagger: 0.07, clearProps: "transform,opacity",
+          }, $(".wish-wall__list"), "top 90%");
+          rise($(".wish-wall__empty"), $(".wish-wall"), { delay: 0.1 });
+        },
+        () => {   // share
+          const shareCard = $(".share-card");
+          rise(shareCard, shareCard);
+          rise($$(".share-card__btn"), shareCard, { delay: 0.2, stagger: 0.08 });
+        },
+        () => {   // closing
+          const closing = $(".closing");
+          reveal($(".closing__ornament"), { scaleX: 0.2, opacity: 0 }, {
+            scaleX: 1, opacity: 1, duration: 1.4, ease: "expo.out", clearProps: "transform,opacity",
+          }, closing);
+          const quote = $(".closing__quote");
+          splitReveal(quote, quote, "top 88%",
+            { y: 22, opacity: 0 },
+            { y: 0, opacity: 1, duration: 1.1, ease: "power3.out", stagger: 0.05, delay: 0.15 });
+          rise([$(".closing__with"), $(".closing__families"), $(".closing__tag")], $(".closing__with"), { delay: 0.2, stagger: 0.14 });
+          reveal($$(".closing__branch"), { opacity: 0 }, { opacity: 1, duration: 2, ease: "power2.out", clearProps: "opacity" }, closing);
+        },
+      ];
 
-        // form + wall
-        rise($(".wish-form"), $(".wish-form"), { duration: 1.3 });
-        rise($(".wish-wall__head"), $(".wish-wall"));
-        const inners = $$(".wish-wall__list .wish__inner");
-        if (inners.length) {
-          gsap.fromTo(inners, { y: 46, opacity: 0 }, {
-            y: 0, opacity: 1, duration: 1.1, ease: "expo.out", stagger: 0.07,
-            clearProps: "transform,opacity", scrollTrigger: st($(".wish-wall__list"), "top 90%"),
-          });
-        }
-        rise($(".wish-wall__empty"), $(".wish-wall"), { delay: 0.1 });
+      function build() {
+        if (built) return;
+        built = true;
+        const r = root.getBoundingClientRect();
+        // Already on screen (e.g. reloaded further down): build everything now, so nothing
+        // shows for a frame and then hides again. Otherwise one group per frame.
+        if (r.top < window.innerHeight && r.bottom > 0) { groups.forEach((fn) => fn()); return; }
+        const next = () => {
+          groups.shift()();
+          if (groups.length) requestAnimationFrame(next);
+        };
+        next();
+      }
 
-        // share
-        const shareCard = $(".share-card");
-        rise(shareCard, shareCard);
-        rise($$(".share-card__btn"), shareCard, { delay: 0.2, stagger: 0.08 });
+      function arm() {
+        if (built) return;
+        if (!("IntersectionObserver" in window)) { build(); return; }
+        const io = new IntersectionObserver((entries) => {
+          if (!entries.some((e) => e.isIntersecting)) return;
+          io.disconnect();
+          build();
+        }, { rootMargin: "400px 0px 400px 0px" });
+        io.observe(root);
+      }
 
-        // closing
-        const closing = $(".closing");
-        const orn = $(".closing__ornament");
-        if (orn) {
-          gsap.fromTo(orn, { scaleX: 0.2, opacity: 0 }, {
-            scaleX: 1, opacity: 1, duration: 1.4, ease: "expo.out", clearProps: "transform,opacity", scrollTrigger: st(closing),
-          });
+      /* Language switch (i18n has already swapped the text and cleared inline styles on the
+         translated elements): re-hide what hasn't revealed yet and re-split unplayed word reveals. */
+      function relang() {
+        for (let i = pending.length - 1; i >= 0; i--) {
+          const p = pending[i];
+          if (played(p.tween)) { pending.splice(i, 1); continue; }
+          const els = p.els.filter((el) => el.isConnected);
+          if (els.length) gsap.set(els, p.from);
         }
-        const quote = $(".closing__quote");
-        if (quote && window.SplitText) {
-          const split = new window.SplitText(quote, { type: "words", wordsClass: "split-word" });
-          quote._split = split;
-          gsap.fromTo(split.words, { y: 22, opacity: 0 }, {
-            y: 0, opacity: 1, duration: 1.1, ease: "power3.out", stagger: 0.05, delay: 0.15, scrollTrigger: st(quote, "top 88%"),
-          });
-        } else rise(quote, closing);
-        rise([$(".closing__with"), $(".closing__families"), $(".closing__tag")], $(".closing__with"), { delay: 0.2, stagger: 0.14 });
-        const branches = $$(".closing__branch");
-        if (branches.length) {
-          gsap.from(branches, { opacity: 0, duration: 2, ease: "power2.out", clearProps: "opacity", scrollTrigger: st(closing) });
-        }
-      };
-      if (App.state.opened) run();
-      else App.on("open", run);
+        splits.forEach((entry) => entry.relang());
+      }
+
+      if (App.state.opened) arm();
+      else App.on("open", arm);
+      return { relang };
     }
   });
+
+  /* Toggle .is-offscreen on blocks with looping CSS animations; the CSS pauses them. */
+  function pauseOffscreen(els) {
+    els = els.filter(Boolean);
+    if (!els.length || !("IntersectionObserver" in window)) return;
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => e.target.classList.toggle("is-offscreen", !e.isIntersecting));
+    }, { rootMargin: "80px 0px" });
+    els.forEach((el) => { el.classList.add("is-offscreen"); io.observe(el); });
+  }
 
   /* ======================================================
      Footer
@@ -711,6 +781,7 @@
   function setupFooter() {
     const footer = document.querySelector(".site-footer");
     if (!footer) return;
+    pauseOffscreen([footer]);
     const top = footer.querySelector(".site-footer__top");
     if (!top) return;
     top.addEventListener("click", () => {

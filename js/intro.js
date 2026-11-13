@@ -406,6 +406,9 @@
       if (state === "unrolled" || state === "leaving" || state === "done") return;
       setState("unrolled");
       if (drag) drag.disable();
+      // The mask is fully open: drop its clip so the exit zoom doesn't drag a clip/mask layer along.
+      gsap.set(el.mask, { clipPath: "none" });
+      gsap.delayedCall(0.8, retireClosed);
       App.emit("intro:unrolled");
       gsap.to(el.labels, { opacity: 0, duration: 0.4 });   // the hashtag would crowd the button
       gsap.set(el.enter, { visibility: "visible" });
@@ -413,13 +416,26 @@
       gsap.fromTo(el.enter, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" });
     }
 
-    /* ---------------- exit: parchment zooms toward you, the curtain lifts ---------------- */
+    /* The closed scroll (roll, ribbon, seal) and its copy are invisible once the sheet is open.
+       Take them out of rendering so the exit zoom doesn't re-lay-out the seal's SVG text or
+       repaint its drop-shadow filters on every frame, and their CSS loops stop ticking. */
+    let retired = false;
+    function retireClosed() {
+      if (retired) return;
+      retired = true;
+      gsap.set([el.bundle, el.band, el.bow, el.seal, el.head, el.hint], { display: "none" });
+    }
+
+    /* ---------------- exit: parchment zooms toward you, the curtain lifts ----------------
+       Only transform and opacity move. data-state="leaving" promotes the moving layers
+       (will-change) and pauses the ambient CSS loops for the length of the exit. */
     function leave() {
       if (state !== "unrolled") return;
       setState("leaving");
       if (!App.music.playing) gesture();
       App.haptic(12);
       offTilt();
+      retireClosed();
       if (reduce) {
         callOpen();
         gsap.to(root, { autoAlpha: 0, duration: 0.35, ease: "power1.out", onComplete: finish });
@@ -430,6 +446,7 @@
         .to(el.zoom, { scale: 1.5, y: -24, duration: 1.15, ease: "power2.in" }, 0.05)
         .to(el.zoom, { opacity: 0, duration: 0.55, ease: "power1.in" }, 0.62)
         .to([el.halo, el.dust, ...el.labels], { opacity: 0, duration: 0.45 }, 0.1)
+        .call(() => dust.stop(), null, 0.56)   // faded out: stop drawing and free its bitmap now
         .to(el.curtain, { yPercent: -100, duration: 1.15, ease: "power3.inOut" }, 0.32)
         .to(el.curtain, { opacity: 0.4, duration: 0.6, ease: "power1.in" }, 0.85)
         .call(callOpen, null, 0.55);
@@ -447,6 +464,7 @@
       if (drag) drag.kill();
       offLang();
       offResize();
+      document.removeEventListener("keydown", onKey);
       document.fonts && document.fonts.removeEventListener && document.fonts.removeEventListener("loadingdone", fit);
       // hand keyboard focus to the page
       const main = document.getElementById("main");
@@ -499,16 +517,22 @@
     }, true);
     root.addEventListener("pointercancel", () => { swipeY = null; }, true);
 
-    root.addEventListener("keydown", (e) => {
-      const k = e.key;
-      if (state === "unrolled" && (k === "ArrowDown" || k === "PageDown" || (k === " " && e.target === root))) {
+    // On the document, not the dialog: after unrolling, focus can sit outside #intro (e.g. the
+    // language toggle) and the keys must still open the page. Removed in finish().
+    function onKey(e) {
+      if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+      const k = e.key, t = e.target;
+      const control = t && t !== root && t.closest ? t.closest("button, a[href], input, select, textarea, [contenteditable]") : null;
+      if (state === "unrolled" && (k === "ArrowDown" || k === "PageDown" || (k === " " && !control))) {
+        // Space on a focused control keeps its own meaning (it presses that button)
         e.preventDefault();
         leave();
       } else if (state === "sealed" && (k === "ArrowDown" || k === "PageDown")) {
         e.preventDefault();
         nudge();
       }
-    });
+    }
+    document.addEventListener("keydown", onKey);
 
     offLang = App.on("lang", () => {
       renderDear();
@@ -532,14 +556,14 @@
        ====================================================================== */
     function makeDust() {
       const c = el.dust;
-      const ctx = c && c.getContext ? c.getContext("2d") : null;
+      let ctx = c && c.getContext ? c.getContext("2d") : null;
       const noop = { stop() {}, resize() {}, burst() {} };
       if (!ctx) return noop;
       let w = 0, h = 0, raf = 0, last = 0, stopped = false;
       let parts = [];
-      const sparks = [];
+      let sparks = [];
       // pre-rendered glow sprite: one drawImage per particle
-      const sprite = document.createElement("canvas");
+      let sprite = document.createElement("canvas");
       sprite.width = sprite.height = 32;
       const sctx = sprite.getContext("2d");
       const g = sctx.createRadialGradient(16, 16, 0, 16, 16, 16);
@@ -560,6 +584,7 @@
         ts: 0.8 + Math.random() * 2.2,
       });
       function resize() {
+        if (stopped) return;
         const dpr = Math.min(2, window.devicePixelRatio || 1);
         w = c.clientWidth || window.innerWidth;
         h = c.clientHeight || window.innerHeight;
@@ -620,11 +645,17 @@
           }
         },
         stop() {
+          if (stopped) return;
           stopped = true;
           if (raf) cancelAnimationFrame(raf);
           raf = 0;
           document.removeEventListener("visibilitychange", onVis);
-          ctx.clearRect(0, 0, w, h);
+          // Free the full-screen backing store (and the sprite) instead of keeping a cleared bitmap.
+          c.width = c.height = 0;
+          sprite.width = sprite.height = 0;
+          ctx = sprite = null;
+          parts = [];
+          sparks = [];
         },
       };
     }

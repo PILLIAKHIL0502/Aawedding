@@ -6,8 +6,9 @@
    Everything is scoped to #reveal / .reveal-date__*.
    ========================================================== */
 #reveal.reveal-date {
-  /* ticket width: ~86vw on phones, 420px on laptops, a touch larger on big screens */
-  --card-w: min(86vw, clamp(420px, 26vw, 500px));
+  /* ticket width: ~86vw on phones, 420px on laptops, growing to ~650px (1.3x) on 2560px screens,
+     and never so tall that the heading and ticket can't share the screen */
+  --card-w: min(86vw, clamp(420px, 26vw, 650px), calc((100svh - 18rem) * 4 / 3));
   --notch: clamp(9px, 3.1vw, 14px);   /* the punched half-circles on the ticket's sides */
   --notch-y: 72%;                     /* where the perforation runs */
 
@@ -40,14 +41,14 @@
 #reveal .reveal-date__inner { max-width: var(--maxw); margin: 0 auto; }
 
 /* ---------------- heading ---------------- */
-#reveal .reveal-date__head { margin-bottom: clamp(1.6rem, 5vw, 3rem); }
+#reveal .reveal-date__head { margin-bottom: calc(clamp(1.6rem, 5vw, 3rem) + 1rem); }   /* + room for the tab on the ticket's edge */
 #reveal .reveal-date__eyebrow { display: block; margin-bottom: .55rem; }
 #reveal .reveal-date__title {
   display: inline-block;
   padding: 0 .12em .1em;
   font-family: var(--script);
   font-weight: 400;
-  font-size: clamp(3rem, 11vw, 5.6rem);
+  font-size: clamp(3rem, 11vw, max(5.6rem, 4.2vw));
   line-height: 1.08;
   color: var(--gold-soft);
   background: var(--foil);
@@ -56,7 +57,7 @@
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-html.lang-te #reveal .reveal-date__title { font-size: clamp(2.2rem, 8.4vw, 3.9rem); line-height: 1.45; }
+html.lang-te #reveal .reveal-date__title { font-size: clamp(2.2rem, 8.4vw, max(3.9rem, 2.9vw)); line-height: 1.45; }
 
 /* ---------------- the ticket ---------------- */
 #reveal .reveal-date__stage {
@@ -138,7 +139,7 @@ html.lang-te #reveal .reveal-date__title { font-size: clamp(2.2rem, 8.4vw, 3.9re
   padding-left: .5em;   /* balances the trailing letter-spacing */
   font-family: var(--sans);
   font-weight: 600;
-  font-size: max(10px, 3.3cqi);
+  font-size: max(11px, 3.3cqi);
   letter-spacing: .5em;
   text-transform: uppercase;
   line-height: 1.2;
@@ -156,7 +157,7 @@ html.lang-te #reveal .reveal-date__day { font-size: max(13px, 4.6cqi); font-weig
 
 #reveal .reveal-date__date {
   position: relative;
-  font-family: var(--serif);
+  font-family: var(--serif-en);   /* Latin numerals: Cormorant in both languages */
   font-weight: 500;
   font-size: 15.5cqi;
   line-height: 1;
@@ -249,11 +250,17 @@ html.lang-te #reveal .reveal-date__time { font-size: 6.4cqi; line-height: 1.5; }
   inset: 0;
   width: 100%;
   height: 100%;
-  touch-action: none;   /* scratching must not scroll the page (only on the card itself) */
+  /* a thumb swiping up or down over the card scrolls the page; sideways strokes scratch
+     (js/scratch.js waits for the browser's decision before marking the foil) */
+  touch-action: pan-y pinch-zoom;
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
   cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><circle cx='16' cy='16' r='12' fill='%23e4d2a6' stroke='%23a8874a' stroke-width='2'/><circle cx='16' cy='16' r='8.5' fill='none' stroke='%23a8874a' stroke-opacity='.7'/><path d='M16 10.5 17.2 14.8 21.5 16 17.2 17.2 16 21.5 14.8 17.2 10.5 16 14.8 14.8Z' fill='%23a8874a'/></svg>") 16 16, pointer;
+}
+/* fx hides the native cursor everywhere for its custom one; on the foil the coin cursor is the point */
+#reveal .reveal-date__foil[data-native-cursor] {
+  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><circle cx='16' cy='16' r='12' fill='%23e4d2a6' stroke='%23a8874a' stroke-width='2'/><circle cx='16' cy='16' r='8.5' fill='none' stroke='%23a8874a' stroke-opacity='.7'/><path d='M16 10.5 17.2 14.8 21.5 16 17.2 17.2 16 21.5 14.8 17.2 10.5 16 14.8 14.8Z' fill='%23a8874a'/></svg>") 16 16, pointer !important;
 }
 #reveal.is-revealed .reveal-date__foil { pointer-events: none; }
 
@@ -286,27 +293,42 @@ html.lang-te #reveal .reveal-date__time { font-size: 6.4cqi; line-height: 1.5; }
 #reveal.is-offscreen .reveal-date__hint,
 #reveal.is-offscreen .reveal-date__glow { animation-play-state: paused; }
 
-/* ---------------- below the ticket: the button, then the celebration ---------------- */
+/* ---------------- "Reveal instantly": a tab clipped onto the ticket's top edge ----------------
+   On a phone the ticket fills most of the screen, so a button below it was often out of view
+   while a guest scratched. On the top edge it is visible whenever the ticket is. */
+#reveal .reveal-date__instant {
+  --btn-bg: var(--emerald-deep);
+  --btn-fg: var(--gold-soft);
+  --btn-bd: rgba(200, 169, 106, .75);
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 50%;
+  translate: -50% -50%;
+  gap: .5rem;
+  min-height: 44px;
+  max-width: calc(100% - 2 * var(--notch));
+  padding: .5rem 1.05rem .5rem .95rem;
+  font-size: .75rem;               /* 12px */
+  letter-spacing: .16em;
+  box-shadow: 0 10px 22px -10px rgba(5, 14, 12, .85), inset 0 1px 0 rgba(244, 231, 196, .14);
+  transition: background-color .3s ease, color .3s ease, border-color .3s ease, transform .35s var(--ease-out), opacity .35s ease, visibility .35s;
+}
+#reveal .reveal-date__instant:hover { --btn-bg: var(--emerald); --btn-bd: var(--gold-soft); }
+#reveal .reveal-date__instant .icon { width: 12px; height: 12px; fill: currentColor; stroke: none; }
+html.lang-te #reveal .reveal-date__instant { font-size: .875rem; font-weight: 500; padding-top: .35rem; padding-bottom: .35rem; }
+#reveal.is-revealed .reveal-date__instant {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px) scale(.94);
+  pointer-events: none;
+}
+
+/* ---------------- below the ticket: the celebration ---------------- */
 #reveal .reveal-date__after {
   display: grid;
   place-items: center;
   min-height: 3.4rem;
-}
-#reveal .reveal-date__after > * { grid-area: 1 / 1; }
-#reveal .reveal-date__instant {
-  min-height: 44px;
-  padding: .55rem 1.15rem;
-  font-size: .66rem;
-  letter-spacing: .2em;
-  transition: background-color .3s ease, color .3s ease, border-color .3s ease, transform .35s var(--ease-out), opacity .35s ease, visibility .35s;
-}
-#reveal .reveal-date__instant .icon { width: 13px; height: 13px; fill: currentColor; stroke: none; }
-html.lang-te #reveal .reveal-date__instant { font-size: .84rem; font-weight: 500; }
-#reveal.is-revealed .reveal-date__instant {
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(8px) scale(.94);
-  pointer-events: none;
 }
 #reveal .reveal-date__msg {
   font-family: var(--script);
@@ -363,6 +385,23 @@ html.lang-te #reveal .reveal-date__msg { font-size: clamp(1.7rem, 6.4vw, 2.4rem)
   html.lang-te #reveal .reveal-date__title { font-size: clamp(1.8rem, 5vw, 2.6rem); }
   #reveal .reveal-date__msg { font-size: clamp(1.9rem, 5vw, 2.6rem); }
   html.lang-te #reveal .reveal-date__msg { font-size: clamp(1.5rem, 4vw, 2rem); }
+}
+
+/* ---------------- laptops and big screens: the dark band fills the screen ---------------- */
+@media (min-width: 1024px) and (min-height: 760px) {
+  #reveal.reveal-date {
+    display: grid;
+    align-content: center;
+    min-height: 100svh;
+  }
+  #reveal .reveal-date__inner { width: 100%; }
+}
+@media (min-width: 2000px) {
+  #reveal .reveal-date__eyebrow { font-size: .8rem; }
+  html.lang-te #reveal .reveal-date__eyebrow { font-size: .95rem; }
+  #reveal .reveal-date__instant { min-height: 48px; padding-inline: 1.3rem; font-size: .84rem; }
+  html.lang-te #reveal .reveal-date__instant { font-size: .95rem; }
+  #reveal .reveal-date__instant .icon { width: 14px; height: 14px; }
 }
 
 /* ---------------- reduced motion: a still coin, no shimmer ---------------- */

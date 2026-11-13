@@ -1,8 +1,14 @@
 /* ==========================================================
    hero.js — "Welcome"
    - entrance on "open": SplitText names (chars in English, words in Telugu)
-     rise from blur to sharp, the ampersand writes itself in, details stagger in
-   - gold foil sheen sweeps the names on a slow loop once they have landed
+     rise from blur to sharp, the ampersand writes itself in, details stagger in.
+     The split and the (paused) timeline are prepared at init while the hero is still
+     hidden behind the intro, so "open" only has to press play.
+     Touch devices and small CPUs get a lighter variant: transform + opacity only,
+     no blur filters and no clip-path (both repaint every frame).
+   - gold foil sheen sweeps the names on a slow loop once they have landed: a gold copy
+     of each name inside a soft band; band and copy slide in opposite directions with
+     transforms only, so the sweep runs on the compositor (no repaints)
    - 4-layer parallax (glow, rings, branches, sparkles) driven by App.tilt
    - scroll-out: names scale down and fade while the layers drift apart
    ========================================================== */
@@ -49,8 +55,14 @@
     };
 
     const animate = !!gsap && !App.reduceMotion;
+    // blur/clip-path entrance only where painting is cheap: a fine pointer and more than 4 cores
+    const cores = navigator.hardwareConcurrency || 8;
+    const lite = App.isTouch || !App.finePointer || cores <= 4;
     let entered = false;
-    let entrance = null;
+    let entrance = null;     // the entrance timeline: prepared (paused) at init, played on "open"
+    let opened = false;
+    let prepToken = 0;       // invalidates a pending (font-waiting) preparation
+    let prepPending = false;
     let inView = true;
     const idle = [];
     let sparks = [];
@@ -71,7 +83,10 @@
     setupVisibility();
 
     if (App.state.opened) enter();
-    else App.on("open", enter);
+    else {
+      App.on("open", enter);
+      prepareWhenFontsReady(4000);
+    }
 
     /* ---------------- guest greeting ---------------- */
     function renderGuest() {
@@ -127,7 +142,6 @@
       const parts = [];
       el.nameEls.forEach((n) => {
         if (n._split) { try { n._split.revert(); } catch (_) {} n._split = null; }
-        n.classList.remove("is-sheen");
         const split = new Split(n, {
           type: chars ? "words,chars" : "words",
           tag: "span",
@@ -146,12 +160,45 @@
     }
 
     /* ---------------- entrance ---------------- */
-    function enter() {
-      if (entered || entrance) return;
+    // Split after the fonts are in (or after maxMs), unless "open" already forced it.
+    function prepareWhenFontsReady(maxMs) {
+      const token = ++prepToken;
+      prepPending = true;
+      const ready = App.fontsReady ? App.fontsReady() : Promise.resolve();
+      Promise.race([ready.catch(() => {}), new Promise((r) => setTimeout(r, maxMs))]).then(() => {
+        if (token !== prepToken) return;
+        prepPending = false;
+        if (entered || entrance) return;
+        prepare();
+        if (opened) entrance.play();
+      });
+    }
+
+    function prepare() {
+      prepToken++;
+      prepPending = false;
+      if (entrance) { entrance.kill(); entrance = null; }
       const [partsA = [el.nameEls[0]], partsB = [el.nameEls[1]]] = splitNames();
+      entrance = buildEntrance(partsA, partsB);
+      // every element now sits in its (invisible) from-state, so the stage can be shown:
+      // the hero's first paint happens here, behind the intro, instead of on "open"
+      hero.classList.remove("hero--pre");
+    }
+
+    function enter() {
+      opened = true;
+      if (entered) return;
+      if (!entrance) {
+        // a language switch is still waiting for its fonts: play as soon as they land (max ~1 s)
+        if (prepPending) { prepareWhenFontsReady(900); return; }
+        prepare();
+      }
+      entrance.play();
+    }
+
+    function buildEntrance(partsA, partsB) {
       const words = !App.splitChars();
-      const tl = gsap.timeline({ defaults: { ease: "expo.out" }, onComplete: finish });
-      entrance = tl;
+      const tl = gsap.timeline({ paused: true, defaults: { ease: "expo.out" }, onComplete: finish });
 
       // decoration
       tl.fromTo(el.glow, { opacity: 0, scale: .72 }, { opacity: 1, scale: 1, duration: 2.6, ease: "power2.out" }, 0);
@@ -170,18 +217,34 @@
       }
       tl.fromTo(el.eyebrow, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 1.3 }, .3);
 
-      const nameFrom = words
-        ? { opacity: 0, yPercent: 45, rotation: 4, filter: "blur(14px)" }
-        : { opacity: 0, yPercent: 65, rotation: (i) => (i % 2 ? 9 : -7), filter: "blur(12px)" };
-      const nameTo = { opacity: 1, yPercent: 0, rotation: 0, filter: "blur(0px)", duration: words ? 1.6 : 1.4 };
+      // Desktop: letters rise out of a soft blur. Lite: the same rise, transform + opacity only.
+      let nameFrom, nameTo;
+      if (lite) {
+        nameFrom = words
+          ? { opacity: 0, yPercent: 55, rotation: 4 }
+          : { opacity: 0, yPercent: 75, rotation: (i) => (i % 2 ? 10 : -8) };
+        nameTo = { opacity: 1, yPercent: 0, rotation: 0, duration: words ? 1.5 : 1.3 };
+      } else {
+        nameFrom = words
+          ? { opacity: 0, yPercent: 45, rotation: 4, filter: "blur(14px)" }
+          : { opacity: 0, yPercent: 65, rotation: (i) => (i % 2 ? 9 : -7), filter: "blur(12px)" };
+        // drop the filter as each letter lands, or ~20 filtered layers ride along with the parallax
+        nameTo = { opacity: 1, yPercent: 0, rotation: 0, filter: "blur(0px)", clearProps: "filter", duration: words ? 1.6 : 1.4 };
+      }
       tl.fromTo(partsA, nameFrom, { ...nameTo, stagger: words ? .2 : .06 }, .45);
 
-      // the ampersand writes itself in while its rules draw outward
+      // the ampersand writes itself in (desktop) or turns in (lite) while its rules draw outward
       const ampAt = words ? .95 : .8;
       if (el.ampGlyph) {
-        tl.fromTo(el.ampGlyph,
-          { opacity: 0, clipPath: "inset(0% 100% 0% 0%)", scale: .8, rotation: -10 },
-          { opacity: 1, clipPath: "inset(0% 0% 0% 0%)", scale: 1, rotation: 0, duration: 1.3, ease: "power3.inOut" }, ampAt);
+        if (lite) {
+          tl.fromTo(el.ampGlyph,
+            { opacity: 0, scale: .6, rotation: -24 },
+            { opacity: 1, scale: 1, rotation: 0, duration: 1.3, ease: "power3.out" }, ampAt);
+        } else {
+          tl.fromTo(el.ampGlyph,
+            { opacity: 0, clipPath: "inset(0% 100% 0% 0%)", scale: .8, rotation: -10 },
+            { opacity: 1, clipPath: "inset(0% 0% 0% 0%)", scale: 1, rotation: 0, duration: 1.3, ease: "power3.inOut", clearProps: "clipPath" }, ampAt);
+        }
       }
       if (el.ampRules.length) {
         tl.fromTo(el.ampRules, { scaleX: 0 }, { scaleX: 1, duration: 1.3, ease: "power3.inOut" }, ampAt + .25);
@@ -200,9 +263,7 @@
         tl.fromTo(sparks, { opacity: 0, scale: 0 },
           { opacity: 1, scale: 1, duration: 1.1, ease: "back.out(2)", stagger: { each: .04, from: "random" } }, .7);
       }
-
-      // first paint of the from-states happens with the stage visible
-      hero.classList.remove("hero--pre");
+      return tl;
     }
 
     function finish() {
@@ -212,8 +273,23 @@
       unsplitNames();
       gsap.set(el.nameEls, { clearProps: "opacity,transform,filter" });
       if (el.ampGlyph) gsap.set(el.ampGlyph, { clearProps: "clipPath,filter" });
-      el.nameEls.forEach((n) => n.classList.add("is-sheen"));
+      addSheen();
       startIdle();
+    }
+
+    /* ---------------- foil sheen (transform-only; see hero.css) ---------------- */
+    function addSheen() {
+      el.nameEls.forEach((n) => {
+        if (n.querySelector(".hero__sheen")) return;
+        const text = n.textContent.trim();
+        if (!text) return;
+        const s = document.createElement("span");
+        s.className = "hero__sheen";
+        s.setAttribute("aria-hidden", "true");
+        s.innerHTML = '<span class="hero__sheen-band"><span class="hero__sheen-text"></span></span>';
+        s.firstChild.firstChild.textContent = text;
+        n.appendChild(s);
+      });
     }
 
     /* ---------------- idle life: branches sway, sparkles drift and twinkle ---------------- */
@@ -304,13 +380,21 @@
     function onLang() {
       renderGuest();
       if (!animate) return;
-      if (!entered) {
-        // mid-entrance: i18n already reverted the split; jump to the final, readable state
-        if (entrance) entrance.progress(1);
+      if (!entered && (!opened || !entrance)) {
+        // not playing yet (still behind the intro): i18n reverted the split, so re-split the new
+        // text once its fonts are in and rebuild the prepared entrance (hidden until then)
+        if (entrance) { entrance.kill(); entrance = null; }
+        hero.classList.add("hero--pre");
+        prepareWhenFontsReady(opened ? 900 : 3000);
         return;
       }
-      // i18n replaced the text (classes survive); bring it in softly
-      el.nameEls.forEach((n) => n.classList.add("is-sheen"));
+      if (!entered) {
+        // mid-entrance: i18n already reverted the split; jump to the final, readable state
+        entrance.progress(1);
+        return;
+      }
+      // i18n replaced the text (and dropped the sheen copy); rebuild it and bring the names in softly
+      addSheen();
       gsap.fromTo(el.nameEls, { opacity: 0, y: 10 },
         { opacity: 1, y: 0, duration: .7, stagger: .08, ease: "power3.out", clearProps: "opacity,transform" });
       if (el.dear && !el.dear.hidden) gsap.fromTo(el.dear, { opacity: 0 }, { opacity: 1, duration: .6 });

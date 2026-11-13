@@ -36,7 +36,7 @@
           </div>
 
           <!-- the scratchable gold foil, painted by js/scratch.js -->
-          <canvas class="reveal-date__foil" aria-hidden="true"></canvas>
+          <canvas class="reveal-date__foil" aria-hidden="true" data-native-cursor></canvas>
 
           <!-- a little coin that shows how to scratch, until the first touch -->
           <span class="reveal-date__hint" aria-hidden="true">
@@ -47,13 +47,15 @@
             </svg>
           </span>
         </div>
-      </div>
 
-      <div class="reveal-date__after">
+        <!-- sits on the ticket's top edge, so it is in view whenever the ticket is (phones included) -->
         <button type="button" class="btn btn--ghost reveal-date__instant">
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3.5 13.6 10.4 20.5 12 13.6 13.6 12 20.5 10.4 13.6 3.5 12 10.4 10.4Z"/></svg>
           <span data-te="వెంటనే చూడండి">Reveal instantly</span>
         </button>
+      </div>
+
+      <div class="reveal-date__after">
         <p class="reveal-date__msg" role="status" tabindex="-1">
           <span class="reveal-date__msg-text" data-te="తేదీ ఖరారు!">It's a date!</span>
         </p>

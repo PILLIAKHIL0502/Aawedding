@@ -11,13 +11,17 @@
   --day-pad-x: max(var(--gutter), env(safe-area-inset-left), env(safe-area-inset-right));
   --day-hair: rgba(200, 169, 106, .4);
   /* visual sizes (portrait first; landscape and short screens override below) */
-  --day-word: min(27vw, 34svh);
+  --day-word: min(27vw, 34svh, 440px);
   --cal-w: min(84vw, 430px, 50svh);
   --clock-w: min(72vw, 40svh, 440px);
   --garden-w: min(88vw, 42svh, 520px);
+  --dot-s: 56px;                /* centre-to-centre spacing of the progress dots */
 
   position: relative;
-  overflow: hidden;             /* the track never widens the page */
+  /* the track never widens the page; clip (unlike hidden) is not a scroll container,
+     so keyboard focus on an off-screen panel can't scroll the section sideways */
+  overflow: hidden;
+  overflow: clip;
   color: var(--ink);
   background-color: var(--ivory);
 }
@@ -30,6 +34,7 @@
   place-items: center;
   padding: clamp(3.5rem, 10vw, 6rem) var(--day-pad-x);
   overflow: hidden;
+  overflow: clip;
 }
 .day__panel--sunday { background: radial-gradient(60% 55% at 50% 48%, rgba(228, 210, 166, .3), transparent 72%); }
 .day__panel--cal    { background: radial-gradient(55% 60% at 68% 52%, rgba(243, 225, 218, .7), transparent 72%); }
@@ -37,7 +42,7 @@
 .day__panel--venue  { background: radial-gradient(60% 60% at 32% 52%, rgba(228, 210, 166, .32), transparent 72%); }
 
 /* pinned horizontal mode */
-.day.day--h { height: 100svh; }
+.day.day--h { height: 100svh; touch-action: pan-y pinch-zoom; }
 .day--h .day__track {
   display: flex;
   height: 100%;
@@ -49,10 +54,12 @@
   height: 100%;
   padding: var(--day-pad-t) var(--day-pad-x) var(--day-pad-b);
 }
-/* a gold hairline between chapters */
-.day--h .day__panel + .day__panel::before {
-  content: ""; position: absolute; left: 0; top: 14%; bottom: 14%; width: 1px;
+/* a gold hairline between chapters (js/day.js adds them and fades each one out as it nears
+   a screen edge, so a panel resting a pixel off never shows a line at the edge) */
+.day__divider {
+  position: absolute; z-index: 2; top: 14%; bottom: 14%; width: 1px; margin-left: -.5px;
   background: linear-gradient(180deg, transparent, var(--day-hair), transparent);
+  opacity: 0; pointer-events: none;
 }
 
 .day__inner { position: relative; z-index: 1; width: 100%; max-width: var(--maxw); }
@@ -60,10 +67,10 @@
 /* ---------- shared type ---------- */
 .day__eyebrow {
   display: inline-flex; align-items: center; gap: .7rem;
-  font-family: var(--sans); font-size: .7rem; font-weight: 600;
-  letter-spacing: .32em; text-transform: uppercase; color: var(--sage);
+  font-family: var(--sans); font-size: .75rem; font-weight: 600;
+  letter-spacing: .3em; text-transform: uppercase; color: var(--sage-ink);
 }
-.day__eyebrow-n { color: var(--gold-deep); letter-spacing: .12em; }
+.day__eyebrow-n { font-family: var(--sans-en); color: var(--gold-ink); letter-spacing: .12em; }
 .day__eyebrow-rule { width: 28px; height: 1px; background: var(--gold); opacity: .7; }
 
 .day__title, .day__venue {
@@ -78,8 +85,8 @@
 }
 .day__sub--italic { font-style: italic; color: var(--emerald); }
 .day__note {
-  font-family: var(--sans); font-size: .66rem; font-weight: 500;
-  letter-spacing: .26em; text-transform: uppercase; color: var(--ink-soft);
+  font-family: var(--sans); font-size: .75rem; font-weight: 500;
+  letter-spacing: .22em; text-transform: uppercase; color: var(--ink-soft);
 }
 
 .day__copy {
@@ -114,7 +121,7 @@
   color: transparent;
   -webkit-text-stroke: clamp(1px, .08vw + .5px, 1.8px) var(--gold-deep);
 }
-.day__word-mask { position: absolute; inset: 0; overflow: hidden; }
+.day__word-mask { position: absolute; inset: 0; overflow: hidden; overflow: clip; }
 .day__word-fill {
   color: transparent;
   background: var(--foil); background-size: 200% 100%;
@@ -127,15 +134,21 @@
 .day__hint {
   display: none; align-items: center; gap: .65rem;
   margin-top: clamp(.6rem, 3svh, 2.2rem);
-  font-family: var(--sans); font-size: .66rem; font-weight: 600;
-  letter-spacing: .32em; text-transform: uppercase; color: var(--ink-soft);
+  font-family: var(--sans); font-size: .72rem; font-weight: 600;
+  letter-spacing: .3em; text-transform: uppercase; color: var(--ink-soft);
 }
 .day--h .day__hint { display: inline-flex; }
+.day__hint-touch { display: none; }
+@media (any-pointer: coarse) {
+  .day__hint-ptr { display: none; }
+  .day__hint-touch { display: inline; }
+}
 .day__hint svg {
   width: 36px; height: 12px; fill: none; stroke: var(--gold-deep); stroke-width: 1.3;
   stroke-linecap: round; stroke-linejoin: round;
-  animation: day-nudge 1.8s var(--ease-in-out) infinite;
+  animation: day-nudge 1.8s var(--ease-in-out) infinite paused;
 }
+.day.is-inview .day__panel--sunday.is-on .day__hint svg { animation-play-state: running; }
 @keyframes day-nudge { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(7px); } }
 
 .day__branch {
@@ -155,12 +168,12 @@
 /* ---------- 02 · calendar ---------- */
 .day__tap {
   display: inline-flex; align-items: center; gap: .5rem;
-  font-family: var(--sans); font-size: .64rem; font-weight: 600;
-  letter-spacing: .26em; text-transform: uppercase; color: var(--gold-deep);
+  font-family: var(--sans); font-size: .72rem; font-weight: 600;
+  letter-spacing: .24em; text-transform: uppercase; color: var(--gold-ink);
 }
 .day__tap svg { width: 14px; height: 14px; fill: var(--blush); stroke: var(--gold-deep); stroke-width: 1.2; }
 
-.day__cal { width: var(--cal-w); perspective: 1100px; }
+.day__cal { width: var(--cal-w); perspective: 1100px; container: daycal / inline-size; }
 .day__cal-card {
   --p: calc(var(--cal-w) * .075);
   position: relative;
@@ -186,27 +199,29 @@
   font-size: calc(var(--cal-w) * .12); line-height: 1.15;
 }
 .day__cal-year {
-  font-family: var(--sans); font-weight: 600; color: var(--gold-deep);
-  font-size: max(.62rem, calc(var(--cal-w) * .03)); letter-spacing: .3em;
+  font-family: var(--sans-en); font-weight: 600; color: var(--gold-ink);
+  font-size: max(11.5px, calc(var(--cal-w) * .03)); letter-spacing: .26em;
 }
 .day__cal-dow, .day__cal-days {
   list-style: none; margin: 0; padding: 0;
-  display: grid; grid-template-columns: repeat(7, 1fr); text-align: center;
+  display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); text-align: center;
 }
 .day__cal-dow li {
   padding: calc(var(--cal-w) * .012) 0 calc(var(--cal-w) * .02);
-  font-family: var(--sans); font-weight: 600; color: var(--sage);
-  font-size: max(.56rem, calc(var(--cal-w) * .026)); letter-spacing: .1em; text-transform: uppercase;
+  font-family: var(--sans); font-weight: 600; color: var(--sage-ink);
+  font-size: max(11px, calc(var(--cal-w) * .026)); letter-spacing: .08em; text-transform: uppercase;
   white-space: nowrap;
 }
-.day__cal-dow li:first-child { color: var(--gold-deep); }
+.day__cal-dow li:first-child { color: var(--gold-ink); }
+.day__dow-s { display: none; }
+@container daycal (max-width: 299.98px) { .day__cal-dow li { letter-spacing: .04em; } }
 .day__cal-days li {
   display: grid; place-items: center; aspect-ratio: 1 / .92;
-  font-family: var(--serif); font-weight: 500; color: var(--ink);
+  font-family: var(--serif-en); font-weight: 500; color: var(--ink);
   font-size: max(.9rem, calc(var(--cal-w) * .05));
   font-variant-numeric: lining-nums tabular-nums;
 }
-.day__cal-days li:nth-child(7n + 1) { color: var(--gold-deep); }
+.day__cal-days li:nth-child(7n + 1) { color: var(--gold-ink); }
 .day__cal-days .day__cal-the { position: relative; z-index: 1; }
 .day__d29 {
   position: relative; display: grid; place-items: center;
@@ -214,7 +229,11 @@
   font: inherit; color: var(--emerald); font-weight: 600;
   touch-action: manipulation;
 }
-.day__d29::after { content: ""; position: absolute; inset: -6px; border-radius: 50%; }   /* bigger hit area */
+/* hit-slop: at least 48x48 around the 29th, whatever the cell size (the grid look is unchanged) */
+.day__d29::after {
+  content: ""; position: absolute; left: 50%; top: 50%;
+  width: max(100%, 48px); height: max(100%, 48px); transform: translate(-50%, -50%);
+}
 .day__d29-num { position: relative; z-index: 1; display: inline-block; }
 .day__ring {
   position: absolute; inset: -24% -30%; width: 160%; height: 148%; max-width: none;
@@ -228,8 +247,8 @@
 .day__cal-foot {
   display: flex; align-items: center; gap: .8rem;
   margin-top: calc(var(--cal-w) * .02);
-  font-family: var(--serif); font-style: italic; color: var(--gold-deep);
-  font-size: max(.78rem, calc(var(--cal-w) * .034)); white-space: nowrap;
+  font-family: var(--serif); font-style: italic; color: var(--gold-ink);
+  font-size: max(.8rem, calc(var(--cal-w) * .034)); white-space: nowrap;
 }
 .day__cal-foot::before, .day__cal-foot::after { content: ""; flex: 1; height: 1px; background: rgba(200, 169, 106, .45); }
 
@@ -256,16 +275,16 @@
   stroke-dasharray: 2.6 87.459; stroke-dashoffset: 1.3;
 }
 .day__clock-nums text {
-  font-family: var(--serif); font-size: 23px; font-weight: 500; fill: var(--emerald);
+  font-family: var(--serif-en); font-size: 23px; font-weight: 500; fill: var(--emerald);
   text-anchor: middle; dominant-baseline: central;
 }
 .day__clock-win { fill: var(--ivory); stroke: var(--gold); stroke-width: 1.2; }
 .day__clock-wintxt {
-  font-family: var(--serif); font-size: 17px; font-weight: 600; fill: var(--emerald);
+  font-family: var(--serif-en); font-size: 17px; font-weight: 600; fill: var(--emerald);
   text-anchor: middle; dominant-baseline: central;
 }
 .day__clock-year {
-  font-family: var(--sans); font-size: 10px; font-weight: 600; letter-spacing: 4px;
+  font-family: var(--sans-en); font-size: 10px; font-weight: 600; letter-spacing: 4px;
   fill: var(--gold-deep); text-anchor: middle;
 }
 .day__hand--h path { fill: var(--emerald); }
@@ -276,14 +295,14 @@
 .day__clock-pin { fill: var(--emerald-deep); }
 
 .day__time {
-  font-family: var(--serif); font-weight: 500; color: var(--emerald);
+  font-family: var(--serif-en); font-weight: 500; color: var(--emerald);
   font-size: clamp(3.4rem, min(17vw, 11svh), 8rem); line-height: 1;
   font-variant-numeric: lining-nums;
   white-space: nowrap;
 }
 .day__time small {
   font-family: var(--sans); font-size: .3em; font-weight: 600; letter-spacing: .18em;
-  color: var(--gold-deep); vertical-align: .9em; margin-left: .15em;
+  color: var(--gold-ink); vertical-align: .9em; margin-left: .15em;
 }
 
 /* ---------- 04 · venue ---------- */
@@ -296,7 +315,8 @@
 .day__leaves g:nth-child(3n) use { fill: var(--sage-soft); }
 .day__blooms circle { fill: var(--blush); stroke: var(--gold-deep); stroke-width: .8; }
 .day__lights circle { fill: var(--gold); }
-.day__panel.is-on .day__lights circle { animation: day-twinkle 2.6s ease-in-out infinite; }
+.day__panel.is-on .day__lights circle { animation: day-twinkle 2.6s ease-in-out infinite paused; }
+.day.is-inview .day__panel.is-on .day__lights circle { animation-play-state: running; }
 .day__lights circle:nth-child(2n) { animation-delay: -.9s; }
 .day__lights circle:nth-child(3n) { animation-delay: -1.7s; }
 @keyframes day-twinkle { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
@@ -321,6 +341,7 @@
   left: 50%; bottom: max(14px, calc(env(safe-area-inset-bottom) + 6px));
   display: flex; align-items: center; gap: 16px;
   height: 44px; padding: 0 22px 0 18px; border-radius: 999px;
+  white-space: nowrap;
   background: rgba(251, 247, 240, .78);
   border: 1px solid rgba(200, 169, 106, .38);
   -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
@@ -331,26 +352,22 @@
 .day--h.is-pinned .day__progress { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
 .day__count {
   display: inline-flex; align-items: center; gap: .3em;
-  font-family: var(--sans); font-size: .72rem; font-weight: 600; letter-spacing: .14em;
+  font-family: var(--sans-en); font-size: .75rem; font-weight: 600; letter-spacing: .14em;
   color: var(--emerald); font-variant-numeric: tabular-nums;
 }
-.day__count-win { display: inline-block; overflow: hidden; height: 1.3em; line-height: 1.3em; }
+.day__count-win { display: inline-block; overflow: hidden; overflow: clip; height: 1.3em; line-height: 1.3em; }
 .day__count-cur { display: inline-block; }
-.day__count-sep { color: var(--gold-deep); }
-.day__bar { position: relative; display: block; width: clamp(92px, 16vw, 168px); height: 44px; }
+.day__count-sep { color: var(--gold-ink); }
+/* four 44x44 jump targets in a row, spaced --dot-s apart; the line runs between the outer centres.
+   The negative margin lets the outer targets reach into the pill's padding. */
+.day__bar { position: relative; display: flex; align-items: center; height: 44px; margin: 0 -14px; flex: none; }
 .day__bar::before, .day__bar-fill {
-  content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; margin-top: -.5px;
+  content: ""; position: absolute; left: 22px; width: calc(var(--dot-s) * 3); top: 50%; height: 1px; margin-top: -.5px;
   background: rgba(200, 169, 106, .45);
 }
 .day__bar-fill { height: 2px; margin-top: -1px; background: var(--gold-deep); transform-origin: 0 50%; transform: scaleX(0); }
-.day__dot {
-  position: absolute; top: 50%; width: 32px; height: 44px; margin: -22px 0 0 -16px;
-  border-radius: 50%;
-}
-.day__dot[data-i="0"] { left: 0; }
-.day__dot[data-i="1"] { left: 33.333%; }
-.day__dot[data-i="2"] { left: 66.667%; }
-.day__dot[data-i="3"] { left: 100%; }
+.day__dot { position: relative; flex: none; width: 44px; height: 44px; }
+.day__dot + .day__dot { margin-left: calc(var(--dot-s) - 44px); }
 .day__dot::before {
   content: ""; position: absolute; left: 50%; top: 50%; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px;
   border-radius: 50%; background: var(--ivory); border: 1px solid var(--gold-deep);
@@ -379,7 +396,7 @@
     --cal-w: min(38vw, calc((100svh - var(--day-pad-t) - var(--day-pad-b)) * .86), 500px);
     --clock-w: min(38vw, calc(100svh - var(--day-pad-t) - var(--day-pad-b) - 16px), 540px);
     --garden-w: min(46vw, calc((100svh - var(--day-pad-t) - var(--day-pad-b)) * 1.2), 640px);
-    --day-word: min(24vw, 40svh);
+    --day-word: min(24vw, 40svh, 440px);
   }
   .day__split { flex-direction: row; text-align: left; gap: clamp(2rem, 7vw, 7.5rem); }
   .day__split .day__copy { align-items: flex-start; flex: 0 1 30rem; }
@@ -416,23 +433,25 @@
   .day--h .day__progress { bottom: max(8px, env(safe-area-inset-bottom)); }
 }
 
-/* phones: the pill moves to the bottom-left so it never meets the music player (bottom-right) */
-@media (max-width: 767px) {
+/* below 1100px the pill sits bottom-left so it never meets the music player (bottom-right) */
+@media (max-width: 1099px) {
+  .day { --dot-s: 48px; }
   .day--h .day__progress {
     left: max(12px, calc(env(safe-area-inset-left) + 8px));
     transform: translateY(10px);
-    gap: 10px; padding: 0 16px 0 14px;
+    gap: 10px; padding: 0 18px 0 14px;
   }
   .day--h.is-pinned .day__progress { transform: none; }
-  .day__bar { width: clamp(64px, calc(100vw - 280px), 110px); }
-  .day__count { font-size: .68rem; letter-spacing: .1em; }
 }
 @media (max-width: 559px) {
+  .day { --dot-s: 44px; }
   .day__plabels { display: none; }
+  .day--h .day__progress { padding-right: 10px; }
 }
-@media (max-width: 359px) {
-  .day--h .day__progress { gap: 8px; padding: 0 12px; }
-  .day__bar { width: 56px; }
+/* small phones: the dots alone (they already say where you are), so the 44px targets fit beside the player */
+@media (max-width: 419px) {
+  .day__count { display: none; }
+  .day--h .day__progress { padding: 0 10px; }
 }
 
 /* large screens: a wider stage, bigger visuals, titles on fewer lines */
@@ -451,8 +470,8 @@
 }
 
 /* ---------- Telugu (తెలుగు) ---------- */
-html.lang-te .day { --day-word: min(23vw, 28svh); }
-@media (min-aspect-ratio: 5/4) { html.lang-te .day { --day-word: min(17vw, 30svh); } }
+html.lang-te .day { --day-word: min(23vw, 28svh, 320px); }
+@media (min-aspect-ratio: 5/4) { html.lang-te .day { --day-word: min(17vw, 30svh, 320px); } }
 html.lang-te .day__word { font-weight: 400; letter-spacing: 0; }
 html.lang-te .day__word-outline, html.lang-te .day__word-fill { padding: .14em .12em .2em; }
 html.lang-te .day__date { font-size: clamp(1.2rem, .9rem + 1.4vw, 2rem); }
@@ -462,14 +481,20 @@ html.lang-te .day__time small { font-family: var(--serif); font-size: .42em; let
 html.lang-te .day__sub { line-height: 1.6; }
 html.lang-te .day__addr { line-height: 1.6; font-size: clamp(.98rem, .85rem + .5vw, 1.2rem); }
 html.lang-te .day__cal-month { font-size: calc(var(--cal-w) * .085); line-height: 1.5; }
-html.lang-te .day__cal-dow li { font-size: clamp(.55rem, calc(var(--cal-w) * .036), .95rem); letter-spacing: 0; }
+html.lang-te .day__cal-dow li { font-size: clamp(12.5px, calc(var(--cal-w) * .034), 15px); letter-spacing: 0; }
+/* narrow cards: the one-letter forms (ఆ సో మం బు గు శు శ), as on printed Telugu calendars */
+@container daycal (max-width: 359.98px) {
+  html.lang-te .day__dow-l { display: none; }
+  html.lang-te .day__dow-s { display: inline; }
+}
 html.lang-te .day__cal-foot { font-size: max(.8rem, calc(var(--cal-w) * .034)); }
 html.lang-te .day__plabels > span { font-size: .95rem; }
 html.lang-te .day__eyebrow { font-size: .86rem; letter-spacing: .04em; }
-html.lang-te .day__tap, html.lang-te .day__hint, html.lang-te .day__note { font-size: .78rem; }
+html.lang-te .day__eyebrow-n { font-size: .78rem; }
+html.lang-te .day__tap, html.lang-te .day__hint, html.lang-te .day__note { font-size: .8rem; letter-spacing: .02em; text-transform: none; }
 @media (max-height: 500px) {
   html.lang-te .day__title, html.lang-te .day__venue { font-size: clamp(1.6rem, 8svh, 2.4rem); }
-  html.lang-te .day { --day-word: min(17vw, 21svh); }
+  html.lang-te .day { --day-word: min(17vw, 21svh, 320px); }
 }
 
 /* ---------- reduced motion ---------- */

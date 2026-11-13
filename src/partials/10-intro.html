@@ -81,12 +81,16 @@
   </div>
 
   <div class="intro__stage">
-    <svg class="intro__halo" viewBox="0 0 400 400" aria-hidden="true" focusable="false">
-      <circle cx="200" cy="200" r="198" />
-      <circle cx="200" cy="200" r="168" class="intro__halo-dash" />
-      <circle cx="200" cy="200" r="132" />
-      <g class="intro__halo-ticks"><circle cx="200" cy="200" r="184" /></g>
-    </svg>
+    <!-- the two turning rings are separate <svg> boxes: rotating the box runs on the compositor,
+         rotating a shape inside an <svg> re-lays-out the SVG on every frame -->
+    <div class="intro__halo" aria-hidden="true">
+      <svg viewBox="0 0 400 400" focusable="false">
+        <circle cx="200" cy="200" r="198" />
+        <circle cx="200" cy="200" r="132" />
+      </svg>
+      <svg class="intro__halo-spin intro__halo-dash" viewBox="0 0 400 400" focusable="false"><circle cx="200" cy="200" r="168" /></svg>
+      <svg class="intro__halo-spin intro__halo-ticks" viewBox="0 0 400 400" focusable="false"><circle cx="200" cy="200" r="184" /></svg>
+    </div>
 
     <div class="intro__head">
       <p class="intro__dear" hidden></p>
@@ -108,11 +112,14 @@
                 <div class="intro__content">
                   <div class="intro__stack">
                     <!-- the seal's imprint, pressed into the parchment -->
-                    <svg class="intro__crest intro__line" viewBox="0 0 80 80" aria-hidden="true" focusable="false">
-                      <circle class="intro__crest-ring" cx="40" cy="40" r="37" pathLength="1" />
-                      <circle class="intro__crest-dots" cx="40" cy="40" r="31.5" />
-                      <text x="40" y="47.5" text-anchor="middle" style="font-family: var(--serif)">A&amp;A</text>
-                    </svg>
+                    <!-- the monogram is HTML text: SVG <text> is re-laid-out on every frame of the exit zoom -->
+                    <span class="intro__crest intro__line" aria-hidden="true">
+                      <svg viewBox="0 0 80 80" focusable="false">
+                        <circle class="intro__crest-ring" cx="40" cy="40" r="37" pathLength="1" />
+                        <circle class="intro__crest-dots" cx="40" cy="40" r="31.5" />
+                      </svg>
+                      <span class="intro__crest-mono">A&amp;A</span>
+                    </span>
                     <svg class="intro__orn intro__line" viewBox="0 0 160 22" aria-hidden="true" focusable="false">
                       <path pathLength="1" d="M4 11h52M104 11h52" />
                       <path pathLength="1" d="M58 11c6-7 14-7 22 0 8 7 16 7 22 0M58 11c6 7 14 7 22 0 8-7 16-7 22 0" />

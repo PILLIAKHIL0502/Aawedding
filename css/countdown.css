@@ -43,7 +43,7 @@
   padding: 0 .12em .1em;
   font-family: var(--script);
   font-weight: 400;
-  font-size: clamp(2.6rem, 9.6vw, 5.2rem);
+  font-size: clamp(2.6rem, 9.6vw, max(5.2rem, 3.9vw));
   line-height: 1.1;
   text-wrap: balance;
   color: var(--gold-soft);
@@ -53,21 +53,22 @@
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-html.lang-te #countdown .countdown__title { font-size: clamp(1.9rem, 7.4vw, 3.7rem); line-height: 1.45; }
+html.lang-te #countdown .countdown__title { font-size: clamp(1.9rem, 7.4vw, max(3.7rem, 2.8vw)); line-height: 1.45; }
 
 /* ---------------- the clock ---------------- */
 #countdown .countdown__clock {
   container-type: inline-size;
   position: relative;
   width: 100%;
-  max-width: 980px;
+  max-width: clamp(980px, 50vw, 1280px);   /* room for the tiles to grow on big screens */
   margin: 0 auto;
 }
 #countdown .countdown__clock-grid {
-  /* card width: a quarter of the row, capped for big screens and for short (landscape) screens */
-  --fw: min(20.5cqi, 184px, 27svh);
+  /* card width: a quarter of the row, capped for short (landscape) screens; 184px on laptops,
+     growing to ~240px (1.3x) on 2560px screens */
+  --fw: min(20.5cqi, clamp(184px, 9.4vw, 240px), 27svh);
   --fh: calc(var(--fw) * 1.14);
-  --gap: min(4.2cqi, 46px);
+  --gap: min(4.2cqi, clamp(46px, 2.35vw, 60px));
   --r: calc(var(--fw) * .09);
   display: grid;
   grid-template-columns: repeat(4, auto);
@@ -174,7 +175,7 @@ html.lang-te #countdown .countdown__title { font-size: clamp(1.9rem, 7.4vw, 3.7r
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--serif);
+  font-family: var(--serif-en);   /* Latin numerals: Cormorant in both languages */
   font-weight: 500;
   font-size: calc(var(--fh) * .66);
   line-height: 1;
@@ -191,7 +192,6 @@ html.lang-te #countdown .countdown__title { font-size: clamp(1.9rem, 7.4vw, 3.7r
 #countdown .countdown__leaf--top .countdown__num { top: 0; }
 #countdown .countdown__half--bottom .countdown__num,
 #countdown .countdown__leaf--bottom .countdown__num { bottom: 0; }
-html.lang-te #countdown .countdown__num { font-size: calc(var(--fh) * .62); padding-top: .1em; }
 
 /* shading that deepens as a leaf turns away from the light */
 #countdown .countdown__shade {
@@ -206,9 +206,9 @@ html.lang-te #countdown .countdown__num { font-size: calc(var(--fh) * .62); padd
 #countdown .countdown__label {
   font-family: var(--sans);
   font-weight: 600;
-  font-size: clamp(9.5px, 2.4cqi, 13px);
-  letter-spacing: .26em;
-  padding-left: .26em;
+  font-size: clamp(11px, 2.4cqi, max(13px, .62vw));   /* >= 11px on phones, ~16px at 2560 */
+  letter-spacing: .22em;
+  padding-left: .22em;
   text-transform: uppercase;
   line-height: 1.3;
   color: var(--gold-soft);
@@ -242,7 +242,7 @@ html.lang-te #countdown .countdown__status { font-size: clamp(1.5rem, 5.6vw, 2.4
 /* ---------------- the slim progress line ---------------- */
 #countdown .countdown__progress {
   --p: 0;
-  width: min(100%, 520px);
+  width: min(100%, clamp(520px, 27vw, 680px));
   margin: clamp(2rem, 6vw, 3.25rem) auto 0;
 }
 #countdown .countdown__track {
@@ -322,6 +322,21 @@ html.lang-te #countdown .countdown__togo { font-style: normal; font-size: clamp(
   #countdown .countdown__progress { margin-top: 1.1rem; }
   #countdown .countdown__togo { margin-top: .5rem; }
   #countdown .countdown__status { margin-top: .9rem; font-size: clamp(1.7rem, 4.6vw, 2.4rem); }
+}
+
+/* ---------------- laptops and big screens: the dark band fills the screen ---------------- */
+@media (min-width: 1024px) and (min-height: 760px) {
+  #countdown.countdown {
+    display: grid;
+    align-content: center;
+    min-height: 100svh;
+  }
+  #countdown .countdown__inner { width: 100%; }
+}
+@media (min-width: 2000px) {
+  #countdown .countdown__eyebrow { font-size: .8rem; }
+  html.lang-te #countdown .countdown__eyebrow { font-size: .95rem; }
+  #countdown .countdown__togo { font-size: 1.45rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {

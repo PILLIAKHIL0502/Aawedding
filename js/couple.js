@@ -26,7 +26,7 @@
     const $$ = (s) => Array.from(root.querySelectorAll(s));
 
     const stage = $(".cpl-stage");
-    const scene = $(".cpl-scene");
+    const sceneEl = $(".cpl-scene");
     const halo = $(".cpl-halo");
     const slotG = $(".cpl-slot--groom");
     const slotB = $(".cpl-slot--bride");
@@ -38,6 +38,8 @@
     const state = { hinted: false, flippedOnce: false, inView: false };
     if (!gsap) root.classList.add("cpl-css-flip");
     let ledeSplit = null, ledeTrigger = null, ledeTween = null, ledeDone = false;
+    let langSeq = 0;          // bumps on every language switch; stale font waits check it
+    let scene = null;         // { tl, st, pinned } for the current gsap.matchMedia branch
 
     // glare layers (decorative) on each face
     cards.forEach((card) => {
@@ -54,16 +56,20 @@
 
     setupFlip();
     setupTilt();
-    setupLede();
+    setupKeyboard();
+    afterFonts(langSeq, setupLede);
     setupScene();
     setupVisibility();
     fitNames();
 
     App.on("lang", () => {
-      resetLede();
+      // i18n has already reverted our split and swapped the text. Drop the old split now and
+      // re-split only once this language's fonts have loaded (Telugu may still be downloading);
+      // if the guest switches again in the meantime, only the newest switch re-splits.
+      const seq = ++langSeq;
+      dropLede();
       fitNames();
-      // Telugu fonts may still be arriving: fit again once they have
-      if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitNames);
+      afterFonts(seq, () => { setupLede(); fitNames(); });
     });
     App.on("resize", fitNames);
     if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener("loadingdone", fitNames);
@@ -95,6 +101,28 @@
       gsap.fromTo(card._fan, { scale: 1 }, {
         scale: 1.06, duration: 0.24, ease: "power2.out", yoyo: true, repeat: 1, overwrite: "auto",
       });
+    }
+
+    /* Keyboard: Tab can land on a card while the scene is still at its start (cards half off
+       screen). Play the scene through to the end so the focused card is in place and visible. */
+    function setupKeyboard() {
+      cards.forEach((card) => card.addEventListener("focusin", () => {
+        let keyboard = true;
+        try { keyboard = card.matches(":focus-visible"); } catch (_) {}
+        if (!keyboard || !scene || scene.tl.progress() > 0.97) return;
+        // after the browser's own scroll-into-view for the focus
+        requestAnimationFrame(() => {
+          if (!scene) return;
+          if (scene.pinned) {
+            const st = scene.st;
+            const y = Math.round(st.start + (st.end - st.start) * 0.985);
+            if (App.lenis) App.lenis.scrollTo(y, { duration: 1.1, force: true });
+            else window.scrollTo(0, y);
+          } else {
+            scene.tl.timeScale(1).play();
+          }
+        });
+      }));
     }
 
     /* a one-off "peek" that hints the card can be turned. A CSS keyframe (not a tween), so it
@@ -133,9 +161,11 @@
       if (App.finePointer) {
         rigs.forEach((rig) => {
           const ref = rig.card._fan;
+          let r = null;
+          rig.card.addEventListener("pointerenter", () => { r = null; });
           rig.card.addEventListener("pointermove", (e) => {
             if (e.pointerType !== "mouse" && e.pointerType !== "pen") return;
-            const r = ref.getBoundingClientRect();
+            if (!r) r = ref.getBoundingClientRect();
             const px = App.clamp(((e.clientX - r.left) / r.width) * 2 - 1, -1, 1);
             const py = App.clamp(((e.clientY - r.top) / r.height) * 2 - 1, -1, 1);
             apply(rig, px, py, 1);
@@ -154,7 +184,7 @@
        Intro line: words rise in once, on scroll
        ====================================================== */
     function setupLede() {
-      if (reduce || !SplitText || !ST || !lede) return;
+      if (reduce || !SplitText || !ST || !lede || ledeSplit) return;
       splitLede();
       if (ledeDone) return;
       gsap.set(ledeSplit.words, { opacity: 0, yPercent: 70, rotate: 3 });
@@ -181,13 +211,53 @@
       });
     }
 
-    function resetLede() {
-      // i18n has already reverted the old split and swapped the text
+    function dropLede() {
+      // i18n has already reverted the old split (and nulled lede._split) and swapped the text;
+      // until the re-split the lede is plain, fully visible text
       if (ledeTween) { ledeTween.kill(); ledeTween = null; }
       if (ledeTrigger) { ledeTrigger.kill(); ledeTrigger = null; }
-      if (ledeSplit && lede._split === ledeSplit) { try { ledeSplit.revert(); } catch (_) {} }
-      ledeSplit = null; lede._split = null;
-      setupLede();
+      if (ledeSplit && lede && lede._split === ledeSplit) { try { ledeSplit.revert(); } catch (_) {} }
+      ledeSplit = null;
+      if (lede) lede._split = null;
+    }
+
+    /* Run fn once the current language's fonts are in (App.fontsReady), and nothing else is
+       still loading (SplitText warns, and measures fallback glyphs, while any font loads).
+       App.fontsReady() can resolve before the Telugu stylesheet has even arrived (after a
+       quick te -> en -> te), so also wait until the lede's own font face exists and is loaded.
+       Gives up after ~6 s and leaves the text plain (still fully readable). */
+    function afterFonts(seq, fn) {
+      const fonts = document.fonts;
+      const t0 = performance.now();
+      const pause = (ms) => new Promise((r) => setTimeout(r, ms));
+      const family = () => (lede ? getComputedStyle(lede).fontFamily.split(",")[0].trim().replace(/^["']|["']$/g, "") : "");
+      const sample = () => (lede ? lede.textContent.slice(0, 48) : "");
+      const faceReady = () => {
+        if (!lede || App.lang !== "te") return true;
+        const fam = family();
+        const faces = Array.from(fonts).filter((f) => f.family.replace(/["']/g, "") === fam);
+        return faces.length > 0 && fonts.check(`1em "${fam}"`, sample());
+      };
+      const settled = () => fonts.status !== "loading" && faceReady();
+      const step = () => {
+        if (seq !== langSeq) return;                       // a newer switch took over
+        let ok = true;
+        try { ok = settled(); } catch (_) {}
+        if (ok) return fn();
+        if (performance.now() - t0 > 6000) return;
+        let wait;
+        try {
+          wait = fonts.status === "loading" ? fonts.ready
+            : App.lang === "te" && lede ? fonts.load(`1em "${family()}"`, sample()) : pause(100);
+        } catch (_) { wait = pause(100); }
+        Promise.race([wait, pause(250)]).catch(() => {}).then(() => requestAnimationFrame(step));
+      };
+      if (!fonts || !fonts.check) return fn();
+      const ready = typeof App.fontsReady === "function" ? App.fontsReady() : fonts.ready;
+      let now = false;
+      try { now = settled(); } catch (_) {}
+      if (now) step();
+      else Promise.resolve(ready).catch(() => {}).then(step);
     }
 
     function whenOpen(fn) {
@@ -199,10 +269,11 @@
        The coming-together scene
        ====================================================== */
     function setupScene() {
-      if (reduce || !ST || !stage || !scene) {
+      if (reduce || !ST || !stage || !sceneEl) {
         root.classList.add("is-linked");
         return;
       }
+      const intro = $(".cpl-intro");
       const mm = gsap.matchMedia();
       mm.add({
         tall: "(min-height: 501px)",
@@ -214,7 +285,12 @@
         tl.eventCallback("onUpdate", () => onProgress(tl.progress()));
 
         if (tall) {
-          ST.create({
+          /* The moving parts get their own layers (.cpl-busy -> will-change) from the moment the
+             stage starts entering the screen until the pin ends, so nothing is promoted or
+             dropped mid-scrub. Off that window they are plain, unpromoted elements. */
+          let near = false, pinned = false;
+          const busy = () => root.classList.toggle("cpl-busy", near || pinned);
+          const st = ST.create({
             trigger: stage,
             start: "top top",
             end: () => "+=" + Math.round(window.innerHeight * (row ? 1.5 : 1.1)),
@@ -223,21 +299,49 @@
             anticipatePin: 1,
             invalidateOnRefresh: true,
             animation: tl,
+            onToggle: (self) => { pinned = self.isActive; busy(); },
+            // (re)initialise every tween here, inside the refresh, not on the first scrub frames
+            onRefresh: () => prime(tl),
           });
-        } else {
-          // short landscape: no pin; play the scene once when it scrolls into view
-          tl.pause(0);
-          tl.timeScale(1 / 2.6);
-          ST.create({
-            trigger: stage,
-            start: "top 72%",
-            once: true,
-            invalidateOnRefresh: true,
-            onEnter: () => whenOpen(() => tl.play()),
+          const pre = intro && ST.create({
+            trigger: intro,
+            start: "bottom bottom",   // the stage's top edge reaches the bottom of the screen
+            end: "bottom top",        // ... and the top: the pin takes over from here
+            onToggle: (self) => { near = self.isActive; busy(); },
           });
+          scene = { tl, st, pinned: true };
+          return () => {
+            scene = null;
+            if (pre) pre.kill();
+            root.classList.remove("is-linked", "cpl-busy");
+          };
         }
-        return () => root.classList.remove("is-linked");
+
+        // short landscape: no pin; play the scene once when it scrolls into view
+        tl.pause(0);
+        tl.timeScale(1 / 2.6);
+        prime(tl);
+        tl.eventCallback("onComplete", () => root.classList.remove("cpl-busy"));
+        const st = ST.create({
+          trigger: stage,
+          start: "top 72%",
+          once: true,
+          invalidateOnRefresh: true,
+          onEnter: () => whenOpen(() => { root.classList.add("cpl-busy"); tl.play(); }),
+        });
+        scene = { tl, st, pinned: false };
+        return () => {
+          scene = null;
+          root.classList.remove("is-linked", "cpl-busy");
+        };
       });
+    }
+
+    /* Render the timeline to its end and back (no callbacks), so each tween reads its start
+       values now rather than the first time the scrub reaches it. */
+    function prime(tl) {
+      const p = tl.progress();
+      tl.progress(1, true).progress(p, true);
     }
 
     function onProgress(p) {
@@ -250,7 +354,7 @@
 
     /* where things start: measured from the untransformed layout */
     function cardStartX(slot, dir) {
-      const sceneLeft = scene.getBoundingClientRect().left;
+      const sceneLeft = sceneEl.getBoundingClientRect().left;
       const left = sceneLeft + slot.offsetLeft;
       const vw = stage.clientWidth || window.innerWidth;
       // the card's centre starts on the screen edge, half off-screen
@@ -260,7 +364,7 @@
       // each ring rolls out from behind its own card (groom: left, bride: right); in px
       const r = ringsBox.getBoundingClientRect();
       const slot = dir < 0 ? slotG : slotB;
-      const cardCentre = scene.getBoundingClientRect().left + slot.offsetLeft + slot.offsetWidth / 2;
+      const cardCentre = sceneEl.getBoundingClientRect().left + slot.offsetLeft + slot.offsetWidth / 2;
       const ringCentre = r.left + ((dir < 0 ? 96 : 144) / 240) * r.width;
       return cardCentre - ringCentre;
     }

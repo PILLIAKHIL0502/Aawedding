@@ -139,20 +139,44 @@
        share location (Web Share API, WhatsApp fallback)
        ====================================================== */
     const shareLink = $('[data-venue-action="share"]');
+    let sharing = false;    // a share sheet is open: ignore repeat taps
+    let linkOnly = false;   // the share sheet failed once: from now on the link itself opens WhatsApp
+
+    // Open WhatsApp in a new tab. The invitation itself never navigates away.
+    // (window.open with "noopener" always returns null, so open without it and drop the opener by hand.)
+    function openWhatsApp() {
+      let w = null;
+      try { w = window.open(whatsappUrl(), "_blank"); } catch (_) { w = null; }
+      if (w) {
+        try { w.opener = null; } catch (_) {}
+        return;
+      }
+      // Blocked as a pop-up (the failed share used up the tap). A fresh tap on the link opens it.
+      App.toast(App.t(
+        "Couldn't open the share menu. Tap again to send it on WhatsApp",
+        "షేర్ మెనూ తెరుచుకోలేదు. వాట్సాప్‌లో పంపడానికి మళ్ళీ నొక్కండి"
+      ), 3600);
+    }
+
     if (shareLink) {
       shareLink.addEventListener("click", async (e) => {
         shareLink.href = whatsappUrl();
-        if (!navigator.share) return;   // the link itself opens WhatsApp
+        if (linkOnly || !navigator.share) return;   // the link itself opens WhatsApp in a new tab
         const data = { title: couple(), text: shareText(), url: V.mapsUrl };
         try { if (navigator.canShare && !navigator.canShare(data)) return; } catch (_) { return; }
         e.preventDefault();
+        if (sharing) return;
+        sharing = true;
         App.haptic(10);
         try {
           await navigator.share(data);
         } catch (err) {
           if (err && err.name === "AbortError") return;   // the guest closed the share sheet
-          const w = window.open(whatsappUrl(), "_blank", "noopener");
-          if (!w) location.href = whatsappUrl();
+          // NotAllowedError (blocked by the page's context), InvalidStateError, ...: use WhatsApp instead
+          linkOnly = true;
+          openWhatsApp();
+        } finally {
+          sharing = false;
         }
       });
     }
@@ -426,18 +450,23 @@
     /* keep the illustration at a comfortable zoom on any frame size, centred on the venue */
     const svg = $(".venue-map__svg");
     const roadText = $(".vm-road-label textPath");
+    const areaText = $(".vm-area");
     // Mehdipatnam Road runs from (-240,520) to (1040,200); its label's baseline sits at y = 475 - x/4.
-    // The label goes in whichever visible stretch is longer: left of the route, or right of the petrol pump.
+    // The label sits left of the route if it fits there, otherwise in the longer visible stretch:
+    // left of the route, or between the route and the frame's right edge.
     const ROAD_SLOPE = 1.0308;   // path length per x unit
+    const ROUTE_X = [378, 410];  // where the route crosses the road (label baseline height)
     function placeRoadLabel(view) {
       if (!roadText) return;
       roadText.style.letterSpacing = "";
       let len = 0;
       try { len = roadText.getComputedTextLength() / ROAD_SLOPE; } catch (_) {}
       if (!len) return;
-      const minX = Math.max(view.left + 16, 4 * (483 - view.bottom));   // keep the text above the frame's bottom edge
-      const slots = [[minX, 370], [Math.max(minX, 600), view.right - 16]];
-      const [a, b] = slots.sort((p, q) => (q[1] - q[0]) - (p[1] - p[0]))[0];
+      const minX = Math.max(view.left + 10, 4 * (483 - view.bottom));   // keep the text above the frame's bottom edge
+      const before = [minX, ROUTE_X[0]];
+      const after = [Math.max(minX, ROUTE_X[1]), view.right - 14];
+      const size = (p) => p[1] - p[0];
+      const [a, b] = len <= size(before) || size(before) >= size(after) ? before : after;
       const room = b - a;
       let x = a;
       if (len > room) {
@@ -445,22 +474,45 @@
         const chars = Math.max(1, (roadText.textContent || "").length);
         const ls = parseFloat(getComputedStyle(roadText).letterSpacing) || 0;
         roadText.style.letterSpacing = `${Math.max(0.5, ls - (len - room) * ROAD_SLOPE / chars).toFixed(2)}px`;
-      } else if (a < 370 && b === 370) {
-        x = Math.max(a, 370 - len - 30);   // sit close to the venue rather than at the frame edge
+      } else if (b === ROUTE_X[0]) {
+        x = Math.max(a, b - len - 36);   // sit close to the venue rather than at the frame edge
       }
       roadText.setAttribute("startOffset", ((x + 240) * ROAD_SLOPE).toFixed(1));
     }
+    // "Asif Nagar" is centred at x = 240 when there's room; on narrow frames it slides right to stay whole.
+    function placeAreaLabel(view) {
+      if (!areaText) return;
+      areaText.style.letterSpacing = "";
+      const width = () => { try { return areaText.getComputedTextLength(); } catch (_) { return 0; } };
+      let w = width();
+      if (!w) return;
+      const lo = view.left + 10;   // frame edge
+      const hi = 345;              // the venue plot
+      if (w > hi - lo) {
+        const chars = Math.max(1, (areaText.textContent || "").length);
+        const ls = parseFloat(getComputedStyle(areaText).letterSpacing) || 0;
+        areaText.style.letterSpacing = `${Math.max(0.5, ls - (w - (hi - lo)) / chars).toFixed(2)}px`;
+        w = width();
+      }
+      areaText.setAttribute("x", Math.max(240, lo + w / 2).toFixed(1));
+    }
     function fitMapArt() {
       if (!svg || !stage) return;
-      const r = svg.getBoundingClientRect();
-      if (!r.width || !r.height) return;
-      const s = App.clamp(r.width / 720, 0.58, 1);
-      const vw = r.width / s;
-      const vh = r.height / s;
+      // layout sizes, not getBoundingClientRect: the entrance and the tilt parallax transform the map
+      const sw = stage.clientWidth;
+      const sh = stage.clientHeight;
+      if (!sw || !sh) return;
+      const s = App.clamp((sw * 1.08) / 720, 0.58, 1.2);   // the drawing is 108% of the stage
+      const vw = (sw * 1.08) / s;
+      const vh = (sh * 1.08) / s;
       svg.setAttribute("viewBox", `${(400 - vw / 2).toFixed(1)} ${(300 - vh / 2).toFixed(1)} ${vw.toFixed(1)} ${vh.toFixed(1)}`);
-      const hw = stage.clientWidth / 2 / s;
-      const hh = stage.clientHeight / 2 / s;
-      placeRoadLabel({ left: 400 - hw, right: 400 + hw, top: 300 - hh, bottom: 300 + hh });
+      // labels keep a readable size on screen however far the drawing is zoomed out
+      svg.style.setProperty("--vm-k", (1 / s).toFixed(3));
+      const hw = sw / 2 / s;
+      const hh = sh / 2 / s;
+      const view = { left: 400 - hw, right: 400 + hw, top: 300 - hh, bottom: 300 + hh };
+      placeRoadLabel(view);
+      placeAreaLabel(view);
     }
     if (svg) {
       fitMapArt();
@@ -485,80 +537,145 @@
 
     /* ======================================================
        entrance animation
+       Three blocks (heading, card, map), each played as it scrolls into view. Nothing heavy
+       runs on "open": the timelines are built in idle time once the section is a screen or two
+       away, or at the latest when a block starts to enter.
        ====================================================== */
     const title = $(".venue__title");
-    let entrance = null;
-    let played = false;
-    let ctx = null;
+    let fontsOk = false;   // the current language's fonts are in, so the title can be split
+    let langGen = 0;       // bumped on every language switch, to drop stale font callbacks
+    let armed = false;     // the section has come near: build the pending blocks
 
     // SplitText registers itself with an active gsap.context, and reverting that context would
     // restore the English markup over i18n's Telugu. So the split lives outside the context.
     function splitTitle() {
-      if (!title || !window.SplitText) return null;
+      if (!title || !window.SplitText || !fontsOk) return null;
+      if (document.fonts && document.fonts.status === "loading") return null;   // animate it whole
       try {
+        if (title._split) { title._split.revert(); title._split = null; }
         const split = new window.SplitText(title, { type: "words", wordsClass: "split-word" });
         title._split = split;   // lets the language switch revert it
         return split.words;
       } catch (_) { return null; }
     }
 
-    function buildEntrance() {
-      const words = splitTitle();
-      ctx = gsap.context(() => {
-        const eyebrow = $(".venue__eyebrow");
-        const ornLines = $$(".venue__orn-line");
-        const ornFill = $$(".venue__ornament .fill");
-        const card = $(".venue-card");
-        const cardPin = $(".venue-card__pin");
-        const rows = $$(".venue-row");
-        const buttons = [$(".venue-btn--primary"), ...$$(".venue-tile"), calBtn].filter(Boolean);
-        const map = $(".venue-map");
-        const routeReveal = $(".vm-route-reveal");
-        const routeStart = $(".vm-route-start");
-        const pulses = $$(".venue-map__pulse");
-        const pill = $(".venue-map__label-pill");
-        const pin = $(".venue-map__pin");
-        const overlays = $$(".venue-map__open, .venue-map__compass");
+    const BLOCKS = [
+      {
+        name: "head",
+        watch: $(".venue__head"),
+        margin: "0px 0px -12% 0px",   // like ScrollTrigger's start: "top 88%"
+        build(tl) {
+          const words = splitTitle();
+          tl.from($(".venue__eyebrow"), { y: 18, opacity: 0, duration: 0.9 }, 0)
+            .from(words || title, { yPercent: 70, opacity: 0, rotate: 3, duration: 1.2, stagger: 0.09 }, 0.08)
+            .from($$(".venue__orn-line"), { strokeDashoffset: 100, duration: 1.4, ease: "power2.inOut" }, 0.3)
+            .from($$(".venue__ornament .fill"), { scale: 0, transformOrigin: "50% 50%", duration: 0.6, ease: "back.out(3)", stagger: 0.05 }, 0.7);
+          return [];
+        },
+      },
+      {
+        name: "card",
+        // the card's own box moves with its entrance offset, so watch the static grid it tops
+        watch: $(".venue__grid"),
+        margin: "0px 0px -12% 0px",
+        build(tl) {
+          const buttons = [$(".venue-btn--primary"), ...$$(".venue-tile"), calBtn].filter(Boolean);
+          tl.from($(".venue-card"), { y: 90, opacity: 0, scale: 0.96, duration: 1.5 }, 0)
+            .from($(".venue-card__pin"), { y: -70, opacity: 0, duration: 1.1, ease: "bounce.out" }, 0.4)
+            .from($$(".venue-row"), { x: -26, opacity: 0, duration: 1, stagger: 0.12 }, 0.45)
+            .from(buttons, { y: 14, scale: 0.6, opacity: 0, duration: 0.75, ease: "back.out(2.2)", stagger: 0.06 }, 0.7);
+          return buttons;
+        },
+      },
+      {
+        name: "map",
+        watch: $(".venue-map"),
+        margin: "0px 0px -4% 0px",   // the map starts 70px low, so this also lands near "top 88%"
+        build(tl) {
+          const overlays = $$(".venue-map__open, .venue-map__compass");
+          tl.from($(".venue-map"), { y: 70, opacity: 0, scale: 0.97, duration: 1.5 }, 0)
+            .from($(".vm-route-start"), { scale: 0, transformOrigin: "50% 50%", duration: 0.6, ease: "back.out(3)" }, 0.45)
+            .from($(".vm-route-reveal"), { strokeDashoffset: 100, duration: 1.8, ease: "power2.inOut" }, 0.5)
+            .from(overlays, { opacity: 0, y: -8, duration: 0.8, stagger: 0.1 }, 0.9)
+            .from($(".venue-map__pin"), { y: -90, opacity: 0, duration: 1.1, ease: "bounce.out" }, 1.05)
+            .from($(".venue-map__label-pill"), { y: 10, opacity: 0, scale: 0.85, duration: 0.8, ease: "back.out(2)" }, 1.5)
+            .from($$(".venue-map__pulse"), { opacity: 0, duration: 0.6 }, 1.7);
+          return overlays;
+        },
+      },
+    ].filter((b) => b.watch);
+    // stale: built for the previous language (the heading's split words are gone); rebuild before playing
+    BLOCKS.forEach((b) => { b.tl = null; b.ctx = null; b.played = false; b.stale = false; });
+    const needsBuild = (b) => !b.played && (!b.tl || b.stale);
 
+    function buildBlock(b) {
+      if (!needsBuild(b)) return;
+      if (b.stale) {
+        b.ctx.revert();   // back to the natural state, so the new from() tweens end in the right place
+        b.ctx = null;
+        b.tl = null;
+        b.stale = false;
+      }
+      b.ctx = gsap.context(() => {
+        const cls = `is-anim-${b.name}`;   // CSS transitions on transform stay off while GSAP drives them
+        let handBack = [];
         const tl = gsap.timeline({
           paused: true,
           defaults: { ease: "expo.out" },
-          onStart: () => root.classList.add("is-animating"),
+          onStart: () => root.classList.add(cls),
           onComplete: () => {
-            root.classList.remove("is-animating");
-            gsap.set(buttons.concat(overlays), { clearProps: "transform,opacity" });
+            root.classList.remove(cls);
+            if (handBack.length) gsap.set(handBack, { clearProps: "transform,opacity" });
           },
         });
-        tl.from(eyebrow, { y: 18, opacity: 0, duration: 0.9 }, 0)
-          .from(words || title, { yPercent: 70, opacity: 0, rotate: 3, duration: 1.2, stagger: 0.09 }, 0.08)
-          .from(ornLines, { strokeDashoffset: 100, duration: 1.4, ease: "power2.inOut" }, 0.3)
-          .from(ornFill, { scale: 0, transformOrigin: "50% 50%", duration: 0.6, ease: "back.out(3)", stagger: 0.05 }, 0.7)
-          .from(card, { y: 90, opacity: 0, scale: 0.96, duration: 1.5 }, 0.35)
-          .from(cardPin, { y: -70, opacity: 0, duration: 1.1, ease: "bounce.out" }, 0.75)
-          .from(rows, { x: -26, opacity: 0, duration: 1, stagger: 0.12 }, 0.8)
-          .from(buttons, { y: 14, scale: 0.6, opacity: 0, duration: 0.75, ease: "back.out(2.2)", stagger: 0.06 }, 1.05)
-          .from(map, { y: 70, opacity: 0, scale: 0.97, duration: 1.5 }, 0.5)
-          .from(routeStart, { scale: 0, transformOrigin: "50% 50%", duration: 0.6, ease: "back.out(3)" }, 0.95)
-          .from(routeReveal, { strokeDashoffset: 100, duration: 1.8, ease: "power2.inOut" }, 1.0)
-          .from(pin, { y: -90, opacity: 0, duration: 1.1, ease: "bounce.out" }, 1.55)
-          .from(pulses, { opacity: 0, duration: 0.6 }, 2.2)
-          .from(pill, { y: 10, opacity: 0, scale: 0.85, duration: 0.8, ease: "back.out(2)" }, 2.0)
-          .from(overlays, { opacity: 0, y: -8, duration: 0.8, stagger: 0.1 }, 1.4);
-        entrance = tl;
-
-        ST.create({
-          trigger: root.querySelector(".venue__grid") || root,
-          start: "top 82%",
-          once: true,
-          invalidateOnRefresh: true,
-          onEnter: () => { played = true; tl.play(); },
-        });
+        handBack = b.build(tl);
+        b.tl = tl;
       }, root);
+    }
+    function playBlock(b) {
+      if (b.played) return;
+      buildBlock(b);
+      b.played = true;
+      b.tl.play();
+    }
+
+    const idle = (fn) => ("requestIdleCallback" in window ? requestIdleCallback(fn, { timeout: 600 }) : setTimeout(fn, 80));
+    // build whatever hasn't played yet, one block per idle slot
+    function buildPending() {
+      const next = BLOCKS.find(needsBuild);
+      if (next) idle(() => { buildBlock(next); buildPending(); });
+    }
+    // fn runs once the current language's fonts are in, unless the language changes first
+    function whenFontsReady(fn) {
+      const gen = langGen;
+      const done = () => {
+        if (gen !== langGen) return;
+        fontsOk = true;
+        if (fn) fn();
+      };
+      (App.fontsReady ? App.fontsReady() : Promise.resolve()).then(done, done);
     }
 
     function startEntrance() {
-      if (!animate) { root.classList.add("is-revealed"); return; }
-      buildEntrance();
+      if (!animate || !("IntersectionObserver" in window)) { root.classList.add("is-revealed"); return; }
+      whenFontsReady();
+      // play each block as it scrolls in
+      BLOCKS.forEach((b) => {
+        const io = new IntersectionObserver((entries) => {
+          if (!entries.some((en) => en.isIntersecting)) return;
+          io.disconnect();
+          playBlock(b);
+        }, { rootMargin: b.margin });
+        io.observe(b.watch);
+      });
+      // build them ahead, quietly, while the section is still a screen or so away
+      const near = new IntersectionObserver((entries) => {
+        if (!entries.some((en) => en.isIntersecting)) return;
+        near.disconnect();
+        armed = true;
+        whenFontsReady(buildPending);
+      }, { rootMargin: "150% 0px 150% 0px" });
+      near.observe(root);
     }
     if (App.state.opened) startEntrance();
     else App.on("open", startEntrance);
@@ -567,12 +684,23 @@
        language switch
        ====================================================== */
     App.on("lang", () => {
+      langGen++;
+      fontsOk = false;
       renderLinks();
       renderChip();
-      // the road label's length changes with the language (and again once the Telugu font arrives)
-      fitMapArt();
-      if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitMapArt).catch(() => {});
+      // i18n reverted our title split. A heading that has played is plain, readable text now; one
+      // that hasn't is rebuilt (re-split) in idle time once the new language's fonts are in, or
+      // straight away if it scrolls into view first.
+      const head = BLOCKS.find((b) => b.name === "head");
+      if (head && head.tl && !head.played) head.stale = true;
+      // the road label's length changes with the language (and again once the Telugu font arrives);
+      // measure after i18n's own layout refresh instead of forcing a layout in the middle of it
+      requestAnimationFrame(fitMapArt);
       setTimeout(fitMapArt, 1500);
+      whenFontsReady(() => {
+        requestAnimationFrame(fitMapArt);
+        if (armed) buildPending();
+      });
       if (iframe) {
         iframe.title = mapTitle();
         if (mapLoaded) {
@@ -582,14 +710,6 @@
         }
       }
       if (menuOpen) placeMenu();
-      // i18n reverted our title split. If the entrance hasn't run yet, rebuild it in the new language;
-      // if it has, the plain text is already in its final, readable state.
-      if (animate && ctx && !played) {
-        ctx.revert();
-        ctx = null;
-        buildEntrance();
-        ST.refresh();
-      }
     });
 
     renderLinks();

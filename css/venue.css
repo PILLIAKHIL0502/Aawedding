@@ -37,6 +37,7 @@
 /* ---------- heading ---------- */
 .venue__inner { position: relative; }
 .venue__head { margin-bottom: clamp(2rem, 6vw, 4rem); }
+.venue__eyebrow { color: var(--sage-ink); }
 .venue__title { font-size: clamp(3rem, 9vw, 5.6rem); line-height: 1.12; padding: 0 .1em; }
 .venue__title .split-word { padding-bottom: .06em; }
 .venue__ornament { margin-top: clamp(.6rem, 2vw, 1rem); }
@@ -49,15 +50,14 @@
   gap: clamp(1.5rem, 4vw, 2.75rem);
   justify-items: center;
 }
-.venue-card, .venue-map { width: 100%; }
-.venue-card { max-width: 560px; }
+.venue-card, .venue-map { width: 100%; max-width: 620px; }   /* stacked: one shared column */
 @media (min-width: 900px) {
   .venue__grid {
     grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
     align-items: stretch;
     justify-items: stretch;
   }
-  .venue-card { max-width: none; }
+  .venue-card, .venue-map { max-width: none; }
 }
 
 /* ---------- the arch card ---------- */
@@ -137,8 +137,8 @@
 .venue-row__icon .icon { width: 21px; height: 21px; stroke-width: 1.4; }
 .venue-row__body { display: grid; gap: .15rem; min-width: 0; padding-top: .1rem; }
 .venue-row__label {
-  font-family: var(--sans); font-size: .66rem; font-weight: 600;
-  letter-spacing: .26em; text-transform: uppercase; color: var(--gold-deep);
+  font-family: var(--sans); font-size: .72rem; font-weight: 600;
+  letter-spacing: .24em; text-transform: uppercase; color: var(--gold-ink);
 }
 .venue-row__value, .venue-row__name {
   font-family: var(--serif); font-weight: 600; color: var(--emerald);
@@ -147,8 +147,8 @@
 }
 .venue-row__name { font-size: clamp(1.3rem, 4vw, 1.62rem); }
 .venue-row__tz {
-  font-family: var(--sans); font-size: .62rem; font-weight: 600; letter-spacing: .14em;
-  color: var(--ink-soft); padding: .2em .55em; margin-left: .25em;
+  font-family: var(--sans); font-size: .7rem; font-weight: 600; letter-spacing: .12em;
+  color: var(--ink-soft); padding: .16em .55em; margin-left: .25em;
   border: 1px solid var(--vn-hair-soft); border-radius: 999px; vertical-align: .3em;
 }
 .venue-row__addr {
@@ -192,7 +192,7 @@
   position: relative; overflow: hidden; isolation: isolate;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .45rem;
   min-height: 78px; padding: .75rem .45rem .7rem;
-  font-family: var(--sans); font-size: .74rem; font-weight: 600; line-height: 1.25; letter-spacing: .02em;
+  font-family: var(--sans); font-size: .78rem; font-weight: 600; line-height: 1.25; letter-spacing: .01em;
   text-align: center; text-decoration: none; color: var(--emerald);
   background: rgba(255, 255, 255, .55);
   border: 1px solid var(--vn-hair);
@@ -313,23 +313,30 @@
 .venue-map__svg .vm-road-edge { fill: none; stroke: var(--gold-soft); stroke-width: 44; }
 .venue-map__svg .vm-road { fill: none; stroke: var(--ivory); stroke-width: 36; }
 .venue-map__svg .vm-road-center { fill: none; stroke: var(--gold); stroke-width: 1.6; stroke-dasharray: 14 12; opacity: .8; }
+/* map labels: --vm-k (set by js/venue.js) is 1 / the drawing's zoom, so on-screen sizes never drop
+   below ~11.5px (tracked caps) / 12.5px (mixed case) / 13px (Telugu) on narrow frames */
+.venue-map__svg { --vm-k: 1; }
 .venue-map__svg .vm-road-label {
-  font-family: var(--sans); font-size: 15px; font-weight: 600; letter-spacing: .3em;
-  fill: var(--gold-deep);
+  font-family: var(--sans); font-size: max(15px, calc(11.6px * var(--vm-k))); font-weight: 600; letter-spacing: .3em;
+  fill: var(--gold-ink);
 }
 .venue-map__svg .vm-plot { fill: var(--blush-soft); stroke: var(--gold); stroke-width: 1.6; stroke-dasharray: 5 4; }
 .venue-map__svg .vm-trees circle { fill: var(--sage); opacity: .75; }
 .venue-map__svg .vm-pump rect { fill: var(--ivory); stroke: var(--sage); stroke-width: 1.4; }
 .venue-map__svg .vm-pump-ico { fill: none; stroke: var(--emerald); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.venue-map__svg .vm-pump-label { font-family: var(--sans); font-size: 14px; font-weight: 600; fill: var(--ink-soft); letter-spacing: .04em; }
-.venue-map__svg .vm-area { font-family: var(--sans); font-size: 14px; font-weight: 700; letter-spacing: .42em; fill: var(--ink-soft); opacity: .5; }
+.venue-map__svg .vm-pump-label { font-family: var(--sans); font-size: max(14px, calc(12.6px * var(--vm-k))); font-weight: 600; fill: var(--ink-soft); letter-spacing: .04em; }
+.venue-map__svg .vm-area {
+  font-family: var(--sans); font-size: max(14px, calc(11.6px * var(--vm-k))); font-weight: 700; letter-spacing: .42em;
+  fill: var(--ink-soft); opacity: .92;
+  paint-order: stroke; stroke: var(--paper); stroke-width: 3px; stroke-linejoin: round;
+}
 .venue-map__svg .vm-route-glow { fill: none; stroke: var(--gold-soft); stroke-width: 11; stroke-linecap: round; stroke-linejoin: round; opacity: .7; }
 .venue-map__svg .vm-route { fill: none; stroke: var(--emerald); stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 2 9; }
 .venue-map__svg .vm-route-reveal { fill: none; stroke: #fff; stroke-width: 40; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 100 100; stroke-dashoffset: 0; }
 .venue-map__svg .vm-route-start { fill: var(--emerald); stroke: var(--ivory); stroke-width: 4; }
-html.lang-te .venue-map__svg .vm-road-label { letter-spacing: .08em; font-size: 18px; font-weight: 500; }
-html.lang-te .venue-map__svg .vm-area { letter-spacing: .08em; font-size: 18px; font-weight: 500; }
-html.lang-te .venue-map__svg .vm-pump-label { font-size: 16px; letter-spacing: 0; font-weight: 500; }
+html.lang-te .venue-map__svg .vm-road-label { letter-spacing: .08em; font-size: max(18px, calc(13.2px * var(--vm-k))); font-weight: 500; }
+html.lang-te .venue-map__svg .vm-area { letter-spacing: .08em; font-size: max(18px, calc(13.2px * var(--vm-k))); font-weight: 500; }
+html.lang-te .venue-map__svg .vm-pump-label { font-size: max(16px, calc(13.2px * var(--vm-k))); letter-spacing: 0; font-weight: 500; }
 
 /* venue marker: a zero-size point at the centre of the map art */
 .venue-map__marker { position: absolute; left: 50%; top: 50%; width: 0; height: 0; }
@@ -365,7 +372,7 @@ html.lang-te .venue-map__svg .vm-pump-label { font-size: 16px; letter-spacing: 0
 .venue-map__compass .vm-needle-n { fill: var(--emerald); }
 .venue-map__compass .vm-needle-s { fill: var(--gold); }
 .venue-map__compass .vm-compass-hub { fill: var(--ivory); stroke: var(--gold-deep); }
-.venue-map__compass .vm-compass-n { font-family: var(--sans); font-size: 7px; font-weight: 700; fill: var(--gold-deep); text-anchor: middle; }
+.venue-map__compass .vm-compass-n { font-family: var(--sans); font-size: 8px; font-weight: 700; fill: var(--gold-ink); text-anchor: middle; }
 .venue-map__needle { transform-origin: 32px 32px; transform-box: view-box; }
 
 /* the live Google map */
@@ -384,7 +391,7 @@ html.lang-te .venue-map__svg .vm-pump-label { font-size: 16px; letter-spacing: 0
   position: absolute; z-index: 3;
   display: inline-flex; align-items: center; gap: .45rem;
   min-height: 44px; padding: .55rem 1rem;
-  font-family: var(--sans); font-size: .68rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+  font-family: var(--sans); font-size: .72rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
   text-decoration: none; border-radius: 999px;
   transition: background-color .3s ease, transform .25s var(--ease-out), box-shadow .3s ease;
 }
@@ -427,12 +434,53 @@ html.lang-te .venue-map__open, html.lang-te .venue-map__interact { font-size: .8
 
 /* map labels stay legible when the frame (and so the drawing) is small */
 @container venue-map (max-width: 440px) {
-  .venue-map__svg .vm-road-label { font-size: 17px; letter-spacing: .14em; }
-  .venue-map__svg .vm-area { font-size: 16px; letter-spacing: .26em; }
-  .venue-map__svg .vm-pump-label { font-size: 16px; }
-  html.lang-te .venue-map__svg .vm-road-label { font-size: 20px; letter-spacing: .04em; }
-  html.lang-te .venue-map__svg .vm-area { font-size: 20px; letter-spacing: .04em; }
-  html.lang-te .venue-map__svg .vm-pump-label { font-size: 18px; }
+  .venue-map__svg .vm-road-label { letter-spacing: .12em; }
+  .venue-map__svg .vm-area { letter-spacing: .22em; }
+  html.lang-te .venue-map__svg .vm-road-label,
+  html.lang-te .venue-map__svg .vm-area { letter-spacing: .02em; }
+}
+
+/* ---------- large screens (27" and up): base.css widens --maxw, the type follows ---------- */
+@media (min-width: 1800px) {
+  .venue { --vn-arch-h: clamp(190px, 11vw, 270px); }
+  .venue__head { margin-bottom: clamp(4rem, 3.4vw, 5.5rem); }
+  .venue__eyebrow { font-size: clamp(.8rem, .5vw, .95rem); }
+  .venue__title { font-size: clamp(5.6rem, 4.6vw, 7.6rem); }
+  .venue__ornament { width: clamp(220px, 13vw, 300px); height: auto; aspect-ratio: 220 / 24; }
+  .venue__grid { gap: clamp(2.75rem, 2.4vw, 4rem); }
+  .venue-card { padding-inline: clamp(2.6rem, 2.6vw, 3.6rem); padding-bottom: clamp(2.4rem, 2vw, 3rem); }
+  .venue-card__pin { top: 3rem; }
+  .venue-row { gap: 1.4rem; padding-block: 1.35rem; }
+  .venue-row__icon { width: 56px; height: 56px; }
+  .venue-row__icon .icon { width: 25px; height: 25px; }
+  .venue-row__label { font-size: .82rem; }
+  .venue-row__tz { font-size: .78rem; }
+  .venue-row__value { font-size: clamp(1.42rem, 1vw, 1.8rem); }
+  .venue-row__name { font-size: clamp(1.62rem, 1.15vw, 2.05rem); }
+  .venue-row__addr { font-size: clamp(1.1rem, .8vw, 1.36rem); }
+  .venue-actions { gap: .9rem; }
+  .venue-btn { font-size: .88rem; min-height: 60px; }
+  .venue-btn--primary { min-height: 66px; font-size: .9rem; }
+  .venue-btn .icon { width: 20px; height: 20px; }
+  .venue-tiles { gap: .8rem; }
+  .venue-tile { min-height: 96px; font-size: .86rem; gap: .6rem; padding-inline: .3rem; }
+  .venue-tile .icon, .venue-tile__icons { width: 26px; height: 26px; }
+  .venue-cal__item { min-height: 66px; }
+  .venue-cal__name { font-size: 1.02rem; }
+  .venue-cal__hint { font-size: 1.04rem; }
+  .venue-map__stage { min-height: 560px; }
+  .venue-map__open { font-size: .8rem; min-height: 50px; padding-inline: 1.2rem; }
+  .venue-map__label-pill { font-size: 1.25rem; }
+  .venue-map__compass { width: 60px; height: 60px; }
+  html.lang-te .venue__title { font-size: clamp(4.4rem, 3.7vw, 6rem); }
+  html.lang-te .venue-row__label { font-size: .95rem; }
+  html.lang-te .venue-row__value { font-size: clamp(1.3rem, .95vw, 1.62rem); }
+  html.lang-te .venue-row__name { font-size: clamp(1.45rem, 1.05vw, 1.85rem); }
+  html.lang-te .venue-row__addr { font-size: clamp(1.06rem, .78vw, 1.3rem); }
+  html.lang-te .venue-btn { font-size: 1.08rem; }
+  html.lang-te .venue-tile { font-size: 1rem; }
+  html.lang-te .venue-map__open { font-size: .98rem; }
+  html.lang-te .venue-map__label-pill { font-size: 1.3rem; }
 }
 
 /* ---------- short screens (landscape phones) ---------- */
@@ -449,7 +497,7 @@ html.lang-te .venue-map__open, html.lang-te .venue-map__interact { font-size: .8
 @container venue-actions (max-width: 19rem) {
   .venue-btn { letter-spacing: .1em; padding-inline: 1rem; }
   .venue-btn__arrow { display: none; }
-  .venue-tile { min-height: 74px; font-size: .7rem; }
+  .venue-tile { min-height: 74px; font-size: .76rem; padding-inline: .35rem; }
 }
 @media (max-width: 380px) {
   .venue-map__open { right: 16px; top: 16px; padding-inline: .8rem; }
@@ -461,9 +509,9 @@ html.lang-te .venue-map__open, html.lang-te .venue-map__interact { font-size: .8
 .venue:not(.is-inview) .venue-card__pin-shadow,
 .venue:not(.is-inview) .venue-map__pulse { animation-play-state: paused; }
 /* while GSAP drives the entrance, CSS transitions on transform must not smear it */
-.venue.is-animating .venue-tile,
-.venue.is-animating .venue-btn,
-.venue.is-animating .venue-map__open { transition: none; }
+.venue.is-anim-card .venue-tile,
+.venue.is-anim-card .venue-btn,
+.venue.is-anim-map .venue-map__open { transition: none; }
 
 @media (prefers-reduced-motion: reduce) {
   .venue-card__pin-svg, .venue-card__pin-shadow { animation: none; }

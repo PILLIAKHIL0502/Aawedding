@@ -46,10 +46,36 @@
 
     const motion = !!(gsap && ST) && !App.reduceMotion;
 
-    /* section visibility (tilt and timers only work while it's on screen) */
+    /* ---------- the pinned story's moving parts (set inside the media context) ---------- */
+    let main = null;      // the pinning ScrollTrigger
+    let pinTL = null;     // pin drop timeline
+    let secT = null;      // the clock's ticking second hand (infinite)
+    let ping = null;      // the map pin's ping ring (infinite)
+    let pinPing = null;
+
+    /* section visibility: tilt, timers and infinite CSS animations only run while it's on screen.
+       (The venue panel stays "on" after the pin ends, so this is what stops its loops further down.) */
     let inView = false;
+    function setInView(v) {
+      inView = v;
+      root.classList.toggle("is-inview", v);
+      syncLoops();
+    }
     if ("IntersectionObserver" in window) {
-      new IntersectionObserver((es) => { inView = es[0].isIntersecting; }, { threshold: 0 }).observe(root);
+      new IntersectionObserver((es) => setInView(es[es.length - 1].isIntersecting), { threshold: 0 }).observe(root);
+    } else {
+      setInView(true);
+    }
+    // the infinite GSAP loops follow the same rule as the CSS ones
+    function syncLoops() {
+      if (secT) {
+        if (inView && pClock.classList.contains("is-on")) secT.play(); else secT.pause();
+      }
+      if (ping) {
+        const live = inView && pVenue.classList.contains("is-on") && pinTL && pinTL.time() >= 0.75;
+        if (live) { if (ping.paused()) ping.restart(); }
+        else if (!ping.paused()) { ping.pause(); gsap.set(pinPing, { opacity: 0 }); }
+      }
     }
 
     /* ---------- interactions that work in every mode ---------- */
@@ -61,8 +87,13 @@
     if (!motion) return;   // static, stacked, fully readable layout
 
     /* ---------- the pinned horizontal story ---------- */
-    let pinTL = null;     // pin drop timeline (built inside the media context)
-    let main = null;      // the pinning ScrollTrigger
+    // scroll the page so panel i rests in view (2px inside the pin so the pill stays up)
+    function goToPanel(i, duration = 1.2) {
+      if (!main) return;
+      const y = main.start + (main.end - main.start) * (i / (N - 1));
+      App.scrollTo(Math.min(main.end - 2, Math.max(main.start + 2, y)), { duration });
+    }
+    const panelAt = (y) => Math.round(Math.min(1, Math.max(0, (y - main.start) / (main.end - main.start || 1))) * (N - 1));
 
     /* ---------- progress pill: 01 / 04, a bar and jump dots ---------- */
     const countCur = q(".day__count-cur");
@@ -87,26 +118,115 @@
       });
       labels.forEach((l, k) => l.classList.toggle("is-active", k === i));
     }
-    dots.forEach((d) => d.addEventListener("click", () => {
+    // a tap goes to the dot nearest the finger (the 44px targets touch, and may overlap if spacing shrinks)
+    dots.forEach((d) => d.addEventListener("click", (e) => {
       if (!main) return;
-      const i = Number(d.dataset.i) || 0;
+      let i = Number(d.dataset.i) || 0;
+      if (e.detail > 0 && e.clientX) {
+        let best = Infinity;
+        dots.forEach((o, k) => {
+          const r = o.getBoundingClientRect();
+          const dist = Math.abs(r.left + r.width / 2 - e.clientX);
+          if (dist < best) { best = dist; i = k; }
+        });
+      }
       App.haptic(8);
-      const y = main.start + (main.end - main.start) * (i / (N - 1));
-      App.scrollTo(Math.min(main.end - 2, Math.max(main.start + 2, y)), { duration: 1.2 });
+      goToPanel(i);
     }));
     dots[0] && dots[0].setAttribute("aria-current", "step");
+
+    /* ---------- touch: a sideways swipe on the pinned track turns the page ----------
+       Passive listeners only; day.css sets touch-action: pan-y on the pinned section, so a
+       gesture that starts vertical still scrolls natively and only sideways ones reach us. */
+    const SWIPE_MIN = 60;
+    let swipeTo = -1, swipeUntil = 0;
+    (function setupSwipe() {
+      let x0 = 0, y0 = 0, axis = null, live = false;
+      const near = () => {
+        if (!main) return false;
+        const y = window.scrollY, slack = window.innerHeight * 0.25;
+        return y >= main.start - slack && y <= main.end + slack;
+      };
+      root.addEventListener("touchstart", (e) => {
+        live = e.touches.length === 1 && near();
+        if (!live) return;
+        x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; axis = null;
+      }, { passive: true });
+      root.addEventListener("touchmove", (e) => {
+        if (!live || axis || e.touches.length !== 1) { if (e.touches.length !== 1) live = false; return; }
+        const dx = e.touches[0].clientX - x0, dy = e.touches[0].clientY - y0;
+        if (Math.abs(dx) > 10 || Math.abs(dy) > 10) axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+      }, { passive: true });
+      root.addEventListener("touchend", (e) => {
+        if (!live) return;
+        live = false;
+        const t = e.changedTouches[0];
+        const dx = t.clientX - x0, dy = t.clientY - y0;
+        if (axis !== "x" || Math.abs(dx) < SWIPE_MIN || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+        const now = performance.now();
+        const from = now < swipeUntil && swipeTo >= 0 ? swipeTo : panelAt(window.scrollY);
+        const to = Math.min(N - 1, Math.max(0, from + (dx < 0 ? 1 : -1)));
+        if (to === from) return;
+        swipeTo = to; swipeUntil = now + 900;
+        App.haptic(8);
+        // next frame: Lenis' own touchend handler (on window, after ours) stops any running scroll
+        requestAnimationFrame(() => goToPanel(to, 0.9));
+      }, { passive: true });
+      root.addEventListener("touchcancel", () => { live = false; }, { passive: true });
+    })();
+
+    /* ---------- keyboard: focus in an off-screen panel brings that panel into view ---------- */
+    root.addEventListener("focusin", (e) => {
+      if (!main) return;
+      const el = e.target;
+      const panel = el.closest && el.closest(".day__panel");
+      let i;
+      if (panel) {
+        i = panels.indexOf(panel);
+        const left = panel.getBoundingClientRect().left;
+        const shown = main.isActive && Math.abs(left) < 4;
+        // a tap on something already on screen focuses it too: leave those alone
+        const tapped = !el.matches(":focus-visible") && main.isActive && Math.abs(left) < root.clientWidth * 0.5;
+        if (shown || tapped) return;
+      } else if (el.closest && el.closest(".day__progress")) {
+        if (main.isActive) return;        // the pill is up: focusing a dot doesn't move anything
+        i = Number(el.dataset.i) || 0;    // reached from outside (e.g. Shift+Tab): show the pill
+      } else return;
+      if (i < 0) return;
+      requestAnimationFrame(() => goToPanel(i, 1));
+    });
 
     const mm = gsap.matchMedia();
 
     mm.add("(prefers-reduced-motion: no-preference)", () => {
       root.classList.add("day--h");
       const W = () => root.clientWidth;
+      let panelW = W();
       const dist = () => Math.max(0, track.scrollWidth - root.clientWidth);
+
+      /* gold hairlines between chapters: each fades out as its boundary nears a screen edge */
+      const dividers = panels.slice(1).map((p, k) => {
+        const d = document.createElement("span");
+        d.className = "day__divider";
+        d.setAttribute("aria-hidden", "true");
+        d.style.left = (k + 1) * 100 + "%";
+        track.appendChild(d);
+        return d;
+      });
+      function dividerUI() {
+        const x = gsap.getProperty(track, "x") || 0;
+        const fade = Math.max(1, panelW * 0.12);
+        dividers.forEach((d, k) => {
+          const pos = (k + 1) * panelW + x;
+          const o = Math.round(Math.min(1, Math.max(0, (Math.min(pos, panelW - pos) - 6) / fade)) * 100) / 100;
+          if (d._o !== o) { d._o = o; d.style.opacity = o; }
+        });
+      }
 
       const htween = gsap.to(track, {
         x: () => -dist(),
         ease: "none",
-        onUpdate() { progressUI(this.progress()); },
+        onUpdate() { progressUI(this.progress()); dividerUI(); },
         scrollTrigger: {
           trigger: root,
           pin: true,
@@ -120,18 +240,21 @@
       });
       main = htween.scrollTrigger;
       // a refresh (resize, language switch) can restore the track silently: resync the pill
-      const resync = () => { cur = -1; progressUI(htween.progress()); };
+      const resync = () => { panelW = W(); cur = -1; progressUI(htween.progress()); dividerUI(); };
       ST.addEventListener("refresh", resync);
       const inPanel = (panel, vars) => ({ trigger: panel, containerAnimation: htween, ...vars });
 
-      /* panels know when they're on screen (twinkling lights, ticking seconds) */
-      const secT = gsap.to(clock, { sec: "+=360", duration: 60, ease: "none", repeat: -1, paused: true, onUpdate: renderClock });
+      /* panels know when they're on screen (hint nudge, twinkling lights, ticking seconds, ping).
+         Sunday counts as "on" until it has slid away, including while the section rises into view. */
+      secT = gsap.to(clock, { sec: "+=360", duration: 60, ease: "none", repeat: -1, paused: true, onUpdate: renderClock });
+      pSun.classList.add("is-on");
       panels.forEach((p, i) => {
         ST.create(inPanel(p, {
-          start: "left right", end: "right left",
+          // a panel resting exactly on a screen edge (its neighbour is the one in view) is off
+          start: "left right-=2", end: "right left+=2",
           onToggle: (self) => {
-            p.classList.toggle("is-on", self.isActive);
-            if (i === 2) self.isActive ? secT.play() : secT.pause();
+            p.classList.toggle("is-on", i === 0 ? self.progress < 1 : self.isActive);
+            syncLoops();
           },
         }));
       });
@@ -188,30 +311,30 @@
 
       const pinDrop = q(".day__pin-drop", pVenue);
       const pinShadow = q(".day__pin-shadow", pVenue);
-      const pinPing = q(".day__pin-ping", pVenue);
+      pinPing = q(".day__pin-ping", pVenue);
       gsap.set(pinDrop, { y: -170, opacity: 0 });
       gsap.set(pinShadow, { scale: 0, opacity: 0, transformOrigin: "50% 50%" });
-      const ping = gsap.fromTo(pinPing, { scale: 0.4, opacity: 0.85, transformOrigin: "50% 50%" },
-        { scale: 3.2, opacity: 0, duration: 1.7, ease: "power2.out", repeat: -1, repeatDelay: 0.5, paused: true });
+      ping = gsap.fromTo(pinPing, { scale: 0.4, opacity: 0.85, transformOrigin: "50% 50%" },
+        { scale: 3.2, opacity: 0, duration: 1.7, ease: "power2.out", repeat: -1, repeatDelay: 0.5, paused: true, immediateRender: false });
       pinTL = gsap.timeline({ paused: true })
         .to(pinDrop, { opacity: 1, duration: 0.15 }, 0)
         .to(pinDrop, { y: 0, duration: 1.1, ease: "bounce.out" }, 0)
         .to(pinShadow, { scale: 1, opacity: 0.22, duration: 1.1, ease: "bounce.out" }, 0)
-        .add(() => { if (pVenue.classList.contains("is-on")) ping.restart(); }, 0.75);
+        .add(syncLoops, 0.75);
       ST.create(inPanel(pVenue, {
         start: "left 40%",
         onEnter: () => pinTL.restart(),
-        onLeaveBack: () => { pinTL.pause(0); ping.pause(0); },
+        onLeaveBack: () => { pinTL.pause(0); syncLoops(); },
       }));
-      ST.create(inPanel(pVenue, { start: "left right", end: "right left", onToggle: (s) => (s.isActive ? pinTL.progress() === 1 && ping.restart() : ping.pause(0)) }));
 
       return () => {
         root.classList.remove("day--h", "is-pinned");
         panels.forEach((p) => p.classList.remove("is-on"));
+        dividers.forEach((d) => d.remove());
         clock.t = TARGET; clock.sec = 0; clock.spin = 0;
         renderClock();
         ST.removeEventListener("refresh", resync);
-        main = null; pinTL = null;
+        main = null; pinTL = null; secT = null; ping = null;
       };
     });
 

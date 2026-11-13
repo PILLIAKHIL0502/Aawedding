@@ -10,6 +10,8 @@
   --bl-line-soft: rgba(200, 169, 106, .24);
   --bl-sage-tint: #e2e6db;            /* sage-soft mixed with ivory */
   --bl-blush-tint: #f7ece5;           /* blush-soft mixed with ivory */
+  /* --gold-ink deepened: small gold text on the blush ground (≥ 4.5:1 on blush, 6.5:1 on ivory) */
+  --bl-gold-ink: #6e5628;
   position: relative;
   isolation: isolate;
   overflow-x: clip;
@@ -23,7 +25,7 @@
 .blessings__wrap { position: relative; max-width: var(--maxw); margin: 0 auto; }
 
 .blessings__head { text-align: center; margin: 0 auto clamp(2.75rem, 7vw, 4.5rem); max-width: 760px; }
-.blessings__eyebrow { display: block; margin-bottom: .9rem; color: var(--gold-deep); }
+.blessings__eyebrow { display: block; margin-bottom: .9rem; color: var(--bl-gold-ink); }
 .blessings__title { margin: 0; padding: 0 .1em; }
 .blessings__title .split-word { padding-bottom: .12em; }
 .blessings__lead {
@@ -117,7 +119,7 @@
   letter-spacing: .22em; text-transform: uppercase; color: var(--emerald);
   transition: color .3s ease;
 }
-.blessings .love__btn.is-ready .love__label { color: var(--gold-deep); }
+.blessings .love__btn.is-ready .love__label { color: var(--bl-gold-ink); }
 .blessings .love__count {
   margin-top: .35rem;
   font-family: var(--serif); font-style: italic; font-size: clamp(1.1rem, 2.4vw, 1.3rem);
@@ -125,7 +127,7 @@
 }
 .blessings .love__num {
   display: inline-block; min-width: 1ch;
-  font-style: normal; font-weight: 600; color: var(--gold-deep);
+  font-style: normal; font-weight: 600; color: var(--bl-gold-ink);
   font-variant-numeric: tabular-nums lining-nums;
 }
 
@@ -150,8 +152,8 @@
 }
 .blessings .wish-form__field { position: relative; display: grid; gap: .45rem; min-width: 0; }
 .blessings .wish-form__label {
-  font-family: var(--sans); font-size: .68rem; font-weight: 600; letter-spacing: .22em; text-transform: uppercase;
-  color: var(--emerald); opacity: .82;
+  font-family: var(--sans); font-size: .72rem; font-weight: 600; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--emerald);
 }
 .blessings .wish-form__input {
   width: 100%; min-width: 0; margin: 0;
@@ -163,14 +165,14 @@
   transition: border-color .25s ease, box-shadow .25s ease, background-color .25s ease;
 }
 .blessings .wish-form__textarea { resize: none; min-height: 7.4rem; padding-bottom: 1.9rem; display: block; }
-.blessings .wish-form__input::placeholder { color: rgba(95, 90, 82, .62); font-style: italic; }
+.blessings .wish-form__input::placeholder { color: rgba(95, 90, 82, .8); font-style: italic; }
 .blessings .wish-form__input:focus { outline: none; border-color: var(--gold); background: #fff; box-shadow: 0 0 0 4px rgba(200, 169, 106, .2); }
 .blessings .wish-form__count {
   position: absolute; right: .95rem; bottom: .6rem; pointer-events: none;
-  font-family: var(--sans); font-size: .72rem; color: var(--ink-soft);
+  font-family: var(--sans); font-size: .78rem; color: var(--ink-soft);
   font-variant-numeric: tabular-nums; transition: color .2s ease;
 }
-.blessings .wish-form__count.is-near { color: var(--gold-deep); font-weight: 600; }
+.blessings .wish-form__count.is-near { color: var(--bl-gold-ink); font-weight: 600; }
 .blessings .wish-form__count.is-full { color: var(--emerald); font-weight: 700; }
 .blessings .wish-form.is-invalid .wish-form__textarea { border-color: var(--gold-deep); box-shadow: 0 0 0 4px rgba(232, 196, 184, .55); animation: bl-shake .45s ease; }
 
@@ -192,7 +194,7 @@
 }
 .blessings .wish-wall__rule { flex: 0 1 120px; height: 1px; background: linear-gradient(90deg, rgba(200, 169, 106, 0), var(--gold)); }
 .blessings .wish-wall__rule:last-child { transform: scaleX(-1); }
-.blessings .wish-wall__title { margin: 0; color: var(--gold-deep); font-weight: 600; }
+.blessings .wish-wall__title { margin: 0; color: var(--bl-gold-ink); font-weight: 600; }
 
 .blessings .wish-wall__empty {
   display: grid; justify-items: center; gap: .8rem;
@@ -249,7 +251,7 @@
 }
 .blessings .wish__by {
   margin-top: .55rem;
-  font-family: var(--script), "NTR", "Anek Telugu"; font-size: 1.55rem; line-height: 1.25; color: var(--gold-deep);
+  font-family: var(--script), "NTR", "Anek Telugu"; font-size: 1.55rem; line-height: 1.25; color: var(--bl-gold-ink);
   overflow-wrap: anywhere;
 }
 .blessings .wish__meta {
@@ -257,7 +259,7 @@
   margin-top: .45rem; padding-top: .35rem; border-top: 1px solid var(--bl-line-soft);
 }
 .blessings .wish__date {
-  font-family: var(--sans); font-size: .64rem; font-weight: 600; letter-spacing: .2em; text-transform: uppercase;
+  font-family: var(--sans); font-size: .72rem; font-weight: 600; letter-spacing: .18em; text-transform: uppercase;
   color: var(--ink-soft);
 }
 .blessings .wish__wa {
@@ -290,12 +292,20 @@
   background: linear-gradient(180deg, rgba(251, 247, 240, .85), rgba(243, 225, 218, .55));
   box-shadow: var(--shadow-soft);
 }
-.blessings .share-card__eyebrow { display: block; margin-bottom: 1.15rem; color: var(--gold-deep); }
+.blessings .share-card__eyebrow { display: block; margin-bottom: 1.15rem; color: var(--bl-gold-ink); }
 .blessings .share-card__actions {
   display: grid; gap: .7rem;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 176px), 1fr));
 }
 .blessings .share-card__btn { padding-left: 1.1rem; padding-right: 1.1rem; }
+/* From 600px every action stays on one line: equal shares of the row, never narrower than its label.
+   When a row can't hold them all, a whole button moves to the next row instead of its words wrapping. */
+@media (min-width: 600px) {
+  .blessings .share-card__actions { display: flex; flex-wrap: wrap; justify-content: center; }
+  .blessings .wish-form__actions .btn,
+  .blessings .share-card__btn { flex: 1 1 0; min-width: max-content; white-space: nowrap; }
+}
+@media (min-width: 960px) { .blessings .share-card { max-width: 920px; } }
 
 /* ---------------- closing ---------------- */
 .blessings .closing {
@@ -317,13 +327,14 @@
 .blessings .closing__families {
   display: inline-block; margin-top: .15rem; padding: .05em .25em .18em;
   font-size: clamp(2.3rem, 6.4vw, 4rem); line-height: 1.2;
-  background: var(--foil); background-size: 200% 100%;
+  /* the shared --foil has near-ivory highlights that vanish on this ivory ground: a deeper foil */
+  background: linear-gradient(110deg, var(--gold-ink) 0%, var(--gold-deep) 24%, var(--gold-ink) 46%, var(--gold-deep) 70%, var(--gold-ink) 100%);
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
 .blessings .closing__tag {
   margin-top: 1.2rem;
   font-family: var(--sans); font-size: .78rem; font-weight: 600; letter-spacing: .28em;
-  color: var(--gold-deep);
+  color: var(--bl-gold-ink);
 }
 .blessings .closing__branch {
   position: absolute; bottom: -1.5rem; z-index: -1; pointer-events: none;
@@ -335,6 +346,20 @@
 .blessings .closing__branch--r img { animation-delay: -4s; }
 @media (max-width: 600px) {
   .blessings .closing__branch { width: 78px; opacity: .34; bottom: -2.5rem; }
+}
+
+/* ---------------- phones: keep the heart, its label and the counter above the music player ----------------
+   The player docks at the bottom-right (about 70px tall). A tighter rhythm between the heading and
+   the heart, and a heart sized by the screen height on short phones, keep the counter clear of it
+   whenever the heading and the heart are on screen together. */
+@media (max-width: 599px) {
+  .blessings { padding-top: clamp(4rem, 14vw, 5rem); }
+  .blessings__head { margin-bottom: 1.5rem; }
+  .blessings__eyebrow { margin-bottom: .7rem; }
+  .blessings__lead { margin-top: .75rem; }
+  .blessings .love__btn { --size: clamp(116px, min(40vw, 21vh), 188px); padding-top: 6px; gap: .75rem; }
+  html:not(.lang-te) .blessings .love__label { min-height: 1.4em; max-width: none; white-space: nowrap; }
+  .blessings .love__count { margin-top: .1rem; }
 }
 
 /* ---------------- large screens: a little more room and scale ---------------- */
@@ -364,6 +389,32 @@
   .blessings .closing__tag { font-size: .9rem; }
 }
 
+@media (min-width: 1800px) {
+  .blessings__wrap { max-width: max(1320px, var(--maxw)); }
+  .blessings__head { max-width: 1040px; }
+  .blessings__title { font-size: clamp(5.4rem, 4.4vw, 7.4rem); }
+  .blessings__lead { font-size: clamp(1.5rem, 1.05vw, 1.85rem); }
+  .blessings .love__btn { --size: clamp(260px, 13vw, 320px); }
+  .blessings .love__label { font-size: clamp(.82rem, .58vw, .95rem); }
+  .blessings .love__count { font-size: clamp(1.45rem, 1vw, 1.75rem); }
+  .blessings .wish-form { gap: clamp(1.25rem, .8vw, 1.5rem); padding: clamp(2.4rem, 1.7vw, 3rem); }
+  .blessings .wish-form__title { font-size: clamp(3.1rem, 2.05vw, 3.7rem); }
+  .blessings .wish-form__label { font-size: clamp(.74rem, .5vw, .84rem); }
+  .blessings .wish-form__input { font-size: clamp(1.3rem, .86vw, 1.5rem); }
+  .blessings .wish-form__textarea { min-height: 8.4rem; }
+  .blessings .wish-form__note { font-size: clamp(.88rem, .58vw, 1rem); }
+  .blessings .btn { font-size: clamp(.82rem, .53vw, .94rem); min-height: clamp(54px, 2.9vw, 62px); }
+  .blessings .wish__text { font-size: clamp(1.32rem, .9vw, 1.5rem); }
+  .blessings .wish__by { font-size: clamp(1.8rem, 1.2vw, 2.1rem); }
+  .blessings .wish__date { font-size: .8rem; }
+  .blessings .share-card { max-width: clamp(1040px, 52vw, 1180px); }
+  .blessings .closing__quote { font-size: clamp(2.9rem, 2.1vw, 3.5rem); }
+  .blessings .closing__with { font-size: clamp(1.45rem, 1vw, 1.7rem); }
+  .blessings .closing__families { font-size: clamp(4.6rem, 3.3vw, 5.6rem); }
+  .blessings .closing__tag { font-size: clamp(.9rem, .6vw, 1.05rem); }
+  .blessings .closing__branch { width: clamp(230px, 12vw, 300px); }
+}
+
 /* ---------------- Telugu ---------------- */
 html.lang-te .blessings .blessings__title { font-size: clamp(2.3rem, 8.4vw, 4.1rem); line-height: 1.35; }
 html.lang-te .blessings .blessings__lead { font-size: clamp(1.1rem, 2.4vw, 1.3rem); line-height: 1.7; }
@@ -381,6 +432,19 @@ html.lang-te .blessings .wish__by { font-size: 1.3rem; }
 html.lang-te .blessings .closing__quote { font-size: clamp(1.3rem, 3.8vw, 2.1rem); line-height: 1.65; max-width: 22em; }
 html.lang-te .blessings .closing__with { font-size: 1.15rem; }
 html.lang-te .blessings .closing__families { font-size: clamp(1.9rem, 6vw, 3rem); line-height: 1.45; }
+@media (max-width: 599px) {
+  html.lang-te .blessings .blessings__lead { line-height: 1.6; }
+  html.lang-te .blessings .love__label { font-size: .94rem; line-height: 1.4; min-height: 2.8em; }
+}
+@media (min-width: 1800px) {
+  html.lang-te .blessings .blessings__title { font-size: clamp(4.1rem, 3.3vw, 5.4rem); }
+  html.lang-te .blessings .blessings__lead { font-size: clamp(1.35rem, .95vw, 1.65rem); }
+  html.lang-te .blessings .love__label { font-size: clamp(1.05rem, .7vw, 1.2rem); }
+  html.lang-te .blessings .wish-form__label { font-size: 1rem; }
+  html.lang-te .blessings .btn { font-size: clamp(1rem, .66vw, 1.15rem); }
+  html.lang-te .blessings .closing__quote { font-size: clamp(2.1rem, 1.6vw, 2.7rem); }
+  html.lang-te .blessings .closing__families { font-size: clamp(3rem, 2.3vw, 3.8rem); }
+}
 
 /* ---------------- keyframes ---------------- */
 @keyframes bl-breathe { 0%, 100% { transform: scale(.92); opacity: .65; } 50% { transform: scale(1.06); opacity: 1; } }
@@ -392,6 +456,13 @@ html.lang-te .blessings .closing__families { font-size: clamp(1.9rem, 6vw, 3rem)
 @keyframes bl-shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-7px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(2px); } }
 @keyframes bl-sway { from { transform: rotate(-2.5deg); } to { transform: rotate(2.5deg); } }
 @keyframes bl-heart-beat { 0%, 100% { transform: scale(1); } 15% { transform: scale(1.25); } 30% { transform: scale(1); } 45% { transform: scale(1.15); } 60% { transform: scale(1); } }
+
+/* looping animations rest while their block is offscreen (.is-offscreen is toggled by blessings.js) */
+.blessings .love.is-offscreen .love__stage::before,
+.blessings .love.is-offscreen .love__orbit,
+.blessings .love.is-offscreen .love__heart,
+.blessings .wish-wall__empty.is-offscreen .wish-wall__envelope-heart,
+.blessings .closing.is-offscreen .closing__branch img { animation-play-state: paused; }
 
 @media (prefers-reduced-motion: reduce) {
   .blessings .love__stage::before, .blessings .love__orbit, .blessings .love__heart,
@@ -414,7 +485,7 @@ html.lang-te .blessings .closing__families { font-size: clamp(1.9rem, 6vw, 3rem)
   font-family: "Cormorant Garamond", serif; font-style: italic; font-weight: 600; font-size: 17px;
 }
 .site-footer__line {
-  font-family: var(--sans); font-size: .72rem; font-weight: 600; letter-spacing: .28em; text-transform: uppercase;
+  font-family: var(--sans); font-size: .75rem; font-weight: 600; letter-spacing: .26em; text-transform: uppercase;
   color: var(--gold-soft); line-height: 1.8;
 }
 @media (max-width: 560px) {
@@ -425,7 +496,7 @@ html.lang-te .blessings .closing__families { font-size: clamp(1.9rem, 6vw, 3rem)
   display: inline-flex; align-items: center; gap: .7rem;
   min-height: 48px; padding: .4rem 1.2rem .4rem .45rem; border-radius: 999px;
   border: 1px solid rgba(200, 169, 106, .45);
-  font-family: var(--sans); font-size: .72rem; font-weight: 600; letter-spacing: .2em; text-transform: uppercase;
+  font-family: var(--sans); font-size: .75rem; font-weight: 600; letter-spacing: .2em; text-transform: uppercase;
   color: var(--gold-soft);
   transition: background-color .3s ease, border-color .3s ease, transform .25s var(--ease-out);
 }
@@ -439,9 +510,10 @@ html.lang-te .blessings .closing__families { font-size: clamp(1.9rem, 6vw, 3rem)
 .site-footer__top:hover .site-footer__top-icon .icon { transform: translateY(-3px); }
 .site-footer__love {
   display: inline-flex; align-items: center; gap: .45rem;
-  font-family: var(--sans); font-size: .74rem; letter-spacing: .08em; color: rgba(251, 247, 240, .62);
+  font-family: var(--sans); font-size: .8rem; letter-spacing: .06em; color: rgba(251, 247, 240, .7);
 }
 .site-footer__heart { width: 12px; height: 12px; fill: var(--blush); transform-origin: 50% 60%; animation: bl-heart-beat 2.2s ease-in-out infinite; }
+.site-footer.is-offscreen .site-footer__heart { animation-play-state: paused; }
 @media (min-width: 1600px) {
   .site-footer__line, .site-footer__top { font-size: .82rem; }
   .site-footer__love { font-size: .82rem; }

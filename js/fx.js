@@ -5,7 +5,9 @@
      touch: a slim indicator rail that wakes while scrolling; hidden on short screens)
    - html.fx-on-dark while a [data-theme="dark"] block is under the viewport centre
    - custom cursor (fine pointers only): gold dot + lagging ring, labels from
-     [data-cursor] / [data-te-cursor], tiny sparkles on click
+     [data-cursor] / [data-te-cursor], tiny sparkles on click.
+     [data-native-cursor] (and everything inside it) keeps the native/author cursor and
+     hides the custom one, e.g. the scratch-off foil with its coin cursor.
    - touch ripple: a gold ring at each tap (pooled nodes)
    - magnetic: [data-magnetic] (optional strength, e.g. data-magnetic="0.4") follows the pointer
    - App.fx.sparkle(x, y, opts): small DOM sparkle burst in viewport coordinates.
@@ -160,6 +162,10 @@
       }
       setActive(0);
 
+      // The nav lives outside #main, so the intro's inert wrapper doesn't cover it: keep its
+      // buttons out of the tab order (and away from screen readers) until the invite opens.
+      nav.inert = true;
+      onOpen(() => { nav.inert = false; });
       document.body.appendChild(nav);
 
       if (ST) {
@@ -171,6 +177,25 @@
             onToggle: (self) => { if (self.isActive) setActive(i); },
           });
         });
+      }
+
+      // Desktop: pinned scenes run edge to edge, so the dot column would sit on their cards.
+      // Dim it while one is pinned; hover/focus brings it back (CSS).
+      if (ST && !rail) {
+        let raf = 0;
+        const check = () => {
+          raf = 0;
+          let pinned = false;
+          const all = ST.getAll();
+          for (let i = 0; i < all.length; i++) {
+            const t = all[i];
+            if (t.pin && t.isActive && t.pin !== nav) { pinned = true; break; }
+          }
+          nav.classList.toggle("is-dim", pinned);
+        };
+        const queue = () => { if (!raf) raf = requestAnimationFrame(check); };
+        window.addEventListener("scroll", queue, { passive: true });
+        ST.addEventListener("refresh", queue);
       }
 
       if (rail) {
@@ -252,7 +277,12 @@
         c.classList.remove("is-on");
       }
 
-      // Elements stacked above the cursor layer (player, toast, language toggle, intro) keep the native cursor.
+      const NATIVE = "[data-native-cursor]";
+      // Areas with their own cursor, iframes, and layers stacked above the cursor layer
+      // (player, toast, language toggle, intro) keep the native cursor.
+      function wantsNative(node) {
+        return node.tagName === "IFRAME" || !!node.closest(NATIVE) || aboveCursorLayer(node);
+      }
       function aboveCursorLayer(node) {
         for (let n = node; n && n !== document.body && n !== html; n = n.parentElement) {
           const cs = getComputedStyle(n);
@@ -282,7 +312,7 @@
         if (e.pointerType === "touch") return;
         const t = e.target instanceof Element ? e.target : null;
         if (!t) return;
-        const native = t.tagName === "IFRAME" || aboveCursorLayer(t);
+        const native = wantsNative(t);
         html.classList.toggle("fx-native", native);
         c.classList.toggle("is-native", native);
         const text = t.closest(TEXT);
@@ -308,7 +338,7 @@
         if (e.pointerType === "touch" || !enabled) return;
         c.classList.add("is-down");
         const t = e.target instanceof Element ? e.target : null;
-        if (t && (t.closest(TEXT) || aboveCursorLayer(t))) return;
+        if (t && (t.closest(TEXT) || wantsNative(t))) return;
         burst(e.clientX, e.clientY, { count: 9, spread: 40, size: 4.2, duration: .75, gravity: 8, dark: c.classList.contains("is-dark") });
       }, { passive: true });
       window.addEventListener("pointerup", () => c.classList.remove("is-down"), { passive: true });
