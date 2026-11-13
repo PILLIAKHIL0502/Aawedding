@@ -27,7 +27,7 @@
 
   const KEY = "aa-lang";
   const TE_FONTS =
-    "https://fonts.googleapis.com/css2?family=Suranna&family=Noto+Serif+Telugu:wght@400;500;600&family=Anek+Telugu:wght@400;500;600&display=swap";
+    "https://fonts.googleapis.com/css2?family=NTR&family=Anek+Telugu:wght@400;500;600&display=swap";
 
   const store = {
     get() { try { return localStorage.getItem(KEY); } catch (_) { return null; } },
@@ -112,7 +112,7 @@
     document.head.appendChild(link);
     return new Promise((resolve) => {
       link.onload = () => {
-        Promise.all(["Suranna", "Noto Serif Telugu", "Anek Telugu"].map((f) => document.fonts.load(`1em "${f}"`, "అ")))
+        Promise.all(["NTR", "Anek Telugu"].map((f) => document.fonts.load(`1em "${f}"`, "అ")))
           .catch(() => {})
           .then(resolve);
       };

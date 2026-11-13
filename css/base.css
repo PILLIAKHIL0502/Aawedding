@@ -164,8 +164,9 @@ html.js-anim [data-reveal] { opacity: 0; }
    Telugu glyphs carry vowel signs above and below the line, so tracking is removed and
    line-height is opened up on translated text. Modules fine-tune sizes with html.lang-te rules. */
 html[lang="te"] {
-  --serif: "Noto Serif Telugu", "Cormorant Garamond", serif;
-  --script: "Suranna", "Noto Serif Telugu", serif;
+  /* NTR: names, headings and quote lines. Anek Telugu: labels, body and buttons. */
+  --serif: "NTR", "Anek Telugu", "Cormorant Garamond", serif;
+  --script: "NTR", "Anek Telugu", serif;
   --sans: "Anek Telugu", "Manrope", system-ui, sans-serif;
 }
 html.lang-te [data-te],
