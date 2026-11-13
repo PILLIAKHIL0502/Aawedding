@@ -1,0 +1,182 @@
+/* ==========================================================
+   i18n.js — English / Telugu (తెలుగు) language switch.
+
+   HOW TO MAKE TEXT TRANSLATABLE
+   In HTML partials, keep English as the element's normal content and
+   put the Telugu alongside it:
+     <p data-te="ఇరు కుటుంబాల ఆశీస్సులతో">Together with their families</p>
+     <p data-te-html="శ్రీ ... <br/> ...">Elder son of<br/>...</p>   (trusted static markup only)
+     <button aria-label="Play music" data-te-aria-label="సంగీతం ప్లే చేయండి">
+     <input placeholder="Your name" data-te-placeholder="మీ పేరు">
+   Put data-te on the innermost text element (a leaf), not on a wrapper
+   whose children have their own listeners or animations.
+
+   In JS, use App.t("English", "తెలుగు") or App.t({ en, te }) at render
+   time, and re-render on App.on("lang", (lang) => ...).
+
+   SplitText: if a module splits an element that also has data-te, it must
+   store the instance on the element (el._split = split) so the switch can
+   revert it first. Never split Telugu into characters: it breaks
+   conjunct letters. Use words. App.splitChars() tells you if chars are OK.
+
+   Language selection order: ?lang=te|en, then a saved choice, then English.
+   ========================================================== */
+(function () {
+  const App = window.App;
+  if (!App) return;
+
+  const KEY = "aa-lang";
+  const TE_FONTS =
+    "https://fonts.googleapis.com/css2?family=Suranna&family=Noto+Serif+Telugu:wght@400;500;600&family=Anek+Telugu:wght@400;500;600&display=swap";
+
+  const store = {
+    get() { try { return localStorage.getItem(KEY); } catch (_) { return null; } },
+    set(v) { try { localStorage.setItem(KEY, v); } catch (_) {} },
+  };
+  const valid = (l) => l === "en" || l === "te";
+  const fromParam = App.params.get("lang");
+  const initial = valid(fromParam) ? fromParam : valid(store.get()) ? store.get() : "en";
+
+  App.lang = "en";
+  App.t = (en, te) => {
+    if (en && typeof en === "object") return App.lang === "te" && en.te != null ? en.te : en.en;
+    return App.lang === "te" && te != null ? te : en;
+  };
+  App.splitChars = () => App.lang !== "te";
+
+  /* ---------- Telugu copy for shared data (names, venue, date) ---------- */
+  App.WEDDING.te = {
+    groom: "అఖిల్",
+    bride: "అలేఖ్య",
+    couple: "అఖిల్ & అలేఖ్య",
+    groomParents: ["శ్రీ పిల్లి మారేశ్వర రావు", "శ్రీమతి అరుణశ్రీ"],
+    brideParents: ["శ్రీ తప్పెట్ల గణేష్ కుమార్", "శ్రీమతి స్వర్ణలత"],
+    groomRelation: "గార్ల జ్యేష్ఠ పుత్రుడు",   // follows the parents' names in Telugu
+    brideRelation: "గార్ల జ్యేష్ఠ పుత్రిక",
+    families: "పిల్లి & తప్పెట్ల కుటుంబాలు",
+    dateLong: "ఆదివారం, 29 నవంబర్ 2026",
+    time: "ఉదయం 9:05 గంటలకు",
+    venue: {
+      name: "రాయల్ రీజెన్సీ గార్డెన్స్",
+      line1: "ఇండియన్ ఆయిల్ పెట్రోల్ బంక్ ఎదురుగా, మెహదీపట్నం రోడ్",
+      line2: "ఆసిఫ్ నగర్, హైదరాబాద్",
+    },
+  };
+
+  /* ---------- swap engine ---------- */
+  const ATTRS = ["aria-label", "placeholder", "title", "alt"];
+  const camel = (a) => "te" + a.split("-").map((s) => s[0].toUpperCase() + s.slice(1)).join("");
+  const SELECTOR = "[data-te],[data-te-html]," + ATTRS.map((a) => `[data-te-${a}]`).join(",");
+  const originals = new WeakMap();
+
+  function snapshot(el) {
+    if (originals.has(el)) return originals.get(el);
+    const o = { html: el.innerHTML, attrs: {} };
+    ATTRS.forEach((a) => { if (el.hasAttribute(a)) o.attrs[a] = el.getAttribute(a); });
+    originals.set(el, o);
+    return o;
+  }
+
+  // Capture the English originals now, before any module splits or rewrites text.
+  document.querySelectorAll(SELECTOR).forEach(snapshot);
+
+  function applyDom(lang) {
+    document.querySelectorAll(SELECTOR).forEach((el) => {
+      const o = snapshot(el);
+      const hasText = el.dataset.te != null || el.dataset.teHtml != null;
+      if (hasText) {
+        if (el._split) { try { el._split.revert(); } catch (_) {} el._split = null; }
+        if (lang === "te") {
+          if (el.dataset.teHtml != null) el.innerHTML = el.dataset.teHtml;
+          else el.textContent = el.dataset.te;
+        } else {
+          el.innerHTML = o.html;
+        }
+        // anything a reveal had hidden mid-animation must stay readable
+        if (window.gsap) window.gsap.set(el, { clearProps: "opacity,transform" });
+      }
+      ATTRS.forEach((a) => {
+        const te = el.dataset[camel(a)];
+        if (te == null) return;
+        if (lang === "te") el.setAttribute(a, te);
+        else if (o.attrs[a] != null) el.setAttribute(a, o.attrs[a]);
+      });
+    });
+  }
+
+  let fontsLinked = false;
+  function loadTeluguFonts() {
+    if (fontsLinked) return Promise.resolve();
+    fontsLinked = true;
+    const link = Object.assign(document.createElement("link"), { rel: "stylesheet", href: TE_FONTS });
+    document.head.appendChild(link);
+    return new Promise((resolve) => {
+      link.onload = () => {
+        Promise.all(["Suranna", "Noto Serif Telugu", "Anek Telugu"].map((f) => document.fonts.load(`1em "${f}"`, "అ")))
+          .catch(() => {})
+          .then(resolve);
+      };
+      link.onerror = resolve;
+      setTimeout(resolve, 3000);
+    });
+  }
+
+  function setLang(lang, { silent = false } = {}) {
+    if (!valid(lang)) return;
+    const changed = lang !== App.lang;
+    App.lang = lang;
+    const html = document.documentElement;
+    html.lang = lang;
+    html.classList.toggle("lang-te", lang === "te");
+    applyDom(lang);
+    updateToggle();
+    store.set(lang);
+    if (lang === "te") {
+      loadTeluguFonts().then(() => window.ScrollTrigger && window.ScrollTrigger.refresh());
+    }
+    if (changed && !silent) {
+      App.emit("lang", lang);
+      window.ScrollTrigger && window.ScrollTrigger.refresh();
+    }
+  }
+  App.setLang = setLang;
+
+  /* ---------- the toggle (fixed, visible on the intro and the page) ---------- */
+  let toggle;
+  function buildToggle() {
+    toggle = document.createElement("div");
+    toggle.className = "lang-toggle";
+    toggle.setAttribute("role", "group");
+    toggle.setAttribute("aria-label", "Language / భాష");
+    toggle.innerHTML =
+      '<span class="lang-toggle__thumb" aria-hidden="true"></span>' +
+      '<button type="button" data-lang="en" lang="en">EN</button>' +
+      '<button type="button" data-lang="te" lang="te">తెలుగు</button>';
+    toggle.addEventListener("click", (e) => {
+      const b = e.target.closest("button[data-lang]");
+      if (!b || b.dataset.lang === App.lang) return;
+      App.haptic(8);
+      setLang(b.dataset.lang);
+    });
+    document.body.appendChild(toggle);
+  }
+  function updateToggle() {
+    if (!toggle) return;
+    toggle.dataset.active = App.lang;
+    toggle.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === App.lang)));
+  }
+
+  buildToggle();
+  // Apply the initial language before modules initialise, so they render and split in it.
+  if (initial === "te") {
+    App._fontsPending = loadTeluguFonts();   // core.start() waits for this before modules init
+    setLang("te", { silent: true });
+    // Elements parsed after this script (if any) get translated once the DOM is complete.
+    // This listener is registered before main.js's, so it runs before modules initialise.
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () => applyDom(App.lang));
+    }
+  } else {
+    updateToggle();
+  }
+})();

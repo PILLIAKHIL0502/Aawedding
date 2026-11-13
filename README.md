@@ -1,4 +1,4 @@
-# Akhil & Alekhya Sree · 29.11.2026
+# Akhil & Alekhya · 29.11.2026
 
 An interactive web wedding invitation built with vanilla JS, GSAP, ScrollTrigger and Lenis. There's no framework, and it deploys as a static site on Vercel.
 
@@ -9,8 +9,8 @@ Royal Regency Gardens, Opp. Indian Oil Petrol Pump, Mehdipatnam Road, Asif Nagar
 
 1. Go to **vercel.com → Add New… → Project → Import Git Repository**, and pick `PILLIAKHIL0502/Aawedding`.
    If the repo isn't listed, click "Adjust GitHub App Permissions" and give Vercel access to it.
-2. **Project name:** `akhil-weds-alekhya`. This gives the URL `akhil-weds-alekhya.vercel.app`, which the link-preview
-   image in `src/partials/00-head.html` already points to. If you pick another name, update `og:image` there.
+2. **Live URL:** https://aawedding-rosy.vercel.app. The link-preview image (`og:image` in `src/partials/00-head.html`)
+   points to this domain. If you add a custom domain, update it there.
 3. **Framework preset:** *Other*. Leave the build settings alone, because `vercel.json` already sets them
    (`npm run build` → `dist/`).
 4. Click **Deploy**. Every `git push` after that redeploys automatically.
@@ -27,6 +27,7 @@ Useful URL parameters:
 
 | Param | Effect |
 |---|---|
+| `?lang=te` | Opens in Telugu (తెలుగు). Send this link to Telugu-reading relatives |
 | `?to=Ravi%20Uncle` | Personal greeting: "Dear Ravi Uncle," on the intro scroll and the hero |
 | `?skipintro` | Skips the rolled-scroll intro (handy while editing) |
 
@@ -44,6 +45,8 @@ scripts/        dev server + build
 ```
 
 All wedding details (names, parents, date, venue and map links) live in **`js/core.js` → `WEDDING`**.
+The Telugu versions live in **`js/i18n.js` → `WEDDING.te`**, and each section keeps its Telugu text next to the English
+(`data-te="…"` attributes in `src/partials/*.html`).
 
 ## Customise
 

@@ -12,6 +12,7 @@
      "music:play" / "music:pause"
      "tilt"          {x, y} in -1..1 from pointer (desktop) or gyroscope (phones)
      "resize"        debounced window resize
+     "lang"          "en" | "te" after the language switch (see js/i18n.js)
    ========================================================== */
 (function () {
   const gsap = window.gsap;
@@ -28,14 +29,16 @@
   const venueQuery = "Royal Regency Gardens, Asif Nagar, Hyderabad";
   const enc = encodeURIComponent;
   const WEDDING = {
+    // The couple are shown by first name only; surnames appear only with the parents.
     groom: {
-      first: "Akhil", full: "Pilli Akhil",
+      first: "Akhil", full: "Akhil", family: "Pilli",
       relation: "Elder son of", parents: ["Mr. Pilli Mareswara Rao", "Mrs. Arunasri"],
     },
     bride: {
-      first: "Alekhya Sree", full: "Tappetla Alekhya Sree",
+      first: "Alekhya", full: "Alekhya", family: "Tappetla",
       relation: "Elder daughter of", parents: ["Mr. Tappetla Ganesh Kumar", "Mrs. Swarnalatha"],
     },
+    couple: "Akhil & Alekhya",
     families: "the Pilli & Tappetla families",
     hashtag: "#AkhilWedsAlekhya",
     start: new Date("2026-11-29T09:05:00+05:30"),
@@ -156,7 +159,12 @@
       setupPointerTilt();
       setupResize();
 
-      try { await Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 2500))]); } catch (_) {}
+      try {
+        await Promise.race([
+          Promise.all([document.fonts.ready, App._fontsPending || Promise.resolve()]),
+          new Promise((r) => setTimeout(r, 2500)),
+        ]);
+      } catch (_) {}
 
       for (const m of modules) {
         try { m.init(App); }
@@ -260,11 +268,13 @@
     });
     if (window.SplitText) {
       splits.forEach((el) => {
-        const chars = el.dataset.split === "chars";
+        // Telugu must never be split into characters (it breaks conjunct letters)
+        const chars = el.dataset.split === "chars" && App.lang !== "te";
         const split = new window.SplitText(el, {
           type: chars ? "lines,words,chars" : "lines,words",
           linesClass: "split-line", wordsClass: "split-word", charsClass: "split-char",
         });
+        el._split = split;   // lets the language switch revert it
         gsap.from(chars ? split.chars : split.words, {
           yPercent: 110, opacity: 0, rotate: chars ? 0 : 4,
           duration: 1.1, ease: "expo.out", stagger: chars ? 0.025 : 0.06,

@@ -159,6 +159,53 @@ html.js-anim [data-reveal] { opacity: 0; }
 .split-line { display: block; overflow: hidden; padding-bottom: .08em; }
 .split-word, .split-char { display: inline-block; will-change: transform; }
 
+/* ---------------- Telugu (తెలుగు) ----------------
+   Switching html[lang] swaps the font tokens, so every module follows automatically.
+   Telugu glyphs carry vowel signs above and below the line, so tracking is removed and
+   line-height is opened up on translated text. Modules fine-tune sizes with html.lang-te rules. */
+html[lang="te"] {
+  --serif: "Noto Serif Telugu", "Cormorant Garamond", serif;
+  --script: "Suranna", "Noto Serif Telugu", serif;
+  --sans: "Anek Telugu", "Manrope", system-ui, sans-serif;
+}
+html.lang-te [data-te],
+html.lang-te [data-te-html] {
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  font-style: normal !important;   /* Telugu has no true italics; synthetic slant looks broken */
+}
+html.lang-te .eyebrow { letter-spacing: .04em; font-size: .86rem; }
+
+/* ---------------- language toggle (built by js/i18n.js) ---------------- */
+.lang-toggle {
+  position: fixed; z-index: 85;
+  top: max(12px, env(safe-area-inset-top)); left: max(12px, env(safe-area-inset-left));
+  display: inline-grid; grid-template-columns: 1fr 1fr; align-items: center;
+  padding: 3px; border-radius: 999px;
+  background: rgba(21, 43, 38, .78);
+  border: 1px solid rgba(200, 169, 106, .55);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  box-shadow: 0 8px 24px -10px rgba(15, 32, 28, .5);
+}
+.lang-toggle button {
+  position: relative; z-index: 1;
+  min-width: 52px; min-height: 36px; padding: 0 .8rem;
+  font-family: "Manrope", system-ui, sans-serif; font-size: .74rem; font-weight: 600; letter-spacing: .08em;
+  color: var(--gold-soft); border-radius: 999px;
+  transition: color .35s ease;
+}
+.lang-toggle button[lang="te"] { font-family: "Anek Telugu", "Noto Sans Telugu", system-ui, sans-serif; letter-spacing: 0; font-size: .82rem; }
+.lang-toggle button[aria-pressed="true"] { color: var(--emerald-deep); }
+.lang-toggle button:focus-visible { outline: 2px solid var(--gold-soft); outline-offset: 2px; }
+/* expand the hit area to 44px without growing the pill */
+.lang-toggle button::after { content: ""; position: absolute; inset: -4px -2px; }
+.lang-toggle__thumb {
+  position: absolute; top: 3px; bottom: 3px; left: 3px; width: calc(50% - 3px);
+  border-radius: 999px; background: var(--foil); background-size: 200% 100%;
+  transition: transform .5s var(--ease-spring);
+}
+.lang-toggle[data-active="te"] .lang-toggle__thumb { transform: translateX(100%); }
+
 /* ---------------- a11y ---------------- */
 .sr-only {
   position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
