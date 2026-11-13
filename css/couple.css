@@ -240,7 +240,7 @@ html.lang-te .couple .cpl-initial { font-size: 27cqi; margin-top: -2cqi; padding
   display: block;
   margin-top: 1.4cqi;
   font-family: var(--sans);
-  font-size: clamp(11px, 4.2cqi, 15px);
+  font-size: clamp(11px, 4.2cqi, 19px);
   font-weight: 600;
   letter-spacing: .2em;
   text-indent: .2em;
@@ -260,7 +260,7 @@ html.lang-te .couple .cpl-initial { font-size: 27cqi; margin-top: -2cqi; padding
   white-space: nowrap;
 }
 .couple .cpl-slot--bride .cpl-name { --name-size: 13.4cqi; }
-html.lang-te .couple .cpl-role { font-size: clamp(12px, 5.8cqi, 19px); font-weight: 500; text-indent: 0; line-height: 1.5; margin-top: .6cqi; }
+html.lang-te .couple .cpl-role { font-size: clamp(12px, 5.8cqi, 24px); font-weight: 500; text-indent: 0; line-height: 1.5; margin-top: .6cqi; }
 html.lang-te .couple .cpl-name { --name-size: 15cqi; line-height: 1.45; }
 html.lang-te .couple .cpl-slot--bride .cpl-name { --name-size: 14cqi; }
 
@@ -295,7 +295,7 @@ html.lang-te .couple .cpl-slot--bride .cpl-name { --name-size: 14cqi; }
   display: block;
   font-family: var(--serif);
   font-style: italic;
-  font-size: clamp(12px, 6.6cqi, 22px);
+  font-size: clamp(12px, 6.6cqi, 30px);
   line-height: 1.25;
   color: var(--gold-soft);
 }
@@ -303,7 +303,7 @@ html.lang-te .couple .cpl-slot--bride .cpl-name { --name-size: 14cqi; }
   display: block;
   font-family: var(--serif);
   font-weight: 500;
-  font-size: clamp(12px, 7.8cqi, 27px);
+  font-size: clamp(12px, 7.8cqi, 36px);
   line-height: 1.22;
   color: var(--ivory);
 }
@@ -329,7 +329,7 @@ html.lang-te .couple .cpl-amp { font-style: normal; font-size: 1em; line-height:
   display: block;
   font-family: var(--sans);
   max-width: 100%;
-  font-size: clamp(11px, 3.9cqi, 14px);
+  font-size: clamp(11px, 3.9cqi, 18px);
   font-weight: 600;
   letter-spacing: .16em;
   text-indent: .16em;
@@ -339,9 +339,9 @@ html.lang-te .couple .cpl-amp { font-style: normal; font-size: 1em; line-height:
   color: var(--gold-soft);
 }
 /* Telugu: parents come first, then the relation; never italic */
-html.lang-te .couple .cpl-relation { font-style: normal; font-size: clamp(12px, 7.2cqi, 23px); line-height: 1.6; }
-html.lang-te .couple .cpl-parents { font-weight: 400; font-size: clamp(12.5px, 8cqi, 26px); line-height: 1.5; }
-html.lang-te .couple .cpl-family { font-size: clamp(12px, 5.6cqi, 17px); letter-spacing: 0; text-indent: 0; font-weight: 500; line-height: 1.5; }
+html.lang-te .couple .cpl-relation { font-style: normal; font-size: clamp(12px, 7.2cqi, 30px); line-height: 1.6; }
+html.lang-te .couple .cpl-parents { font-weight: 400; font-size: clamp(12.5px, 8cqi, 34px); line-height: 1.5; }
+html.lang-te .couple .cpl-family { font-size: clamp(12px, 5.6cqi, 22px); letter-spacing: 0; text-indent: 0; font-weight: 500; line-height: 1.5; }
 html.lang-te .couple .cpl-face--back { gap: 3.2cqi; }
 
 /* ----- "Tap to flip" chip (part of the button, stays in front while the card turns) ----- */
@@ -356,7 +356,7 @@ html.lang-te .couple .cpl-face--back { gap: 3.2cqi; }
   padding: .55em .9em .55em .75em;
   border-radius: 999px;
   font-family: var(--sans);
-  font-size: clamp(11px, 3.6cqi, 13px);
+  font-size: clamp(11px, 3.6cqi, 16px);
   font-weight: 600;
   letter-spacing: .08em;
   text-transform: uppercase;
@@ -375,7 +375,7 @@ html.lang-te .couple .cpl-face--back { gap: 3.2cqi; }
 }
 .couple .cpl-card[aria-pressed="true"] .cpl-chip { background: var(--ivory); color: var(--emerald); }
 .couple .cpl-card[aria-pressed="true"] .cpl-chip__icon { transform: rotate(180deg); }
-html.lang-te .couple .cpl-chip { font-size: clamp(12px, 4.2cqi, 14px); letter-spacing: 0; padding: .6em .8em .46em .65em; gap: .35em; }
+html.lang-te .couple .cpl-chip { font-size: clamp(12px, 4.2cqi, 17px); letter-spacing: 0; padding: .6em .8em .46em .65em; gap: .35em; }
 /* gentle pulse that invites the first tap; runs only while the section is on screen */
 .couple .cpl-chip::after {
   content: ""; position: absolute; inset: -1px;

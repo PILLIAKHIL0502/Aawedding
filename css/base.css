@@ -95,7 +95,7 @@ h1, h2, h3, h4, p { margin: 0; }
   font-weight: 500;
   letter-spacing: .32em;
   text-transform: uppercase;
-  color: var(--sage);
+  color: var(--sage-ink);   /* small text: the text-safe sage (5:1 on ivory) */
 }
 [data-theme="dark"] .eyebrow { color: var(--gold-soft); }
 .display {
