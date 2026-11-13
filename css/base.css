@@ -1,0 +1,172 @@
+/* ==========================================================
+   base.css — shared design tokens, reset, typography, buttons.
+   Every module's CSS builds on these tokens. Do not redefine them.
+   ========================================================== */
+:root {
+  /* palette */
+  --ivory: #fbf7f0;
+  --paper: #f5eee2;
+  --paper-deep: #efe5d3;
+  --emerald: #1f3d36;
+  --emerald-deep: #152b26;
+  --emerald-ink: #0f201c;
+  --sage: #8ba888;
+  --sage-soft: #c9d6c6;
+  --gold: #c8a96a;
+  --gold-soft: #e4d2a6;
+  --gold-deep: #a8874a;
+  --blush: #e8c4b8;
+  --blush-soft: #f3e1da;
+  --ink: #2b2a27;
+  --ink-soft: #5f5a52;
+
+  /* gold foil gradient for text/surfaces */
+  --foil: linear-gradient(110deg, #a8874a 0%, #e9d5a4 22%, #c8a96a 40%, #f4e7c4 55%, #b8955a 75%, #e4d2a6 100%);
+
+  /* type */
+  --serif: "Cormorant Garamond", "Times New Roman", serif;
+  --script: "Pinyon Script", "Brush Script MT", cursive;
+  --sans: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* motion */
+  --ease-out: cubic-bezier(.22, 1, .36, 1);
+  --ease-in-out: cubic-bezier(.65, 0, .35, 1);
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+
+  /* layout */
+  --gutter: clamp(16px, 5vw, 48px);
+  --maxw: 1120px;
+  --radius: 18px;
+  --radius-lg: 28px;
+  --section-pad: clamp(5rem, 12vw, 9rem);
+
+  /* elevation */
+  --shadow-soft: 0 24px 60px -30px rgba(31, 61, 54, .35);
+  --shadow-lift: 0 30px 80px -30px rgba(15, 32, 28, .55);
+}
+
+/* ---------------- reset ---------------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+html.is-locked, html.is-locked body { overflow: hidden; height: 100%; }
+body {
+  margin: 0;
+  font-family: var(--sans);
+  color: var(--ink);
+  background-color: var(--ivory);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.4  0 0 0 0 0.35  0 0 0 0 0.3  0 0 0 .06 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: clip;
+  -webkit-tap-highlight-color: transparent;
+}
+main { display: block; overflow-x: clip; }
+img, svg, canvas, video { display: block; max-width: 100%; }
+button { font: inherit; color: inherit; cursor: pointer; background: none; border: 0; padding: 0; }
+a { color: inherit; }
+h1, h2, h3, h4, p { margin: 0; }
+::selection { background: var(--gold-soft); color: var(--emerald-deep); }
+
+/* ---------------- typography ---------------- */
+.script { font-family: var(--script); font-weight: 400; line-height: 1.15; }
+.serif  { font-family: var(--serif); }
+.italic { font-style: italic; }
+.muted  { color: var(--ink-soft); }
+.foil-text {
+  background: var(--foil); background-size: 200% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.eyebrow {
+  font-family: var(--sans);
+  font-size: .72rem;
+  font-weight: 500;
+  letter-spacing: .32em;
+  text-transform: uppercase;
+  color: var(--sage);
+}
+[data-theme="dark"] .eyebrow { color: var(--gold-soft); }
+.display {
+  font-family: var(--script);
+  font-size: clamp(2.8rem, 10vw, 5rem);
+  color: var(--emerald);
+  line-height: 1.1;
+}
+[data-theme="dark"] .display { color: var(--gold-soft); }
+
+/* ---------------- layout ---------------- */
+.section {
+  position: relative;
+  padding: var(--section-pad) var(--gutter);
+}
+.container { max-width: var(--maxw); margin: 0 auto; }
+[data-theme="dark"] {
+  color: var(--ivory);
+  background:
+    radial-gradient(70% 90% at 50% 0%, rgba(200, 169, 106, .16), transparent 60%),
+    linear-gradient(180deg, var(--emerald), var(--emerald-deep));
+}
+.section-head { text-align: center; margin-bottom: clamp(2.5rem, 7vw, 4.5rem); }
+.section-head .eyebrow { display: block; margin-bottom: .9rem; }
+
+/* ---------------- buttons ---------------- */
+.btn {
+  --btn-bg: transparent; --btn-fg: var(--emerald); --btn-bd: var(--gold);
+  display: inline-flex; align-items: center; justify-content: center; gap: .6rem;
+  min-height: 48px; padding: .85rem 1.5rem; border-radius: 999px;
+  font-family: var(--sans); font-size: .76rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase;
+  text-decoration: none; white-space: nowrap;
+  color: var(--btn-fg); background: var(--btn-bg); border: 1px solid var(--btn-bd);
+  transition: background-color .3s ease, color .3s ease, border-color .3s ease, transform .25s var(--ease-out), box-shadow .3s ease;
+  position: relative; overflow: hidden; isolation: isolate;
+}
+.btn:active { transform: scale(.96); }
+.btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+.btn .icon { width: 18px; height: 18px; }
+.btn--solid { --btn-bg: var(--emerald); --btn-fg: var(--gold-soft); --btn-bd: var(--emerald); }
+.btn--solid:hover { --btn-bg: var(--emerald-deep); box-shadow: 0 12px 30px -12px rgba(15, 32, 28, .6); }
+.btn--ghost:hover { --btn-bg: rgba(200, 169, 106, .14); }
+.btn--gold { --btn-bg: var(--gold); --btn-fg: var(--emerald-deep); --btn-bd: var(--gold); }
+.btn--gold:hover { --btn-bg: var(--gold-soft); }
+[data-theme="dark"] .btn--ghost { --btn-fg: var(--gold-soft); }
+.btn-row { display: flex; flex-wrap: wrap; gap: .75rem; justify-content: center; }
+
+/* ---------------- icons ---------------- */
+.icon {
+  width: 24px; height: 24px; flex: none;
+  fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
+}
+
+/* ---------------- ornament divider ---------------- */
+.ornament { display: block; width: 220px; height: 24px; margin: 0 auto; color: var(--gold); }
+.ornament path { stroke: currentColor; stroke-width: 1; fill: none; }
+.ornament .fill { fill: currentColor; stroke: none; }
+
+/* ---------------- toast ---------------- */
+.toast {
+  position: fixed; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom)); z-index: 90;
+  transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
+  max-width: calc(100vw - 32px);
+  background: var(--emerald); color: var(--ivory); border: 1px solid rgba(200, 169, 106, .5);
+  padding: .75rem 1.25rem; border-radius: 999px; font-size: .85rem; text-align: center;
+  transition: opacity .3s ease, transform .4s var(--ease-out);
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ---------------- reveal helpers (driven by core.js) ---------------- */
+/* Elements are hidden only once JS confirms it will animate them (html.js-anim). */
+html.js-anim [data-reveal] { opacity: 0; }
+.split-line { display: block; overflow: hidden; padding-bottom: .08em; }
+.split-word, .split-char { display: inline-block; will-change: transform; }
+
+/* ---------------- a11y ---------------- */
+.sr-only {
+  position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  html.js-anim [data-reveal] { opacity: 1; }
+}

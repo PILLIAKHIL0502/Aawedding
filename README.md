@@ -1,40 +1,53 @@
 # Akhil & Alekhya Sree · 29.11.2026
 
-A web wedding invitation: plain HTML, CSS and JS, with no build step.
+An interactive web wedding invitation built with vanilla JS, GSAP, ScrollTrigger and Lenis. There's no framework, and it deploys as a static site on Vercel.
 
-**Sunday, 29 November 2026 · 9:05 AM**
-Royal Residence Gardens, Opp. Indian Petrol Pump, Asif Nagar, Hyderabad
+**Sunday, 29 November 2026 · 9:05 AM IST**
+Royal Regency Gardens, Opp. Indian Oil Petrol Pump, Mehdipatnam Road, Asif Nagar, Hyderabad
 
-## What's inside
+## Deploy on Vercel (one time, about 2 minutes)
 
-| Feature | Notes |
-|---|---|
-| Door-opening intro with a gold seal | The tap also starts the music, since browsers block autoplay |
-| Original background music | Synthesised live in the browser (`music.js`). Royalty-free, no download |
-| Falling petals | Canvas animation. Off for people who've turned on reduced motion |
-| Live countdown | Counts down to 9:05 AM IST |
-| Add to calendar | Google Calendar link plus an `.ics` file for Apple and Outlook, with a reminder 1 day before |
-| Directions and map | Opens Google Maps for the venue |
-| Share | Native share sheet on phones, plus a WhatsApp button |
-| Link preview | `assets/og-image.png`, the card WhatsApp shows when the link is pasted |
-| Status/story image | `assets/story.png` (1080×1920) for WhatsApp Status or Instagram Stories |
+1. Go to **vercel.com → Add New… → Project → Import Git Repository**, and pick `PILLIAKHIL0502/Aawedding`.
+   If the repo isn't listed, click "Adjust GitHub App Permissions" and give Vercel access to it.
+2. **Project name:** `akhil-weds-alekhya`. This gives the URL `akhil-weds-alekhya.vercel.app`, which the link-preview
+   image in `src/partials/00-head.html` already points to. If you pick another name, update `og:image` there.
+3. **Framework preset:** *Other*. Leave the build settings alone, because `vercel.json` already sets them
+   (`npm run build` → `dist/`).
+4. Click **Deploy**. Every `git push` after that redeploys automatically.
+5. If your production branch isn't the one with this code, open **Settings → Git → Production Branch** and set it.
 
 ## Run locally
 
 ```bash
-python3 -m http.server 8000
-# open http://localhost:8000
+npm run dev           # http://localhost:8080 (assembles the page on every request)
+npm run build         # writes dist/, which is what Vercel serves
 ```
 
-## Publish free on GitHub Pages
+Useful URL parameters:
 
-1. Merge into `main`.
-2. Open the repo's **Settings → Pages**, choose **Deploy from a branch**, then `main` / root.
-3. The site will be at `https://pilliakhil0502.github.io/aawedding/`.
-   If the URL is different, update `og:image` in `index.html`, because it has to be an absolute URL.
+| Param | Effect |
+|---|---|
+| `?to=Ravi%20Uncle` | Personal greeting: "Dear Ravi Uncle," on the intro scroll and the hero |
+| `?skipintro` | Skips the rolled-scroll intro (handy while editing) |
+
+## How it's organised
+
+```
+src/partials/   page sections, stitched together in filename order
+  00-head  10-intro  15-player  20-hero  30-couple  35-reveal
+  40-day   50-countdown  60-venue  70-blessings  90-footer  99-foot
+css/            base.css (design tokens) + one stylesheet per section
+js/             core.js (App contract, wedding data) + one module per feature
+vendor/         GSAP 3.13 (+ScrollTrigger, Draggable, SplitText), Lenis (vendored, no CDN)
+assets/         branch.svg, favicon, og-image.png (link preview), story.png (Status/Story)
+scripts/        dev server + build
+```
+
+All wedding details (names, parents, date, venue and map links) live in **`js/core.js` → `WEDDING`**.
 
 ## Customise
 
-- **Your own song:** add `assets/music.mp3` and it replaces the synth automatically. Only use a track you have the rights to.
-- **Photos:** put an `<img src="assets/groom.jpg" alt="Akhil">` inside each `.arch` div in `index.html`. It fills the arch frame.
-- **Colours:** change the CSS variables at the top of `styles.css`.
+- **Your own song:** add `assets/music.mp3` and it replaces the built-in original composition automatically.
+  Only use a track you have the rights to.
+- **Photos:** each arch frame in `src/partials/30-couple.html` has a comment showing where an `<img>` goes.
+- **Colours:** change the tokens at the top of `css/base.css`.
