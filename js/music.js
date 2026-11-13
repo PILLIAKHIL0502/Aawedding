@@ -468,6 +468,13 @@
 
 /* ==========================================================
    PLAYER UI — the floating capsule / card (#player)
+     capsule   record · live bars · play; a tap anywhere on it opens the card
+     card      .is-expanded; closes on a tap outside, Esc, or ~60px of page scroll
+     disc      .is-disc: while the page scrolls the capsule rolls up into the record
+               alone and comes back ~1.2s after scrolling stops; on screens < 360px
+               wide it stays a disc (a tap opens the card, which has play/pause)
+   The visualiser's rAF loop runs only while the player is on screen, playing, and
+   its bars (capsule or card) are showing.
    ========================================================== */
 (function () {
   const App = window.App;
@@ -479,6 +486,7 @@
     const M = App.music;
     const $ = (s) => root.querySelector(s);
     const recBtn = $(".player__record");
+    const surface = $(".player__bg");
     const playBtn = $(".player__play");
     const closeBtn = $(".player__close");
     const bars = Array.from(root.querySelectorAll(".player__bar"));
@@ -497,6 +505,8 @@
     const reduce = App.reduceMotion;
 
     let expanded = false, shown = false, raf = 0, everPlayed = false, lastSec = -1, lastEnd = "";
+    let onScreen = false;     // .is-shown has been applied (the spring-in has started)
+    let compact = false;      // .is-disc
 
     /* ---- play ⇄ pause icon: the two halves of the triangle become the two bars ---- */
     const ICON = {
@@ -569,9 +579,15 @@
     const level = new Float32Array(bars.length);
     const slow = new Float32Array(bars.length);
     let data = null;
+    // The bars show in the capsule and the card (not in the disc); the card also needs the progress.
+    function wantLoop() {
+      if (!onScreen || !M.playing || document.hidden) return false;
+      if (expanded) return true;
+      return !compact && !reduce;
+    }
     function frame() {
       raf = 0;
-      if (!M.playing || document.hidden) { stopLoop(); return; }
+      if (!wantLoop()) { stopLoop(); return; }
       const an = M.analyser;
       if (an && !reduce) {
         if (!data || data.length !== an.frequencyBinCount) data = new Uint8Array(an.frequencyBinCount);
@@ -594,19 +610,20 @@
       raf = requestAnimationFrame(frame);
     }
     function startLoop() {
-      if (raf || !M.playing || document.hidden) return;
-      if (reduce && !expanded) return;
+      if (raf) return;
       if (!reduce) root.classList.add("is-live");
       raf = requestAnimationFrame(frame);
     }
     function stopLoop() {
       if (raf) cancelAnimationFrame(raf);
       raf = 0;
+      if (!root.classList.contains("is-live")) return;
       root.classList.remove("is-live");
       level.fill(0);
       slow.fill(0);
       bars.forEach((b) => (b.style.transform = ""));
     }
+    function syncLoop() { wantLoop() ? startLoop() : stopLoop(); }
 
     /* ---- show (after the invitation opens, or as soon as music plays on an open page) ---- */
     function show(delay) {
@@ -614,10 +631,63 @@
       shown = true;
       setTimeout(() => {
         root.classList.add("is-shown");
+        onScreen = true;
+        syncLoop();
         setTimeout(() => root.classList.add("is-ready"), 1400);
       }, delay || 0);
     }
     const introGone = () => App.state.opened || !document.getElementById("intro");
+
+    /* ---- compact disc: while scrolling, and always on narrow screens ---- */
+    const narrow = window.matchMedia("(max-width: 359.98px)");
+    const SCROLL_IDLE = 1200;   // ms after the last scroll event before the capsule comes back
+    const SHRINK_AT = 8;        // px of scroll before the capsule rolls up (ignores jitter)
+    const COLLAPSE_AT = 60;     // px of scroll that closes the open card
+    let scrolling = false, scrollT = 0, anchorY = null, expandY = 0, expandAt = 0;
+
+    function updateCompact() {
+      const v = !expanded && (scrolling || narrow.matches);
+      if (v !== compact) {
+        compact = v;
+        root.classList.toggle("is-disc", v);
+      }
+      syncLoop();
+    }
+    function settle() {
+      scrollT = 0;
+      anchorY = null;
+      if (scrolling) { scrolling = false; updateCompact(); }
+    }
+    // Keyboard focus on the play button: keep the capsule, or hiding the button would drop focus.
+    const keyboardOnPlayer = () => {
+      const a = document.activeElement;
+      return !!a && root.contains(a) && a.matches(":focus-visible");
+    };
+    function onScroll() {
+      if (!onScreen) return;
+      const y = window.scrollY;
+      if (expanded) {
+        // a glide that was already running when the card opened shouldn't close it
+        if (performance.now() - expandAt < 400) { expandY = y; return; }
+        if (Math.abs(y - expandY) <= COLLAPSE_AT) return;
+        const a = document.activeElement;
+        setExpanded(false, { focusRecord: !!a && root.contains(a) && a !== recBtn });
+        anchorY = null;
+        scrolling = !keyboardOnPlayer();
+        updateCompact();
+      } else if (!scrolling) {
+        if (anchorY === null) anchorY = y;
+        if (Math.abs(y - anchorY) >= SHRINK_AT && !keyboardOnPlayer()) {
+          scrolling = true;
+          updateCompact();
+        }
+      }
+      clearTimeout(scrollT);
+      scrollT = setTimeout(settle, SCROLL_IDLE);
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    if (narrow.addEventListener) narrow.addEventListener("change", updateCompact);
+    else if (narrow.addListener) narrow.addListener(updateCompact);
 
     /* ---- expand / collapse ---- */
     function setExpanded(v, { focusRecord = false } = {}) {
@@ -625,13 +695,26 @@
       if (v === expanded) return;
       expanded = v;
       root.classList.toggle("is-expanded", v);
+      if (v) {
+        expandY = window.scrollY;
+        expandAt = performance.now();
+        clearTimeout(scrollT);
+        scrollT = 0;
+        scrolling = false;
+        anchorY = null;
+      }
+      updateCompact();
       render();
-      if (v) startLoop();
-      else if (reduce) stopLoop();
       if (focusRecord) recBtn.focus({ preventScroll: true });
     }
 
     recBtn.addEventListener("click", () => { App.haptic(6); setExpanded(!expanded); });
+    // the rest of the capsule / disc (bars, title, padding) opens the card too
+    surface.addEventListener("click", () => {
+      if (expanded) return;
+      App.haptic(6);
+      setExpanded(true);
+    });
     closeBtn.addEventListener("click", () => setExpanded(false, { focusRecord: true }));
     playBtn.addEventListener("click", () => {
       App.haptic(10);
@@ -662,7 +745,7 @@
       everPlayed = true;
       if (introGone()) show(0);
       render();
-      startLoop();
+      syncLoop();             // waits for .is-shown: no visualiser behind the intro
     });
     App.on("music:pause", (d) => {
       if (d && d.reason === "blocked") everPlayed = false;   // the browser refused: invite a tap
@@ -671,10 +754,11 @@
     });
     App.on("lang", render);
     App.on("open", () => show(App.skipIntro ? 350 : 750));
-    document.addEventListener("visibilitychange", () => { if (!document.hidden) startLoop(); });
+    document.addEventListener("visibilitychange", syncLoop);
 
+    updateCompact();
     render();
     if (App.state.opened) show(350);
-    if (M.playing) { everPlayed = true; render(); startLoop(); }
+    if (M.playing) { everPlayed = true; render(); syncLoop(); }
   });
 })();

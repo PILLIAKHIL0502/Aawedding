@@ -1,7 +1,10 @@
 <div id="player" class="player" data-state="paused" data-mode="file">
   <div class="player__panel">
     <!-- the surface: a gold hairline + emerald fill, clipped from the capsule to the card -->
+    <!-- the surface is also the capsule's tap target: its clip-path is the hit area -->
     <div class="player__frame" aria-hidden="true"><div class="player__bg"></div></div>
+    <!-- glow + ripple around the compact disc (scrolling, or narrow screens) -->
+    <span class="player__halo" aria-hidden="true"></span>
 
     <!-- the record: a capsule button when collapsed, the card's centrepiece when expanded -->
     <div class="player__rec">
