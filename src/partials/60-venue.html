@@ -1,0 +1,258 @@
+<section id="venue" class="venue section" data-nav="Venue" data-te-nav="వేదిక" aria-labelledby="venue-title">
+  <div class="venue__decor" aria-hidden="true">
+    <span class="venue__glow venue__glow--a"></span>
+    <span class="venue__glow venue__glow--b"></span>
+    <span class="venue__branch"></span>
+  </div>
+
+  <div class="container venue__inner">
+    <header class="section-head venue__head">
+      <span class="eyebrow venue__eyebrow" data-te="మాతో చేరండి">Join us</span>
+      <h2 class="display venue__title" id="venue-title" data-te="ఎప్పుడు & ఎక్కడ">When &amp; Where</h2>
+      <svg class="ornament venue__ornament" viewBox="0 0 220 24" aria-hidden="true" focusable="false">
+        <path class="venue__orn-line" d="M8 12H92M128 12H212"/>
+        <path class="venue__orn-line" d="M96 12c4-6 10-6 14 0c4 6 10 6 14 0"/>
+        <path class="fill" d="M110 6.5l2.2 5.5-2.2 5.5-2.2-5.5z"/>
+        <circle class="fill" cx="8" cy="12" r="1.6"/><circle class="fill" cx="212" cy="12" r="1.6"/>
+      </svg>
+    </header>
+
+    <div class="venue__grid">
+      <!-- ============ venue card ============ -->
+      <article class="venue-card" aria-labelledby="venue-name">
+        <div class="venue-card__pin" aria-hidden="true">
+          <svg class="venue-card__pin-svg" viewBox="0 0 48 60" focusable="false">
+            <defs>
+              <linearGradient id="vn-pin-foil" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#e9d5a4"/>
+                <stop offset=".45" stop-color="#c8a96a"/>
+                <stop offset=".75" stop-color="#f4e7c4"/>
+                <stop offset="1" stop-color="#a8874a"/>
+              </linearGradient>
+            </defs>
+            <path fill="url(#vn-pin-foil)" stroke="#a8874a" stroke-width="1" d="M24 58C24 58 5 36.5 5 22.5C5 11.7 13.5 3 24 3s19 8.7 19 19.5C43 36.5 24 58 24 58z"/>
+            <circle cx="24" cy="22" r="11" fill="#fbf7f0"/>
+            <path fill="#1f3d36" d="M24 28.6c-.3 0-.6-.1-.8-.3c-3.3-2.9-5.6-4.9-5.6-7.6c0-1.9 1.5-3.4 3.3-3.4c1.3 0 2.4.7 3.1 1.8c.7-1.1 1.8-1.8 3.1-1.8c1.8 0 3.3 1.5 3.3 3.4c0 2.7-2.3 4.7-5.6 7.6c-.2.2-.5.3-.8.3z"/>
+          </svg>
+          <span class="venue-card__pin-shadow"></span>
+        </div>
+
+        <ul class="venue-card__rows">
+          <li class="venue-row">
+            <span class="venue-row__icon" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24" focusable="false"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M12 13.2l.9 1.8 2 .3-1.45 1.4.35 2-1.8-.95-1.8.95.35-2-1.45-1.4 2-.3z"/></svg>
+            </span>
+            <span class="venue-row__body">
+              <span class="venue-row__label" data-te="తేదీ">Date</span>
+              <span class="venue-row__value" data-te="ఆదివారం, 29 నవంబర్ 2026">Sunday, 29 November 2026</span>
+            </span>
+          </li>
+          <li class="venue-row">
+            <span class="venue-row__icon" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
+            </span>
+            <span class="venue-row__body">
+              <span class="venue-row__label" data-te="సమయం">Time</span>
+              <span class="venue-row__value"><span data-te="ఉదయం 9:05">9:05 AM</span> <span class="venue-row__tz">IST</span></span>
+            </span>
+          </li>
+          <li class="venue-row venue-row--place">
+            <span class="venue-row__icon" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M12 21s-6.5-6.2-6.5-11.2a6.5 6.5 0 0 1 13 0C18.5 14.8 12 21 12 21z"/><circle cx="12" cy="9.8" r="2.4"/></svg>
+            </span>
+            <span class="venue-row__body">
+              <span class="venue-row__label" data-te="వేదిక">Venue</span>
+              <span class="venue-row__name" id="venue-name" data-te="రాయల్ రీజెన్సీ గార్డెన్స్">Royal Regency Gardens</span>
+              <span class="venue-row__addr venue-address">
+                <span data-te="ఇండియన్ ఆయిల్ పెట్రోల్ బంక్ ఎదురుగా, మెహదీపట్నం రోడ్">Opp. Indian Oil Petrol Pump, Mehdipatnam Road</span>
+                <span data-te="ఆసిఫ్ నగర్, హైదరాబాద్">Asif Nagar, Hyderabad</span>
+              </span>
+            </span>
+          </li>
+        </ul>
+
+        <div class="venue-actions" role="group" aria-label="Location links" data-te-aria-label="లొకేషన్ లింకులు">
+          <a class="btn btn--solid venue-btn venue-btn--primary" data-venue-link="maps"
+             href="https://www.google.com/maps/search/?api=1&amp;query=Royal%20Regency%20Gardens%2C%20Asif%20Nagar%2C%20Hyderabad"
+             target="_blank" rel="noopener">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 4.5L3.5 6.6v13l5.5-2.1 6 2.1 5.5-2.1v-13L15 6.6z"/><path d="M9 4.5v13M15 6.6v13"/></svg>
+            <span class="venue-btn__label" data-te="గూగుల్ మ్యాప్స్‌లో తెరవండి">Open in Google Maps</span>
+            <svg class="icon venue-btn__arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 17L17 7M9 7h8v8"/></svg>
+          </a>
+
+          <div class="venue-tiles">
+            <a class="venue-tile" data-venue-link="directions"
+               href="https://www.google.com/maps/dir/?api=1&amp;destination=Royal%20Regency%20Gardens%2C%20Asif%20Nagar%2C%20Hyderabad"
+               target="_blank" rel="noopener">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.8l9.2 9.2-9.2 9.2L2.8 12z"/><path d="M9 14.5v-2.2a1.5 1.5 0 0 1 1.5-1.5h4.3M13 8.8l2 2-2 2"/></svg>
+              <span class="venue-tile__label" data-te="దారి చూపించు">Directions</span>
+            </a>
+            <a class="venue-tile" data-venue-link="apple"
+               href="https://maps.apple.com/?q=Royal%20Regency%20Gardens&amp;address=Asif%20Nagar%2C%20Hyderabad"
+               target="_blank" rel="noopener">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.8"/><path d="M14.9 9.1l-1.7 4.1-4.1 1.7 1.7-4.1z"/></svg>
+              <span class="venue-tile__label" data-te="ఆపిల్ మ్యాప్స్">Apple Maps</span>
+            </a>
+            <button class="venue-tile venue-tile--copy" type="button" data-venue-action="copy">
+              <span class="venue-tile__icons" aria-hidden="true">
+                <svg class="icon venue-tile__i-copy" viewBox="0 0 24 24" focusable="false"><rect x="8.5" y="8.5" width="11.5" height="11.5" rx="2.2"/><path d="M15.5 8.5V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7.5a2 2 0 0 0 2 2h2.5"/></svg>
+                <svg class="icon venue-tile__i-done" viewBox="0 0 24 24" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+              </span>
+              <span class="venue-tile__label" data-te="చిరునామా కాపీ చేయండి">Copy address</span>
+            </button>
+            <a class="venue-tile" data-venue-action="share"
+               href="https://wa.me/?text=Akhil%20%26%20Alekhya%20Sree%20%C2%B7%20Royal%20Regency%20Gardens%2C%20Opp.%20Indian%20Oil%20Petrol%20Pump%2C%20Mehdipatnam%20Road%2C%20Asif%20Nagar%2C%20Hyderabad%20https%3A%2F%2Fwww.google.com%2Fmaps%2Fsearch%2F%3Fapi%3D1%26query%3DRoyal%2520Regency%2520Gardens%252C%2520Asif%2520Nagar%252C%2520Hyderabad"
+               target="_blank" rel="noopener">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="17.5" cy="5.5" r="2.5"/><circle cx="6.5" cy="12" r="2.5"/><circle cx="17.5" cy="18.5" r="2.5"/><path d="M8.7 10.7l6.6-3.9M8.7 13.3l6.6 3.9"/></svg>
+              <span class="venue-tile__label" data-te="లొకేషన్ షేర్ చేయండి">Share location</span>
+            </a>
+          </div>
+
+          <div class="venue-cal">
+            <button class="btn btn--ghost venue-btn venue-cal__toggle" type="button" aria-expanded="false" aria-controls="venue-cal-menu" aria-haspopup="true">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4M12 12.8v5M9.5 15.3h5"/></svg>
+              <span class="venue-btn__label" data-te="క్యాలెండర్‌లో చేర్చండి">Add to calendar</span>
+              <svg class="icon venue-cal__chev" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 10l5 5 5-5"/></svg>
+            </button>
+            <div class="venue-cal__menu" id="venue-cal-menu" role="menu" aria-label="Add to calendar" data-te-aria-label="క్యాలెండర్‌లో చేర్చండి" hidden>
+              <a class="venue-cal__item" role="menuitem" data-venue-link="gcal" target="_blank" rel="noopener"
+                 href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Wedding%20of%20Akhil%20%26%20Alekhya%20Sree&amp;dates=20261129T033500Z/20261129T073500Z&amp;details=Akhil%20%26%20Alekhya%20Sree%20are%20getting%20married.%20Sunday%2C%2029%20November%202026%20at%209%3A05%20AM%20(IST).%0AMap%3A%20https%3A%2F%2Fwww.google.com%2Fmaps%2Fsearch%2F%3Fapi%3D1%26query%3DRoyal%2520Regency%2520Gardens%252C%2520Asif%2520Nagar%252C%2520Hyderabad%0AInvitation%3A%20https%3A%2F%2Fakhilwedsalekhya.vercel.app%2F&amp;location=Royal%20Regency%20Gardens%2C%20Opp.%20Indian%20Oil%20Petrol%20Pump%2C%20Mehdipatnam%20Road%2C%20Asif%20Nagar%2C%20Hyderabad&amp;ctz=Asia%2FKolkata">
+                <span class="venue-cal__ico" aria-hidden="true">
+                  <svg class="icon" viewBox="0 0 24 24" focusable="false"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M8.5 14h3M8.5 17h6"/></svg>
+                </span>
+                <span class="venue-cal__text">
+                  <span class="venue-cal__name" data-te="గూగుల్ క్యాలెండర్">Google Calendar</span>
+                  <span class="venue-cal__hint" data-te="బ్రౌజర్‌లో తెరుచుకుంటుంది">Opens in your browser</span>
+                </span>
+              </a>
+              <button class="venue-cal__item" role="menuitem" type="button" data-venue-action="ics">
+                <span class="venue-cal__ico" aria-hidden="true">
+                  <svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5"/><path d="M4.5 16.5v1.5a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-1.5"/></svg>
+                </span>
+                <span class="venue-cal__text">
+                  <span class="venue-cal__name" data-te="ఆపిల్ / ఔట్‌లుక్ (.ics)">Apple / Outlook (.ics)</span>
+                  <span class="venue-cal__hint" data-te="ఒక రోజు ముందు రిమైండర్‌తో">With a reminder a day before</span>
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ============ map ============ -->
+      <figure class="venue-map" aria-labelledby="venue-map-cap">
+        <figcaption class="sr-only" id="venue-map-cap" data-te="రాయల్ రీజెన్సీ గార్డెన్స్ మ్యాప్, ఆసిఫ్ నగర్, హైదరాబాద్">Map of Royal Regency Gardens, Asif Nagar, Hyderabad</figcaption>
+        <div class="venue-map__frame">
+          <div class="venue-map__stage">
+            <!-- Illustrated map: always painted underneath; the Google map iframe covers it once it loads. -->
+            <a class="venue-map__art" href="https://www.google.com/maps/search/?api=1&amp;query=Royal%20Regency%20Gardens%2C%20Asif%20Nagar%2C%20Hyderabad"
+               target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+              <svg class="venue-map__svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" focusable="false">
+                <defs>
+                  <pattern id="vn-blocks" width="56" height="56" patternUnits="userSpaceOnUse" patternTransform="rotate(-14)">
+                    <rect class="vm-bld" x="5" y="5" width="20" height="14" rx="2"/>
+                    <rect class="vm-bld" x="29" y="5" width="22" height="20" rx="2"/>
+                    <rect class="vm-bld" x="5" y="23" width="14" height="28" rx="2"/>
+                    <rect class="vm-bld" x="23" y="29" width="28" height="12" rx="2"/>
+                    <rect class="vm-bld vm-bld--soft" x="23" y="44" width="12" height="8" rx="1.5"/>
+                  </pattern>
+                  <radialGradient id="vn-vignette" cx=".5" cy=".5" r=".75">
+                    <stop offset=".55" stop-color="#efe5d3" stop-opacity="0"/>
+                    <stop offset="1" stop-color="#c8a96a" stop-opacity=".28"/>
+                  </radialGradient>
+                </defs>
+                <g class="venue-map__layer">
+                  <rect class="vm-bg" x="-100" y="-100" width="1000" height="800"/>
+                  <rect x="-100" y="-100" width="1000" height="800" fill="url(#vn-blocks)"/>
+                  <!-- parks -->
+                  <path class="vm-park" d="M560 40c50-14 120 6 140 40c18 32-8 74-60 80c-52 6-104-12-112-50c-6-30 2-60 32-70z"/>
+                  <path class="vm-park" d="M60 470c34-18 96-14 116 14c18 26 0 66-44 74c-42 8-92-6-100-36c-6-22 6-42 28-52z"/>
+                  <path class="vm-park" d="M226 150c24-10 62-4 70 16c8 22-12 40-40 42c-26 2-48-8-50-26c-2-14 8-26 20-32z"/>
+                  <!-- streets -->
+                  <g class="vm-street">
+                    <path d="M118-20L172 640"/>
+                    <path d="M300-20C288 160 330 300 312 470S292 600 300 640"/>
+                    <path d="M560-20L522 640"/>
+                    <path d="M702-20L738 640"/>
+                    <path d="M-20 118C200 96 520 140 820 88"/>
+                    <path d="M-20 548C260 518 520 560 820 506"/>
+                  </g>
+                  <g class="vm-lane">
+                    <path d="M-20 240L250 222"/>
+                    <path d="M330 196L540 176"/>
+                    <path d="M600 430L820 410"/>
+                    <path d="M420 440L440 640"/>
+                    <path d="M640 160L660 360"/>
+                    <path d="M200 300L292 292"/>
+                  </g>
+                  <!-- Mehdipatnam Road -->
+                  <path class="vm-road-edge" d="M-40 470L840 250"/>
+                  <path class="vm-road" d="M-40 470L840 250"/>
+                  <path class="vm-road-center" d="M-40 470L840 250"/>
+                  <path id="vn-road-path" fill="none" d="M-40 486L840 266"/>
+                  <text class="vm-road-label"><textPath href="#vn-road-path" startOffset="25%" data-te="మెహదీపట్నం రోడ్">MEHDIPATNAM ROAD</textPath></text>
+                  <!-- the venue plot -->
+                  <path class="vm-plot" d="M352 238l92-20 14 92-92 22z"/>
+                  <g class="vm-trees">
+                    <circle cx="372" cy="252" r="6"/><circle cx="432" cy="236" r="5"/><circle cx="440" cy="296" r="6"/>
+                    <circle cx="378" cy="314" r="5"/><circle cx="410" cy="246" r="4"/>
+                  </g>
+                  <!-- petrol pump, across the road -->
+                  <g class="vm-pump" transform="translate(452 384)">
+                    <rect x="-14" y="-12" width="28" height="24" rx="6"/>
+                    <path class="vm-pump-ico" d="M-6 7v-13h8v13M-6 -1h8M2 -3l4 3v6"/>
+                    <text class="vm-pump-label" x="20" y="5" data-te="పెట్రోల్ బంక్">Petrol Pump</text>
+                  </g>
+                  <!-- area label -->
+                  <text class="vm-area" x="214" y="168" data-te="ఆసిఫ్ నగర్">ASIF NAGAR</text>
+                  <!-- route to the venue -->
+                  <path class="vm-route-glow" d="M178 640L162 452L388 392L398 312"/>
+                  <path class="vm-route" d="M178 640L162 452L388 392L398 312"/>
+                  <circle class="vm-route-start" cx="178" cy="600" r="7"/>
+                </g>
+                <rect x="-100" y="-100" width="1000" height="800" fill="url(#vn-vignette)" pointer-events="none"/>
+              </svg>
+
+              <!-- the venue marker sits at the exact centre of the map art -->
+              <span class="venue-map__marker">
+                <span class="venue-map__pulse"></span>
+                <span class="venue-map__pulse venue-map__pulse--2"></span>
+                <svg class="venue-map__pin" viewBox="0 0 48 60" focusable="false">
+                  <path fill="url(#vn-pin-foil)" stroke="#a8874a" stroke-width="1" d="M24 58C24 58 5 36.5 5 22.5C5 11.7 13.5 3 24 3s19 8.7 19 19.5C43 36.5 24 58 24 58z"/>
+                  <circle cx="24" cy="22" r="10" fill="#1f3d36"/>
+                  <path fill="#e4d2a6" d="M24 28c-.3 0-.5-.1-.7-.3c-3-2.6-5-4.4-5-6.8c0-1.7 1.3-3 3-3c1.2 0 2.2.6 2.7 1.6c.6-1 1.6-1.6 2.8-1.6c1.7 0 3 1.3 3 3c0 2.4-2 4.2-5 6.8c-.3.2-.5.3-.8.3z"/>
+                </svg>
+                <span class="venue-map__label">
+                  <span class="venue-map__label-name" data-te="రాయల్ రీజెన్సీ గార్డెన్స్">Royal Regency Gardens</span>
+                </span>
+              </span>
+
+              <svg class="venue-map__compass" viewBox="0 0 64 64" focusable="false">
+                <circle cx="32" cy="32" r="29" class="vm-compass-ring"/>
+                <circle cx="32" cy="32" r="23" class="vm-compass-ring vm-compass-ring--in"/>
+                <g class="venue-map__needle">
+                  <path class="vm-needle-n" d="M32 9l5.5 23H26.5z"/>
+                  <path class="vm-needle-s" d="M32 55l-5.5-23h11z"/>
+                </g>
+                <circle cx="32" cy="32" r="2.6" class="vm-compass-hub"/>
+                <text x="32" y="7.4" class="vm-compass-n">N</text>
+              </svg>
+            </a>
+            <!-- js/venue.js inserts the Google Maps iframe here when the map nears the viewport -->
+          </div>
+
+          <a class="venue-map__open" data-venue-link="maps"
+             href="https://www.google.com/maps/search/?api=1&amp;query=Royal%20Regency%20Gardens%2C%20Asif%20Nagar%2C%20Hyderabad"
+             target="_blank" rel="noopener">
+            <span data-te="మ్యాప్స్‌లో తెరవండి">Open in Maps</span>
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 17L17 7M9 7h8v8"/></svg>
+          </a>
+          <button class="venue-map__interact" type="button" aria-pressed="false" hidden>
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 11.5V5.8a1.6 1.6 0 0 1 3.2 0v5"/><path d="M12.2 10.2a1.6 1.6 0 0 1 3.2 0v1.3M15.4 11a1.6 1.6 0 0 1 3.1.4v3.4c0 3.4-2.4 6.2-5.8 6.2h-.6c-2 0-3.4-.9-4.6-2.4l-2.6-3.4a1.6 1.6 0 0 1 2.4-2.1L9 14.5"/></svg>
+            <span class="venue-map__interact-label" data-te="మ్యాప్‌ను ఉపయోగించండి">Interact with map</span>
+          </button>
+        </div>
+      </figure>
+    </div>
+  </div>
+</section>

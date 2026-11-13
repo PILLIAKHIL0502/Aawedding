@@ -141,7 +141,7 @@
   }
   App.setLang = setLang;
 
-  /* ---------- the toggle (fixed, visible on the intro and the page) ---------- */
+  /* ---------- the toggle: plain text "EN | తె", fixed top-left on the intro and the page ---------- */
   let toggle;
   function buildToggle() {
     toggle = document.createElement("div");
@@ -149,9 +149,9 @@
     toggle.setAttribute("role", "group");
     toggle.setAttribute("aria-label", "Language / భాష");
     toggle.innerHTML =
-      '<span class="lang-toggle__thumb" aria-hidden="true"></span>' +
-      '<button type="button" data-lang="en" lang="en">EN</button>' +
-      '<button type="button" data-lang="te" lang="te">తెలుగు</button>';
+      '<button type="button" data-lang="en" lang="en" aria-label="English">EN</button>' +
+      '<span class="lang-toggle__sep" aria-hidden="true"></span>' +
+      '<button type="button" data-lang="te" lang="te" aria-label="తెలుగు (Telugu)">తె</button>';
     toggle.addEventListener("click", (e) => {
       const b = e.target.closest("button[data-lang]");
       if (!b || b.dataset.lang === App.lang) return;
@@ -159,11 +159,34 @@
       setLang(b.dataset.lang);
     });
     document.body.appendChild(toggle);
+    watchContrast();
   }
   function updateToggle() {
     if (!toggle) return;
     toggle.dataset.active = App.lang;
     toggle.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === App.lang)));
+  }
+
+  /* Green text vanishes on the dark-green sections (intro, date card, countdown, footer), so the
+     toggle checks what's underneath it and switches to a light mint palette there. */
+  function watchContrast() {
+    let queued = false;
+    const check = () => {
+      queued = false;
+      const r = toggle.getBoundingClientRect();
+      const x = r.left + r.width / 2, y = r.top + r.height / 2;
+      const under = document.elementsFromPoint(x, y).find((el) => !toggle.contains(el));
+      const dark = !!(under && under.closest('[data-theme="dark"], #intro'));
+      toggle.classList.toggle("is-on-dark", dark);
+    };
+    const queue = () => { if (!queued) { queued = true; requestAnimationFrame(check); } };
+    window.addEventListener("scroll", queue, { passive: true });
+    window.addEventListener("resize", queue);
+    App.on("open", () => setTimeout(queue, 50));
+    App.on("lang", queue);
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", queue);
+    else queue();
+    window.addEventListener("load", queue);
   }
 
   buildToggle();

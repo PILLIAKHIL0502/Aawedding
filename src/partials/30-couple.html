@@ -1,0 +1,178 @@
+<section id="couple" class="couple" data-nav="The Couple" data-te-nav="వధూవరులు" aria-labelledby="cpl-title">
+  <!-- shared paint for the rings and card ornaments (ids are prefixed cpl- to stay unique) -->
+  <svg class="cpl-defs" width="0" height="0" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="cpl-gold-a" gradientUnits="userSpaceOnUse" x1="52" y1="30" x2="140" y2="118">
+        <stop offset="0" stop-color="#a8874a"/>
+        <stop offset=".22" stop-color="#f4e7c4"/>
+        <stop offset=".45" stop-color="#c8a96a"/>
+        <stop offset=".7" stop-color="#e9d5a4"/>
+        <stop offset="1" stop-color="#a8874a"/>
+      </linearGradient>
+      <linearGradient id="cpl-gold-b" gradientUnits="userSpaceOnUse" x1="188" y1="30" x2="100" y2="118">
+        <stop offset="0" stop-color="#a8874a"/>
+        <stop offset=".25" stop-color="#e9d5a4"/>
+        <stop offset=".5" stop-color="#b8955a"/>
+        <stop offset=".72" stop-color="#f4e7c4"/>
+        <stop offset="1" stop-color="#a8874a"/>
+      </linearGradient>
+      <linearGradient id="cpl-gem" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#fbf7f0"/>
+        <stop offset=".5" stop-color="#f3e1da"/>
+        <stop offset="1" stop-color="#e4d2a6"/>
+      </linearGradient>
+      <!-- a pair of crossed sprigs that sits at the foot of each arch -->
+      <symbol id="cpl-sprig" viewBox="0 0 120 44">
+        <path d="M60 42 C 46 34, 30 26, 6 22" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
+        <path d="M60 42 C 74 34, 90 26, 114 22" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
+        <g fill="currentColor">
+          <path d="M18 23 c 3 -7 10 -9 15 -7 c -3 6 -9 9 -15 7z" opacity=".9"/>
+          <path d="M30 29 c 2 -8 9 -11 15 -9 c -2 7 -9 11 -15 9z" opacity=".75"/>
+          <path d="M42 35 c 1 -7 7 -11 13 -10 c -1 7 -7 11 -13 10z" opacity=".9"/>
+          <path d="M24 26 c -6 3 -9 9 -7 14 c 6 -2 9 -8 7 -14z" opacity=".6"/>
+          <path d="M102 23 c -3 -7 -10 -9 -15 -7 c 3 6 9 9 15 7z" opacity=".9"/>
+          <path d="M90 29 c -2 -8 -9 -11 -15 -9 c 2 7 9 11 15 9z" opacity=".75"/>
+          <path d="M78 35 c -1 -7 -7 -11 -13 -10 c 1 7 7 11 13 10z" opacity=".9"/>
+          <path d="M96 26 c 6 3 9 9 7 14 c -6 -2 -9 -8 -7 -14z" opacity=".6"/>
+          <circle cx="60" cy="40" r="2.2"/>
+        </g>
+      </symbol>
+      <!-- small flourish used on the card backs -->
+      <symbol id="cpl-flourish" viewBox="0 0 160 20">
+        <path d="M2 10 H58 M102 10 H158" fill="none" stroke="currentColor" stroke-width=".9" stroke-linecap="round"/>
+        <path d="M58 10 C 64 3, 72 3, 80 10 C 88 17, 96 17, 102 10" fill="none" stroke="currentColor" stroke-width=".9"/>
+        <path d="M58 10 C 64 17, 72 17, 80 10 C 88 3, 96 3, 102 10" fill="none" stroke="currentColor" stroke-width=".9"/>
+        <path d="M80 4.5 L84 10 L80 15.5 L76 10 Z" fill="currentColor"/>
+        <circle cx="52" cy="10" r="1.6" fill="currentColor"/><circle cx="108" cy="10" r="1.6" fill="currentColor"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- ===== intro line ===== -->
+  <header class="cpl-intro">
+    <p class="cpl-eyebrow eyebrow"><span id="cpl-title" data-te="వధూవరులు">The Couple</span></p>
+    <svg class="cpl-intro__orn" viewBox="0 0 160 20" aria-hidden="true" focusable="false"><use href="#cpl-flourish"/></svg>
+    <p class="cpl-lede" data-te="హృదయం నిండా ఆనందంతో, మమ్మల్ని ఒక్కటి చేసిన ప్రేమకు కృతజ్ఞతతో, మా కొత్త జీవిత ప్రయాణం ప్రారంభంలో మీ రాకను సాదరంగా కోరుకుంటున్నాము.">With joy in our hearts and gratitude for the love that brought us here, we request the pleasure of your company as we begin our journey together.</p>
+  </header>
+
+  <!-- ===== the "coming together" scene (pinned and scroll-scrubbed by js/couple.js) ===== -->
+  <div class="cpl-stage">
+    <div class="cpl-halo" aria-hidden="true"></div>
+
+    <div class="cpl-scene">
+      <!-- ---------- The Groom ---------- -->
+      <div class="cpl-slot cpl-slot--groom">
+        <div class="cpl-fan">
+          <button type="button" class="cpl-card" aria-pressed="false"
+            aria-label="The Groom, Akhil. Elder son of Mr. Pilli Mareswara Rao and Mrs. Arunasri. Flip card"
+            data-te-aria-label="వరుడు అఖిల్. శ్రీ పిల్లి మారేశ్వర రావు & శ్రీమతి అరుణశ్రీ గార్ల జ్యేష్ఠ పుత్రుడు. కార్డును తిప్పండి">
+            <span class="cpl-card__inner">
+              <span class="cpl-face cpl-face--front">
+                <span class="cpl-arch">
+                  <span class="cpl-initial" data-te="అ">A</span>
+                  <svg class="cpl-sprig" viewBox="0 0 120 44" aria-hidden="true" focusable="false"><use href="#cpl-sprig"/></svg>
+                  <!-- PHOTO: to show a photo of Akhil, put an <img> right here (inside .cpl-arch), e.g.
+                       <img class="cpl-photo" src="assets/akhil.jpg" alt="Akhil" data-te-alt="అఖిల్" loading="lazy" decoding="async" />
+                       A portrait crop (about 3:4) works best. The image fills the arch, and the initial and sprig hide automatically. -->
+                </span>
+                <span class="cpl-role"><span data-te="వరుడు">The Groom</span></span>
+                <span class="cpl-name"><span data-te="అఖిల్">Akhil</span></span>
+              </span>
+              <span class="cpl-face cpl-face--back">
+                <svg class="cpl-flourish" viewBox="0 0 160 20" aria-hidden="true" focusable="false"><use href="#cpl-flourish"/></svg>
+                <span class="cpl-lineage"
+                  data-te-html='<span class="cpl-parents">శ్రీ పిల్లి మారేశ్వర రావు <span class="cpl-amp">&amp;</span> శ్రీమతి అరుణశ్రీ</span><span class="cpl-relation">గార్ల జ్యేష్ఠ పుత్రుడు</span>'>
+                  <span class="cpl-relation">Elder son of</span>
+                  <span class="cpl-parents">Mr.&nbsp;Pilli Mareswara Rao <span class="cpl-amp">&amp;</span> Mrs.&nbsp;Arunasri</span>
+                </span>
+                <span class="cpl-rule" aria-hidden="true"></span>
+                <span class="cpl-family"><span data-te="పిల్లి కుటుంబం">The Pilli family</span></span>
+              </span>
+            </span>
+            <span class="cpl-chip" aria-hidden="true">
+              <svg class="cpl-chip__icon" viewBox="0 0 24 24" focusable="false"><path d="M4 12a8 8 0 0 1 13.7-5.6L20 8.7M20 4v4.7h-4.7M20 12a8 8 0 0 1-13.7 5.6L4 15.3M4 20v-4.7h4.7"/></svg>
+              <span data-te="తిప్పడానికి తాకండి">Tap to flip</span>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ---------- the rings ---------- -->
+      <div class="cpl-rings" aria-hidden="true">
+        <div class="cpl-bloom"></div>
+        <svg class="cpl-rings__svg" viewBox="0 0 240 150" focusable="false">
+          <g class="cpl-ring cpl-ring--a">
+            <circle class="cpl-ring__band" cx="96" cy="78" r="40" stroke="url(#cpl-gold-a)" pathLength="1"/>
+            <circle class="cpl-ring__inner" cx="96" cy="78" r="35.6" pathLength="1"/>
+            <circle class="cpl-ring__shine" cx="96" cy="78" r="41.6" pathLength="1"/>
+          </g>
+          <g class="cpl-ring cpl-ring--b">
+            <circle class="cpl-ring__band" cx="144" cy="78" r="40" stroke="url(#cpl-gold-b)" pathLength="1"/>
+            <circle class="cpl-ring__inner" cx="144" cy="78" r="35.6" pathLength="1"/>
+            <circle class="cpl-ring__shine" cx="144" cy="78" r="41.6" pathLength="1"/>
+            <g class="cpl-gem">
+              <path class="cpl-gem__set" d="M137 39.5 L144 35 L151 39.5"/>
+              <path class="cpl-gem__stone" d="M136 31 L140 25.5 H148 L152 31 L144 41 Z" fill="url(#cpl-gem)"/>
+              <path class="cpl-gem__facet" d="M136 31 H152 M140 25.5 L142.5 31 L144 41 L145.5 31 L148 25.5"/>
+            </g>
+          </g>
+          <!-- ring A passes over ring B here, so the two read as interlocked -->
+          <g class="cpl-ring cpl-ring--a cpl-ring--over">
+            <path class="cpl-ring__band" d="M128.8 100.9 A40 40 0 0 1 108.4 116.0" stroke="url(#cpl-gold-a)"/>
+          </g>
+          <g class="cpl-sparks">
+            <path class="cpl-spark" d="M120 6 l2.2 6.8 6.8 2.2 -6.8 2.2 -2.2 6.8 -2.2 -6.8 -6.8 -2.2 6.8 -2.2z"/>
+            <path class="cpl-spark" d="M196 40 l1.6 4.9 4.9 1.6 -4.9 1.6 -1.6 4.9 -1.6 -4.9 -4.9 -1.6 4.9 -1.6z"/>
+            <path class="cpl-spark" d="M44 46 l1.4 4.2 4.2 1.4 -4.2 1.4 -1.4 4.2 -1.4 -4.2 -4.2 -1.4 4.2 -1.4z"/>
+            <path class="cpl-spark" d="M206 112 l1.2 3.6 3.6 1.2 -3.6 1.2 -1.2 3.6 -1.2 -3.6 -3.6 -1.2 3.6 -1.2z"/>
+            <path class="cpl-spark" d="M34 116 l1.6 4.9 4.9 1.6 -4.9 1.6 -1.6 4.9 -1.6 -4.9 -4.9 -1.6 4.9 -1.6z"/>
+            <path class="cpl-spark" d="M120 132 l1.2 3.6 3.6 1.2 -3.6 1.2 -1.2 3.6 -1.2 -3.6 -3.6 -1.2 3.6 -1.2z"/>
+          </g>
+        </svg>
+      </div>
+
+      <!-- ---------- The Bride ---------- -->
+      <div class="cpl-slot cpl-slot--bride">
+        <div class="cpl-fan">
+          <button type="button" class="cpl-card" aria-pressed="false"
+            aria-label="The Bride, Alekhya Sree. Elder daughter of Mr. Tappetla Ganesh Kumar and Mrs. Swarnalatha. Flip card"
+            data-te-aria-label="వధువు అలేఖ్య శ్రీ. శ్రీ తప్పెట్ల గణేష్ కుమార్ & శ్రీమతి స్వర్ణలత గార్ల జ్యేష్ఠ పుత్రిక. కార్డును తిప్పండి">
+            <span class="cpl-card__inner">
+              <span class="cpl-face cpl-face--front">
+                <span class="cpl-arch">
+                  <span class="cpl-initial" data-te="అ">A</span>
+                  <svg class="cpl-sprig" viewBox="0 0 120 44" aria-hidden="true" focusable="false"><use href="#cpl-sprig"/></svg>
+                  <!-- PHOTO: to show a photo of Alekhya Sree, put an <img> right here (inside .cpl-arch), e.g.
+                       <img class="cpl-photo" src="assets/alekhya.jpg" alt="Alekhya Sree" data-te-alt="అలేఖ్య శ్రీ" loading="lazy" decoding="async" />
+                       A portrait crop (about 3:4) works best. The image fills the arch, and the initial and sprig hide automatically. -->
+                </span>
+                <span class="cpl-role"><span data-te="వధువు">The Bride</span></span>
+                <span class="cpl-name"><span data-te="అలేఖ్య శ్రీ">Alekhya Sree</span></span>
+              </span>
+              <span class="cpl-face cpl-face--back">
+                <svg class="cpl-flourish" viewBox="0 0 160 20" aria-hidden="true" focusable="false"><use href="#cpl-flourish"/></svg>
+                <span class="cpl-lineage"
+                  data-te-html='<span class="cpl-parents">శ్రీ తప్పెట్ల గణేష్ కుమార్ <span class="cpl-amp">&amp;</span> శ్రీమతి స్వర్ణలత</span><span class="cpl-relation">గార్ల జ్యేష్ఠ పుత్రిక</span>'>
+                  <span class="cpl-relation">Elder daughter of</span>
+                  <span class="cpl-parents">Mr.&nbsp;Tappetla Ganesh Kumar <span class="cpl-amp">&amp;</span> Mrs.&nbsp;Swarnalatha</span>
+                </span>
+                <span class="cpl-rule" aria-hidden="true"></span>
+                <span class="cpl-family"><span data-te="తప్పెట్ల కుటుంబం">The Tappetla family</span></span>
+              </span>
+            </span>
+            <span class="cpl-chip" aria-hidden="true">
+              <svg class="cpl-chip__icon" viewBox="0 0 24 24" focusable="false"><path d="M4 12a8 8 0 0 1 13.7-5.6L20 8.7M20 4v4.7h-4.7M20 12a8 8 0 0 1-13.7 5.6L4 15.3M4 20v-4.7h4.7"/></svg>
+              <span data-te="తిప్పడానికి తాకండి">Tap to flip</span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <p class="cpl-caption">
+      <span class="cpl-caption__line" aria-hidden="true"></span>
+      <span class="cpl-caption__text" data-te="రెండు కుటుంబాలు · ఒకే వేడుక">Two families · One celebration</span>
+      <span class="cpl-caption__line" aria-hidden="true"></span>
+    </p>
+  </div>
+</section>

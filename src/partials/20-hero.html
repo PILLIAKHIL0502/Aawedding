@@ -1,0 +1,72 @@
+<section id="hero" class="hero" data-nav="Welcome" data-te-nav="స్వాగతం" aria-labelledby="hero-names">
+  <!-- parallax depth: glow → rings → branches → (content) → sparkles. Decorative only. -->
+  <div class="hero__layers" aria-hidden="true">
+    <div class="hero__layer hero__layer--glow">
+      <div class="hero__depth" data-depth="6"><div class="hero__glow"></div></div>
+    </div>
+
+    <div class="hero__layer hero__layer--rings">
+      <div class="hero__depth" data-depth="12">
+        <svg class="hero__rings" viewBox="0 0 600 600" focusable="false">
+          <circle class="hero__ring hero__ring--outer" cx="300" cy="300" r="296" pathLength="1" />
+          <circle class="hero__ring hero__ring--main" cx="300" cy="300" r="270" pathLength="1" />
+          <g class="hero__ring-spin"><circle class="hero__ring hero__ring--dash" cx="300" cy="300" r="252" /></g>
+          <circle class="hero__ring hero__ring--inner" cx="300" cy="300" r="214" pathLength="1" />
+          <g class="hero__ring-gems">
+            <path d="M300 23l5 7-5 7-5-7z" /><path d="M300 563l5 7-5 7-5-7z" />
+            <path d="M23 300l7-5 7 5-7 5z" /><path d="M563 300l7-5 7 5-7 5z" />
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <div class="hero__layer hero__layer--branches">
+      <div class="hero__depth" data-depth="22">
+        <div class="hero__branch hero__branch--tl"><div class="hero__branch-in"><img src="assets/branch.svg" alt="" width="360" height="500" decoding="async" draggable="false" /></div></div>
+        <div class="hero__branch hero__branch--tr"><div class="hero__branch-in"><img src="assets/branch.svg" alt="" width="360" height="500" decoding="async" draggable="false" /></div></div>
+        <div class="hero__branch hero__branch--bl"><div class="hero__branch-in"><img src="assets/branch.svg" alt="" width="360" height="500" decoding="async" draggable="false" /></div></div>
+        <div class="hero__branch hero__branch--br"><div class="hero__branch-in"><img src="assets/branch.svg" alt="" width="360" height="500" decoding="async" draggable="false" /></div></div>
+      </div>
+    </div>
+
+    <div class="hero__layer hero__layer--sparks">
+      <div class="hero__depth hero__sparks" data-depth="40"></div>
+    </div>
+  </div>
+
+  <div class="hero__stage">
+    <div class="hero__content">
+      <div class="hero__top">
+        <p class="hero__dear" hidden></p>
+        <p class="hero__eyebrow eyebrow"><span data-te="ఇరు కుటుంబాల ఆశీస్సులతో">Together with their families</span></p>
+      </div>
+
+      <h1 class="hero__names" id="hero-names">
+        <span class="hero__name hero__name--a" data-te="అఖిల్">Akhil</span>
+        <span class="hero__amp" aria-hidden="true"><i class="hero__amp-rule hero__amp-rule--l"></i><span class="hero__amp-glyph">&amp;</span><i class="hero__amp-rule hero__amp-rule--r"></i></span>
+        <span class="sr-only"> &amp; </span>
+        <span class="hero__name hero__name--b" data-te="అలేఖ్య శ్రీ">Alekhya Sree</span>
+      </h1>
+
+      <div class="hero__bottom">
+        <p class="hero__tagline"><span data-te="వివాహ మహోత్సవానికి ఆహ్వానం">are getting married</span></p>
+        <p class="hero__date">
+          <time class="hero__date-in" datetime="2026-11-29T09:05+05:30">
+            <span class="hero__date-side hero__date-day"><span data-te="ఆదివారం">Sunday</span></span>
+            <span class="hero__date-sep" aria-hidden="true"></span>
+            <span class="hero__date-num">29</span>
+            <span class="hero__date-sep" aria-hidden="true"></span>
+            <span class="hero__date-side hero__date-month"><span data-te="నవంబర్ 2026">Nov 2026</span></span>
+          </time>
+        </p>
+      </div>
+    </div>
+
+    <button class="hero__cue" type="button" data-cursor="">
+      <span class="hero__cue-in">
+        <span class="hero__cue-label" data-te="కిందికి జరపండి">Scroll</span>
+        <span class="hero__cue-line" aria-hidden="true"><i></i></span>
+      </span>
+    </button>
+  </div>
+</section>

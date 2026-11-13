@@ -1,0 +1,372 @@
+/* ==========================================================
+   reveal.css — "Save the date" scratch card (#reveal).
+   A gold-foil ticket: the foil is a <canvas> painted and scratched by
+   js/scratch.js; the date is plain HTML underneath, so it is readable
+   by screen readers and survives if the canvas never paints.
+   Everything is scoped to #reveal / .reveal-date__*.
+   ========================================================== */
+#reveal.reveal-date {
+  /* ticket width: ~86vw on phones, 420px on laptops, a touch larger on big screens */
+  --card-w: min(86vw, clamp(420px, 26vw, 500px));
+  --notch: clamp(9px, 3.1vw, 14px);   /* the punched half-circles on the ticket's sides */
+  --notch-y: 72%;                     /* where the perforation runs */
+
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  padding: var(--section-pad) max(var(--gutter), env(safe-area-inset-right)) var(--section-pad) max(var(--gutter), env(safe-area-inset-left));
+  text-align: center;
+}
+
+#reveal .reveal-date__glow {
+  position: absolute;
+  left: 50%;
+  top: 60%;
+  z-index: -1;
+  width: min(150vw, 980px);
+  aspect-ratio: 1;
+  margin-left: calc(min(150vw, 980px) / -2);
+  margin-top: calc(min(150vw, 980px) / -2);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(200, 169, 106, .2), rgba(200, 169, 106, .06) 52%, rgba(200, 169, 106, 0));
+  pointer-events: none;
+  animation: reveal-date-breathe 9s ease-in-out infinite alternate;
+}
+@keyframes reveal-date-breathe {
+  from { transform: scale(.92); opacity: .75; }
+  to   { transform: scale(1.06); opacity: 1; }
+}
+
+#reveal .reveal-date__inner { max-width: var(--maxw); margin: 0 auto; }
+
+/* ---------------- heading ---------------- */
+#reveal .reveal-date__head { margin-bottom: clamp(1.6rem, 5vw, 3rem); }
+#reveal .reveal-date__eyebrow { display: block; margin-bottom: .55rem; }
+#reveal .reveal-date__title {
+  display: inline-block;
+  padding: 0 .12em .1em;
+  font-family: var(--script);
+  font-weight: 400;
+  font-size: clamp(3rem, 11vw, 5.6rem);
+  line-height: 1.08;
+  color: var(--gold-soft);
+  background: var(--foil);
+  background-size: 160% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+html.lang-te #reveal .reveal-date__title { font-size: clamp(2.2rem, 8.4vw, 3.9rem); line-height: 1.45; }
+
+/* ---------------- the ticket ---------------- */
+#reveal .reveal-date__stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(1.1rem, 3.5vw, 1.75rem);
+}
+#reveal .reveal-date__shadow { position: relative; width: var(--card-w); }
+/* the soft cast shadow lives on its own layer, so the ticket's punched notches stay crisp */
+#reveal .reveal-date__shadow::before {
+  content: "";
+  position: absolute;
+  inset: 6% 4% -1%;
+  border-radius: 28px;
+  box-shadow: 0 46px 70px -26px rgba(5, 14, 12, .9), 0 20px 34px -20px rgba(5, 14, 12, .75);
+  pointer-events: none;
+}
+#reveal .reveal-date__ticket {
+  position: relative;
+  z-index: 1;
+  container-type: inline-size;
+  aspect-ratio: 4 / 3;
+  border-radius: clamp(14px, 4vw, 22px);
+  overflow: hidden;
+  background:
+    radial-gradient(90% 70% at 50% 36%, rgba(200, 169, 106, .17), rgba(200, 169, 106, 0) 70%),
+    linear-gradient(155deg, var(--emerald) 0%, var(--emerald-deep) 62%, var(--emerald-ink) 100%);
+  box-shadow: inset 0 0 0 1px rgba(200, 169, 106, .5), inset 0 1px 0 rgba(244, 231, 196, .25);
+  -webkit-mask:
+    radial-gradient(circle at 0 var(--notch-y), #0000 var(--notch), #000 calc(var(--notch) + .5px)) left / 51% 100% no-repeat,
+    radial-gradient(circle at 100% var(--notch-y), #0000 var(--notch), #000 calc(var(--notch) + .5px)) right / 51% 100% no-repeat;
+  mask:
+    radial-gradient(circle at 0 var(--notch-y), #0000 var(--notch), #000 calc(var(--notch) + .5px)) left / 51% 100% no-repeat,
+    radial-gradient(circle at 100% var(--notch-y), #0000 var(--notch), #000 calc(var(--notch) + .5px)) right / 51% 100% no-repeat;
+}
+
+/* ---------------- what's printed underneath ---------------- */
+#reveal .reveal-date__face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: var(--notch-y) 1fr;
+}
+#reveal .reveal-date__frame {
+  position: absolute;
+  inset: 3.2cqi;
+  border: 1px solid rgba(200, 169, 106, .32);
+  border-radius: 2.4cqi;
+  pointer-events: none;
+}
+#reveal .reveal-date__corner {
+  position: absolute;
+  width: 4.2cqi;
+  height: 4.2cqi;
+  border: 0 solid rgba(228, 210, 166, .7);
+  pointer-events: none;
+}
+#reveal .reveal-date__corner--tl { top: 5.4cqi; left: 5.4cqi; border-top-width: 1px; border-left-width: 1px; }
+#reveal .reveal-date__corner--tr { top: 5.4cqi; right: 5.4cqi; border-top-width: 1px; border-right-width: 1px; }
+#reveal .reveal-date__corner--bl { bottom: 5.4cqi; left: 5.4cqi; border-bottom-width: 1px; border-left-width: 1px; }
+#reveal .reveal-date__corner--br { bottom: 5.4cqi; right: 5.4cqi; border-bottom-width: 1px; border-right-width: 1px; }
+
+#reveal .reveal-date__main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3.2cqi;
+  padding-top: 3cqi;
+  min-width: 0;
+}
+#reveal .reveal-date__day {
+  display: flex;
+  align-items: center;
+  gap: .9em;
+  padding-left: .5em;   /* balances the trailing letter-spacing */
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: max(10px, 3.3cqi);
+  letter-spacing: .5em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  color: var(--gold-soft);
+}
+#reveal .reveal-date__day::before,
+#reveal .reveal-date__day::after {
+  content: "";
+  width: 7cqi;
+  height: 1px;
+  background: currentColor;
+  opacity: .5;
+}
+html.lang-te #reveal .reveal-date__day { font-size: max(13px, 4.6cqi); font-weight: 500; padding-left: 0; }
+
+#reveal .reveal-date__date {
+  position: relative;
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 15.5cqi;
+  line-height: 1;
+  white-space: nowrap;
+  font-variant-numeric: lining-nums;
+}
+#reveal .reveal-date__date i { font-style: normal; margin: 0 .12em; opacity: .7; }
+#reveal .reveal-date__digits,
+#reveal .reveal-date__glint-in { display: block; padding: .08em .05em .04em; }
+#reveal .reveal-date__digits {
+  color: var(--gold);
+  background: var(--foil);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+/* the shimmer: a soft window slides across while its contents slide back, so the
+   bright copy of the date stays put and only the light moves (transform-only) */
+#reveal .reveal-date__glint {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 30%;
+  overflow: hidden;
+  pointer-events: none;
+  transform: translateX(-110%);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 42%, #000 58%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 42%, #000 58%, transparent);
+  visibility: hidden;
+}
+#reveal .reveal-date__glint-in {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 333.333%;
+  color: #fffaf0;
+  -webkit-text-fill-color: #fffaf0;
+  text-shadow: 0 0 .22em rgba(244, 231, 196, .75);
+  transform: translateX(33%);
+}
+#reveal.is-revealed .reveal-date__glint { visibility: visible; animation: reveal-date-glint 1.9s var(--ease-in-out) .55s 3 both; }
+#reveal.is-revealed .reveal-date__glint-in { animation: reveal-date-glint-in 1.9s var(--ease-in-out) .55s 3 both; }
+@keyframes reveal-date-glint    { from { transform: translateX(-110%); } to { transform: translateX(340%); } }
+@keyframes reveal-date-glint-in { from { transform: translateX(33%); }   to { transform: translateX(-102%); } }
+
+#reveal .reveal-date__stub {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 calc(var(--notch) + 3cqi);
+  padding-bottom: 3.2cqi;
+  border-top: 1px dashed rgba(200, 169, 106, .5);
+}
+#reveal .reveal-date__time {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 6.6cqi;
+  line-height: 1.2;
+  letter-spacing: .05em;
+  color: var(--ivory);
+}
+html.lang-te #reveal .reveal-date__time { font-size: 6.4cqi; line-height: 1.5; }
+
+#reveal .reveal-date__twinkle {
+  position: absolute;
+  width: 5cqi;
+  height: 5cqi;
+  fill: var(--gold-soft);
+  opacity: 0;
+  transform: scale(0);
+  pointer-events: none;
+}
+#reveal .reveal-date__twinkle--a { top: 19%; left: 13%; }
+#reveal .reveal-date__twinkle--b { top: 27%; right: 11%; width: 3.6cqi; height: 3.6cqi; }
+#reveal .reveal-date__twinkle--c { top: 58%; left: 25%; width: 3cqi; height: 3cqi; }
+#reveal.is-revealed .reveal-date__twinkle { animation: reveal-date-twinkle 1.7s var(--ease-in-out) 4 both; }
+#reveal.is-revealed .reveal-date__twinkle--a { animation-delay: .5s; }
+#reveal.is-revealed .reveal-date__twinkle--b { animation-delay: .95s; }
+#reveal.is-revealed .reveal-date__twinkle--c { animation-delay: 1.35s; }
+@keyframes reveal-date-twinkle {
+  0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+  50%      { opacity: 1; transform: scale(1) rotate(45deg); }
+}
+
+/* ---------------- the foil ---------------- */
+#reveal .reveal-date__foil {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  touch-action: none;   /* scratching must not scroll the page (only on the card itself) */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><circle cx='16' cy='16' r='12' fill='%23e4d2a6' stroke='%23a8874a' stroke-width='2'/><circle cx='16' cy='16' r='8.5' fill='none' stroke='%23a8874a' stroke-opacity='.7'/><path d='M16 10.5 17.2 14.8 21.5 16 17.2 17.2 16 21.5 14.8 17.2 10.5 16 14.8 14.8Z' fill='%23a8874a'/></svg>") 16 16, pointer;
+}
+#reveal.is-revealed .reveal-date__foil { pointer-events: none; }
+
+/* the coin that demonstrates the gesture until the first touch */
+#reveal .reveal-date__hint {
+  position: absolute;
+  left: 16%;
+  top: 44%;
+  width: 11cqi;
+  height: 11cqi;
+  pointer-events: none;
+  filter: drop-shadow(0 .8cqi 1.2cqi rgba(15, 32, 28, .45));
+  animation: reveal-date-hint 3.8s var(--ease-in-out) 1.2s infinite both;
+}
+#reveal .reveal-date__hint svg { width: 100%; height: 100%; overflow: visible; }
+#reveal .reveal-date__coin { fill: var(--gold-soft); stroke: var(--gold-deep); stroke-width: 1.6; }
+#reveal .reveal-date__coin-rim { fill: none; stroke: var(--gold-deep); stroke-opacity: .6; stroke-width: 1; }
+#reveal .reveal-date__coin-star { fill: var(--gold-deep); }
+@keyframes reveal-date-hint {
+  0%   { opacity: 0; transform: translate(0, 0) rotate(-14deg); }
+  10%  { opacity: 1; }
+  30%  { transform: translate(15cqi, -9cqi) rotate(6deg); }
+  50%  { transform: translate(29cqi, 6cqi) rotate(-8deg); }
+  70%  { transform: translate(44cqi, -8cqi) rotate(8deg); }
+  86%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(56cqi, 3cqi) rotate(-4deg); }
+}
+#reveal.is-touched .reveal-date__hint,
+#reveal.is-revealed .reveal-date__hint { display: none; }
+#reveal.is-offscreen .reveal-date__hint,
+#reveal.is-offscreen .reveal-date__glow { animation-play-state: paused; }
+
+/* ---------------- below the ticket: the button, then the celebration ---------------- */
+#reveal .reveal-date__after {
+  display: grid;
+  place-items: center;
+  min-height: 3.4rem;
+}
+#reveal .reveal-date__after > * { grid-area: 1 / 1; }
+#reveal .reveal-date__instant {
+  min-height: 44px;
+  padding: .55rem 1.15rem;
+  font-size: .66rem;
+  letter-spacing: .2em;
+  transition: background-color .3s ease, color .3s ease, border-color .3s ease, transform .35s var(--ease-out), opacity .35s ease, visibility .35s;
+}
+#reveal .reveal-date__instant .icon { width: 13px; height: 13px; fill: currentColor; stroke: none; }
+html.lang-te #reveal .reveal-date__instant { font-size: .84rem; font-weight: 500; }
+#reveal.is-revealed .reveal-date__instant {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px) scale(.94);
+  pointer-events: none;
+}
+#reveal .reveal-date__msg {
+  font-family: var(--script);
+  font-size: clamp(2.3rem, 8.5vw, 3.3rem);
+  line-height: 1.1;
+  color: var(--gold-soft);
+  outline: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(14px) scale(.96);
+  transition: opacity .6s var(--ease-out), transform .8s var(--ease-spring), visibility .6s;
+}
+#reveal .reveal-date__msg-text {
+  display: inline-block;
+  padding: 0 .14em .1em;
+  background: var(--foil);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+#reveal.is-revealed .reveal-date__msg {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition-delay: .3s;
+}
+html.lang-te #reveal .reveal-date__msg { font-size: clamp(1.7rem, 6.4vw, 2.4rem); line-height: 1.5; }
+
+/* ---------------- landscape phones: title and button beside the ticket ---------------- */
+@media (max-height: 520px) and (orientation: landscape) {
+  #reveal.reveal-date {
+    --card-w: min(50vw, 420px, calc((100svh - 3rem) * 4 / 3));
+    --notch: 11px;
+    display: grid;
+    align-items: center;
+    min-height: 100svh;
+    padding-top: max(1.5rem, env(safe-area-inset-top));
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+  }
+  #reveal .reveal-date__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--card-w);
+    grid-template-areas: "head card" "after card";
+    align-items: center;
+    column-gap: clamp(1.25rem, 4vw, 3rem);
+    width: 100%;
+  }
+  #reveal .reveal-date__stage { display: contents; }
+  #reveal .reveal-date__head { grid-area: head; align-self: end; margin-bottom: 1rem; }
+  #reveal .reveal-date__shadow { grid-area: card; }
+  #reveal .reveal-date__after { grid-area: after; align-self: start; }
+  #reveal .reveal-date__title { font-size: clamp(2.4rem, 7vw, 3.6rem); }
+  html.lang-te #reveal .reveal-date__title { font-size: clamp(1.8rem, 5vw, 2.6rem); }
+  #reveal .reveal-date__msg { font-size: clamp(1.9rem, 5vw, 2.6rem); }
+  html.lang-te #reveal .reveal-date__msg { font-size: clamp(1.5rem, 4vw, 2rem); }
+}
+
+/* ---------------- reduced motion: a still coin, no shimmer ---------------- */
+@media (prefers-reduced-motion: reduce) {
+  #reveal .reveal-date__glow { animation: none; }
+  #reveal .reveal-date__hint { animation: none; opacity: .95; transform: translate(4cqi, 2cqi) rotate(-10deg); }
+  #reveal.is-revealed .reveal-date__glint,
+  #reveal.is-revealed .reveal-date__glint-in { animation: none; visibility: hidden; }
+  #reveal.is-revealed .reveal-date__twinkle { animation: none; opacity: .9; transform: scale(1); }
+}
