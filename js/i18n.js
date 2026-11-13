@@ -53,7 +53,7 @@
     brideParents: ["శ్రీ తప్పెట్ల గణేష్ కుమార్", "శ్రీమతి స్వర్ణలత"],
     groomRelation: "గార్ల జ్యేష్ఠ పుత్రుడు",   // follows the parents' names in Telugu
     brideRelation: "గార్ల జ్యేష్ఠ పుత్రిక",
-    families: "పిల్లి & తప్పెట్ల కుటుంబాలు",
+    families: "పిల్లి & తప్పెట్ల వారి కుటుంబాలు",
     dateLong: "ఆదివారం, 29 నవంబర్ 2026",
     time: "ఉదయం 9:05 గంటలకు",
     venue: {
@@ -62,6 +62,10 @@
       line2: "ఆసిఫ్ నగర్, హైదరాబాద్",
     },
   };
+
+  /* ---------- browser-tab title ---------- */
+  const TITLE_EN = document.title;
+  const TITLE_TE = "అఖిల్ & అలేఖ్య శ్రీ · 29.11.2026";
 
   /* ---------- swap engine ---------- */
   const ATTRS = ["aria-label", "placeholder", "title", "alt"];
@@ -129,6 +133,7 @@
     html.lang = lang;
     html.classList.toggle("lang-te", lang === "te");
     applyDom(lang);
+    document.title = lang === "te" ? TITLE_TE : TITLE_EN;
     updateToggle();
     store.set(lang);
     if (lang === "te") {

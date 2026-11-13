@@ -16,7 +16,8 @@ nothing religious. **Family: please check the names and phrasing, and edit freel
 | Elder son of {parents} | {parents} గార్ల జ్యేష్ఠ పుత్రుడు (the parents come first in Telugu) |
 | Elder daughter of {parents} | {parents} గార్ల జ్యేష్ఠ పుత్రిక |
 | The Groom / The Bride | వరుడు / వధువు |
-| the Pilli & Tappetla families | పిల్లి & తప్పెట్ల కుటుంబాలు |
+| the Pilli & Tappetla families | పిల్లి & తప్పెట్ల వారి కుటుంబాలు |
+| The Pilli family / The Tappetla family | పిల్లి వారి కుటుంబం / తప్పెట్ల వారి కుటుంబం |
 | Sunday, 29 November 2026 | ఆదివారం, 29 నవంబర్ 2026 |
 | Sunday / November | ఆదివారం / నవంబర్ |
 | 9:05 AM | ఉదయం 9:05 |
@@ -33,7 +34,7 @@ nothing religious. **Family: please check the names and phrasing, and edit freel
 | Tap the seal to open | ముద్రను తాకి తెరవండి |
 | Sound on for music | సంగీతం కోసం సౌండ్ ఆన్ చేయండి |
 | Together with their families | ఇరు కుటుంబాల ఆశీస్సులతో |
-| invite you to celebrate their wedding | తమ వివాహ వేడుకకు మిమ్మల్ని సాదరంగా ఆహ్వానిస్తున్నారు |
+| invite you to celebrate their wedding | తమ వివాహ వేడుకకు మిమ్మల్ని ఆహ్వానిస్తున్నారు |
 | are getting married | వివాహ మహోత్సవానికి ఆహ్వానం |
 | Open invitation | ఆహ్వానాన్ని తెరవండి |
 | Scroll | కిందికి జరపండి |
@@ -42,7 +43,7 @@ nothing religious. **Family: please check the names and phrasing, and edit freel
 
 | English | తెలుగు |
 |---|---|
-| With joy in our hearts and gratitude for the love that brought us here, we request the pleasure of your company as we begin our journey together. | హృదయం నిండా ఆనందంతో, మమ్మల్ని ఒక్కటి చేసిన ప్రేమకు కృతజ్ఞతతో, మా కొత్త జీవిత ప్రయాణం ప్రారంభంలో మీ రాకను సాదరంగా కోరుకుంటున్నాము. |
+| With joy in our hearts and gratitude for the love that brought us here, we request the pleasure of your company as we begin our journey together. | హృదయం నిండా ఆనందంతో, మమ్మల్ని ఒక్కటి చేసిన ప్రేమకు కృతజ్ఞతతో, మా కొత్త జీవిత ప్రయాణం మొదలయ్యే ఈ వేళ మీరు మాతో ఉండాలని మనసారా కోరుకుంటున్నాము. |
 | Tap to flip | తిప్పడానికి తాకండి |
 | Two families · One celebration | రెండు కుటుంబాలు · ఒకే వేడుక |
 
@@ -54,7 +55,7 @@ nothing religious. **Family: please check the names and phrasing, and edit freel
 | Scratch to reveal | గీకి చూడండి |
 | Scratch here | ఇక్కడ గీకండి |
 | It's a date! | తేదీ ఖరారు! |
-| Reveal instantly | వెంటనే చూపించు |
+| Reveal instantly | వెంటనే చూడండి |
 | the 29th of November, 2026 | 29 నవంబర్, 2026 |
 | The morning we say yes | మేము ఒక్కటయ్యే ఉదయం |
 | Counting down to forever | కొత్త జీవితానికి కౌంట్‌డౌన్ |
@@ -68,10 +69,10 @@ nothing religious. **Family: please check the names and phrasing, and edit freel
 | English | తెలుగు |
 |---|---|
 | When & Where | ఎప్పుడు & ఎక్కడ |
-| Join us | మాతో చేరండి |
+| Join us | తప్పకుండా రండి |
 | Date / Time / Venue | తేదీ / సమయం / వేదిక |
 | Open in Google Maps | గూగుల్ మ్యాప్స్‌లో తెరవండి |
-| Get directions / Directions | దారి చూపించు |
+| Get directions / Directions | దారి చూడండి |
 | Apple Maps | ఆపిల్ మ్యాప్స్ |
 | Copy address | చిరునామా కాపీ చేయండి |
 | Address copied | చిరునామా కాపీ అయింది |
@@ -96,10 +97,10 @@ nothing religious. **Family: please check the names and phrasing, and edit freel
 | Share this invitation | ఈ ఆహ్వానాన్ని షేర్ చేయండి |
 | Send on WhatsApp | వాట్సాప్‌లో పంపండి |
 | Copy link / Link copied | లింక్ కాపీ చేయండి / లింక్ కాపీ అయింది |
-| Your presence is the greatest gift, and your blessings the warmest welcome. | మీ రాకే మాకు గొప్ప కానుక, మీ ఆశీస్సులే మాకు ఆత్మీయ స్వాగతం. |
+| Your presence is the greatest gift, and your blessings the warmest welcome. | మీ రాకే మాకు గొప్ప కానుక, మీ ఆశీస్సులే మా కొత్త జీవితానికి ఆత్మీయ స్వాగతం. |
 | With love, | ప్రేమతో, |
 | Back to top | పైకి వెళ్ళండి |
-| Made with love | ప్రేమతో రూపొందించబడింది |
+| Made with love | ప్రేమతో రూపొందించాం |
 
 ## Player and navigation
 

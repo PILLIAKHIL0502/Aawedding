@@ -28,7 +28,7 @@
   const TOASTS = [
     ["Your love has reached the couple 💛", "మీ ప్రేమ వధూవరులకు చేరింది 💛"],
     ["Straight to the couple's hearts 💕", "నేరుగా వధూవరుల హృదయాలకు 💕"],
-    ["Sent with love, received with joy 🌸", "ప్రేమతో పంపారు, ఆనందంతో అందుకున్నారు 🌸"],
+    ["Sent with love, received with joy 🌸", "మీరు ప్రేమతో పంపారు, వారు ఆనందంగా అందుకున్నారు 🌸"],
     ["One more blessing for the happy couple 💐", "నూతన వధూవరులకు మరో ఆశీస్సు 💐"],
   ];
 
@@ -88,7 +88,7 @@
         label.textContent = state === "ready"
           ? App.t("Now let go to send", "ఇప్పుడు వదలండి")
           : state === "charging"
-            ? App.t("Keep holding…", "అలాగే పట్టుకోండి…")
+            ? App.t("Keep holding…", "అలాగే నొక్కి ఉంచండి…")
             : App.t("Hold to send love", "ప్రేమను పంపడానికి నొక్కి పట్టుకోండి");
         renderCount(shown);
       }
@@ -191,7 +191,7 @@
         const now = Date.now();
         if (now - lastHint > 6000) {
           lastHint = now;
-          App.toast(App.t("Hold a little longer to send your blessing", "ఆశీస్సు పంపడానికి కాసేపు నొక్కి పట్టుకోండి"));
+          App.toast(App.t("Hold a little longer to send your blessing", "మీ ఆశీస్సు పంపడానికి ఇంకాసేపు నొక్కి పట్టుకోండి"));
         }
       }
 
@@ -327,7 +327,7 @@
 
       function waWishUrl(text, name) {
         if (!text) return "https://wa.me/";
-        const head = App.t(`A wish for ${W.couple} 💛`, `${TE.couple || W.couple} కోసం ఒక శుభాకాంక్ష 💛`);
+        const head = App.t(`A wish for ${W.couple} 💛`, `${TE.couple || W.couple}లకు ఒక శుభాకాంక్ష 💛`);
         const msg = `${head}\n\n“${text}”\n— ${name || wellWisher()}\n\n${W.hashtag}`;
         return "https://wa.me/?text=" + encodeURIComponent(msg);
       }
@@ -480,8 +480,8 @@
         layout();
         fly(li, from);
         App.toast(saved
-          ? App.t("Your wish has been added 💌", "మీ శుభాకాంక్ష జతచేయబడింది 💌")
-          : App.t("Your wish is on the wall, but this browser can't save it", "మీ శుభాకాంక్ష కనిపిస్తోంది, కానీ ఈ బ్రౌజర్‌లో భద్రపరచలేము"), 2800);
+          ? App.t("Your wish has been added 💌", "మీ శుభాకాంక్షను జత చేశాం 💌")
+          : App.t("Your wish is on the wall, but this browser can't save it", "మీ శుభాకాంక్ష కనిపిస్తోంది, కానీ ఈ బ్రౌజర్‌లో సేవ్ కాలేదు"), 2800);
         return true;
       }
 
@@ -565,8 +565,8 @@
         const v = TE.venue || {};
         return App.t(
           `You're invited! 💍 ${W.couple} are getting married on ${W.dateLong} at ${W.time}, ${W.venue.name}, ${W.venue.line2}.`,
-          `మీకు సాదర ఆహ్వానం! 💍 ${TE.couple || W.couple} వివాహం ${TE.dateLong || W.dateLong}, ${TE.time || W.time}, ` +
-          `${v.name || W.venue.name}, ${v.line2 || W.venue.line2}‌లో.`
+          `మీకు సాదర ఆహ్వానం! 💍 ${TE.couple || W.couple} వివాహం ${TE.dateLong || W.dateLong}, ${TE.time || W.time} ` +
+          `${v.name || W.venue.name}, ${v.line2 || W.venue.line2}‌లో జరగనుంది.`
         );
       }
       async function copyText(s) {

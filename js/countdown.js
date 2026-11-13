@@ -153,10 +153,11 @@
       if (phase === "before") {
         if (d >= 2) togo = App.t(`${d} days to go`, `ఇంకా ${d} రోజులు`);
         else if (d === 1) togo = App.t("1 day to go", "ఇంకా 1 రోజు");
-        else togo = App.t("Almost time", "ఇంకొన్ని గంటల్లో");
+        else togo = App.t("Almost time", "సమయం దగ్గరపడింది!");
+        const one = (n, a, b) => `${n} ${n === 1 ? a : b}`;
         sr = App.t(
-          `${d} days, ${h} hours and ${m} minutes to go`,
-          `ఇంకా ${d} రోజులు, ${h} గంటలు, ${m} నిమిషాలు`
+          `${one(d, "day", "days")}, ${one(h, "hour", "hours")} and ${one(m, "minute", "minutes")} to go`,
+          `ఇంకా ${one(d, "రోజు", "రోజులు")}, ${one(h, "గంట", "గంటలు")}, ${one(m, "నిమిషం", "నిమిషాలు")}`
         );
       } else if (phase === "today") {
         status = App.t("Today's the day!", "ఈరోజే ఆ శుభదినం!");

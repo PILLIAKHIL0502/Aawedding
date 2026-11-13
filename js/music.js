@@ -543,9 +543,9 @@
       closeBtn.setAttribute("aria-label", App.t("Hide music player", "సంగీత ప్లేయర్‌ను దాచండి"));
       statusEl.textContent = playing
         ? App.t("Now playing", "ఇప్పుడు వినిపిస్తోంది")
-        : App.t("Paused", "ఆపివేయబడింది");
+        : App.t("Paused", "ఆగింది");
       const title = synth ? App.t("Music box", "మ్యూజిక్ బాక్స్") : M.title;
-      const artist = synth ? App.t("An original melody", "ఒక స్వంత బాణీ") : M.artist;
+      const artist = synth ? App.t("An original melody", "ప్రత్యేకంగా కూర్చిన బాణీ") : M.artist;
       titleEl.textContent = metaTitle.textContent = title;
       artistEl.textContent = metaArtist.textContent = artist;
       updateProgress(true);

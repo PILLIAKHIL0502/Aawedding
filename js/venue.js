@@ -129,7 +129,7 @@
         selectAddressText();
         App.toast(App.t(
           "Couldn't copy automatically. The address is selected for you",
-          "ఆటోమేటిక్‌గా కాపీ కాలేదు. చిరునామా ఎంచుకోబడింది, కాపీ చేసుకోండి"
+          "ఆటోమేటిక్‌గా కాపీ కాలేదు. చిరునామాను సెలెక్ట్ చేశాం, మీరే కాపీ చేసుకోండి"
         ), 3600);
       }
     }
