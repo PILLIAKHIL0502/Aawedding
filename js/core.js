@@ -66,11 +66,62 @@
 
   /* ---------- tiny event bus ---------- */
   const listeners = {};
-  const on = (evt, fn) => ((listeners[evt] ||= []).push(fn), () => off(evt, fn));
+  let registering = null;   // module currently initialising (tags its listeners)
+  const on = (evt, fn) => {
+    if (registering && !fn.__module) fn.__module = registering;
+    (listeners[evt] ||= []).push(fn);
+    return () => off(evt, fn);
+  };
   const off = (evt, fn) => { listeners[evt] = (listeners[evt] || []).filter((f) => f !== fn); };
   const emit = (evt, data) => (listeners[evt] || []).slice().forEach((fn) => {
     try { fn(data); } catch (e) { console.error(`[App] listener for "${evt}" failed`, e); }
   });
+
+  /* While the unrolled parchment covers the page, measure the real (unlocked) layout once.
+     The guest is reading, the page behind is hidden, so the ~50-190 ms refresh is invisible here
+     instead of stalling the curtain lift or the hero entrance. */
+  let prerefreshed = false;
+  const prerefresh = () => {
+    if (prerefreshed || App.state.opened || !ScrollTrigger) return;
+    const html = document.documentElement;
+    const t0 = performance.now();
+    html.classList.remove("is-locked");
+    ScrollTrigger.refresh();
+    html.classList.add("is-locked");
+    prerefreshed = true;
+    if (App.params.has("debugperf")) console.log(`[perf] prerefresh ${(performance.now() - t0).toFixed(1)}ms`);
+  };
+  on("intro:unrolled", () => setTimeout(prerefresh, 120));
+
+  // Modules whose "open" work is visible immediately after the curtain lifts.
+  const ABOVE_FOLD = new Set(["intro", "hero", "player", "fx", "particles"]);
+
+  // Run each listener in its own animation frame, then call done().
+  const runSpread = (fns, done) => {
+    const queue = fns.slice();
+    const next = () => {
+      const fn = queue.shift();
+      if (!fn) return done && done();
+      const t0 = performance.now();
+      try { fn(); } catch (e) { console.error('[App] "open" listener failed', e); }
+      if (App.params.has("debugperf")) console.log(`[perf] open:${fn.__module || "core"} ${(performance.now() - t0).toFixed(1)}ms @${t0.toFixed(0)}`);
+      requestAnimationFrame(next);
+    };
+    next();
+  };
+
+  // Call fn once the intro overlay has finished leaving (hidden or removed), or after 2.5 s.
+  const afterIntroGone = (fn) => {
+    const intro = document.getElementById("intro");
+    let fired = false;
+    const fire = () => { if (!fired) { fired = true; fn(); } };
+    const gone = () => !intro || !intro.isConnected || intro.hidden || getComputedStyle(intro).display === "none";
+    if (gone()) return fire();
+    const mo = new MutationObserver(() => { if (gone()) { mo.disconnect(); fire(); } });
+    mo.observe(intro, { attributes: true, attributeFilter: ["style", "class", "hidden"] });
+    mo.observe(intro.parentNode, { childList: true });
+    setTimeout(() => { mo.disconnect(); fire(); }, 2500);
+  };
 
   /* ---------- module registry ---------- */
   const modules = [];
@@ -120,10 +171,12 @@
       document.documentElement.classList.add("is-locked");
       App.lenis && App.lenis.stop();
     },
-    unlock() {
-      document.documentElement.classList.remove("is-locked");
+    unlock({ refresh = true } = {}) {
+      const html = document.documentElement;
+      const wasLocked = html.classList.contains("is-locked");
+      html.classList.remove("is-locked");
       App.lenis && App.lenis.start();
-      ScrollTrigger && ScrollTrigger.refresh();
+      if (refresh && wasLocked && ScrollTrigger) ScrollTrigger.refresh();
     },
 
     scrollTo(target, opts = {}) {
@@ -148,12 +201,32 @@
     },
 
     /* Called by intro (or by core when the intro is skipped). */
+    /* Called by the intro mid-way through its curtain lift (or by core when the intro is skipped).
+       Every module sets up its entrance on "open"; running them all in one frame stalled the
+       curtain animation on phones (~140 ms, ~400 ms on slow CPUs). So listeners run one per
+       animation frame, and the single layout refresh waits until the intro overlay is gone. */
     open() {
       if (App.state.opened) return;
       App.state.opened = true;
-      App.unlock();
+      App.unlock({ refresh: false });
       document.documentElement.classList.add("is-open");
-      emit("open");
+      // What's on screen at the start sets up during the curtain lift; sections further down
+      // set up once the intro is gone (nobody can scroll to them before that anyway).
+      const all = (listeners.open || []).slice();
+      const now = all.filter((fn) => !fn.__module || ABOVE_FOLD.has(fn.__module));
+      const later = all.filter((fn) => !now.includes(fn));
+      runSpread(now, () => afterIntroGone(() => runSpread(later, () => {
+        // Layout was already measured while the guest read the parchment (see prerefresh), so the
+        // final tidy-up refresh can wait for an idle moment instead of interrupting the hero entrance.
+        const go = () => {
+          const t0 = performance.now();
+          ScrollTrigger && ScrollTrigger.refresh();
+          if (App.params.has("debugperf")) console.log(`[perf] refresh ${(performance.now() - t0).toFixed(1)}ms @${t0.toFixed(0)}`);
+        };
+        if (!prerefreshed) go();
+        else if ("requestIdleCallback" in window) requestIdleCallback(go, { timeout: 6000 });
+        else setTimeout(go, 4000);
+      })));
     },
 
     async start() {
@@ -171,8 +244,10 @@
 
       const ready = new Set();
       for (const m of modules) {
+        registering = m.name;
         try { m.init(App); ready.add(m.name); }
         catch (e) { console.error(`[App] module "${m.name}" failed to init`, e); }
+        registering = null;
       }
 
       setupReveals();
@@ -244,6 +319,44 @@
     window.addEventListener("resize", () => {
       clearTimeout(t);
       t = setTimeout(() => emit("resize"), 150);
+    });
+    if (!ScrollTrigger) return;
+    /* Rotating a phone can add or remove whole pinned scenes (short screens drop the pin), which
+       shifts every later section. Remember where the reader is at the first resize event (before
+       gsap.matchMedia reverts any pin) and put them back in the same scene after the refresh. */
+    let anchor = null;
+    const capture = () => {
+      if (anchor || !App.state.opened) return;
+      const pinned = ScrollTrigger.getAll().find((st) => st.pin && st.isActive);
+      if (pinned) {
+        anchor = { el: pinned.trigger.closest("section") || pinned.trigger, progress: pinned.progress, pinned: true };
+        return;
+      }
+      const mid = window.innerHeight / 2;
+      for (const el of document.querySelectorAll("main section, main footer")) {
+        const r = el.getBoundingClientRect();
+        if (r.top <= mid && r.bottom > mid) { anchor = { el, offset: (mid - r.top) / Math.max(1, r.height) }; break; }
+      }
+    };
+    window.addEventListener("resize", capture, true);
+    ScrollTrigger.addEventListener("refresh", () => {
+      const a = anchor;
+      anchor = null;
+      if (!a || !a.el.isConnected) return;
+      let y;
+      const st = a.pinned && ScrollTrigger.getAll().find((s) => s.pin && a.el.contains(s.trigger));
+      if (st) {
+        y = st.start + a.progress * (st.end - st.start);           // same point in the pinned scene
+      } else if (a.pinned) {
+        const r = a.el.getBoundingClientRect();                      // pin gone: same share of the section
+        y = r.top + window.scrollY + a.progress * Math.max(0, r.height - window.innerHeight);
+      } else {
+        const r = a.el.getBoundingClientRect();                      // keep the same spot at mid-screen
+        y = r.top + window.scrollY + a.offset * r.height - window.innerHeight / 2;
+      }
+      y = Math.max(0, y);
+      if (App.lenis) App.lenis.scrollTo(y, { immediate: true, force: true });
+      else window.scrollTo(0, y);
     });
   }
 

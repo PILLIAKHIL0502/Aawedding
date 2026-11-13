@@ -85,6 +85,7 @@
   document.querySelectorAll(SELECTOR).forEach(snapshot);
 
   function applyDom(lang) {
+    const reset = [];
     document.querySelectorAll(SELECTOR).forEach((el) => {
       const o = snapshot(el);
       const hasText = el.dataset.te != null || el.dataset.teHtml != null;
@@ -96,8 +97,8 @@
         } else {
           el.innerHTML = o.html;
         }
-        // anything a reveal had hidden mid-animation must stay readable
-        if (window.gsap) window.gsap.set(el, { clearProps: "opacity,transform" });
+        // anything a reveal had hidden mid-animation must stay readable (batched below)
+        if (el.style.opacity || el.style.transform) reset.push(el);
       }
       ATTRS.forEach((a) => {
         const te = el.dataset[camel(a)];
@@ -106,6 +107,7 @@
         else if (o.attrs[a] != null) el.setAttribute(a, o.attrs[a]);
       });
     });
+    if (reset.length && window.gsap) window.gsap.set(reset, { clearProps: "opacity,transform" });
   }
 
   let fontsLinked = false;
@@ -132,19 +134,51 @@
     const html = document.documentElement;
     html.lang = lang;
     html.classList.toggle("lang-te", lang === "te");
+    const anchor = changed && !silent ? captureAnchor() : null;
     applyDom(lang);
     document.title = lang === "te" ? TITLE_TE : TITLE_EN;
     updateToggle();
     store.set(lang);
-    if (lang === "te") {
-      loadTeluguFonts().then(() => window.ScrollTrigger && window.ScrollTrigger.refresh());
-    }
     if (changed && !silent) {
       App.emit("lang", lang);
       window.ScrollTrigger && window.ScrollTrigger.refresh();
+      restoreAnchor(anchor);
+    }
+    if (lang === "te") {
+      loadTeluguFonts().then(() => {
+        if (window.ScrollTrigger) window.ScrollTrigger.refresh();
+        restoreAnchor(anchor);
+      });
     }
   }
+
+  /* Telugu text is taller, so switching language changes section heights above the reader.
+     Keep the section they're looking at in the same place on screen. Inside a pinned scene,
+     ScrollTrigger already preserves progress, so leave it alone. */
+  function captureAnchor() {
+    if (!App.state.opened) return null;
+    const ST = window.ScrollTrigger;
+    if (ST && ST.getAll().some((t) => t.pin && t.isActive)) return null;
+    const blocks = document.querySelectorAll("main > section, main > footer, main > .pin-spacer > section");
+    for (const el of blocks) {
+      const r = el.getBoundingClientRect();
+      if (r.bottom > 1) return { el, top: r.top };
+    }
+    return null;
+  }
+  function restoreAnchor(a) {
+    if (!a || !a.el.isConnected) return;
+    const delta = a.el.getBoundingClientRect().top - a.top;
+    if (Math.abs(delta) < 1) return;
+    const y = window.scrollY + delta;
+    if (App.lenis) App.lenis.scrollTo(y, { immediate: true, force: true });
+    else window.scrollTo(0, y);
+  }
   App.setLang = setLang;
+  /* Resolves when the current language's fonts are ready. Re-split text (SplitText) only after
+     this, or the split measures fallback-font glyphs. */
+  App.fontsReady = () =>
+    (App.lang === "te" ? loadTeluguFonts() : Promise.resolve()).then(() => document.fonts.ready);
 
   /* ---------- the toggle: plain text "EN | తె", fixed top-left on the intro and the page ---------- */
   let toggle;
@@ -163,7 +197,8 @@
       App.haptic(8);
       setLang(b.dataset.lang);
     });
-    document.body.appendChild(toggle);
+    // first in the DOM so it's also first in the keyboard tab order (it sits top-left)
+    document.body.insertBefore(toggle, document.body.firstChild);
     watchContrast();
   }
   function updateToggle() {
@@ -173,25 +208,53 @@
   }
 
   /* Green text vanishes on the dark-green sections (intro, date card, countdown, footer), so the
-     toggle checks what's underneath it and switches to a light mint palette there. */
+     toggle switches to a light mint palette over them. Instead of hit-testing every scroll frame,
+     one ScrollTrigger per dark section reports when it passes under the toggle (pins included). */
   function watchContrast() {
-    let queued = false;
-    const check = () => {
-      queued = false;
-      const r = toggle.getBoundingClientRect();
-      const x = r.left + r.width / 2, y = r.top + r.height / 2;
-      const under = document.elementsFromPoint(x, y).find((el) => !toggle.contains(el));
-      const dark = !!(under && under.closest('[data-theme="dark"], #intro'));
-      toggle.classList.toggle("is-on-dark", dark);
-    };
-    const queue = () => { if (!queued) { queued = true; requestAnimationFrame(check); } };
-    window.addEventListener("scroll", queue, { passive: true });
-    window.addEventListener("resize", queue);
-    App.on("open", () => setTimeout(queue, 50));
-    App.on("lang", queue);
-    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", queue);
-    else queue();
-    window.addEventListener("load", queue);
+    const ST = window.ScrollTrigger;
+    const intro = document.getElementById("intro");
+    const introShowing = () =>
+      !!intro && intro.isConnected && !intro.hidden && getComputedStyle(intro).display !== "none" &&
+      getComputedStyle(intro).visibility !== "hidden";
+    const active = new Set();
+    const update = () => toggle.classList.toggle("is-on-dark", introShowing() || active.size > 0);
+
+    if (ST) {
+      const y = () => {
+        const r = toggle.getBoundingClientRect();
+        return Math.round(r.top + r.height / 2) || 28;
+      };
+      document.querySelectorAll('main [data-theme="dark"]').forEach((el) => {
+        if (getComputedStyle(el).position === "fixed") return;
+        ST.create({
+          trigger: el,
+          start: () => `top ${y()}px`,
+          end: () => `bottom ${y()}px`,
+          refreshPriority: -1,           // measure after pinned scenes add their spacing
+          onToggle: (self) => { self.isActive ? active.add(el) : active.delete(el); update(); },
+        });
+      });
+    } else {
+      // no ScrollTrigger: hit-test, throttled to one check per frame
+      let queued = false;
+      const check = () => {
+        queued = false;
+        const r = toggle.getBoundingClientRect();
+        const under = document.elementsFromPoint(r.left + r.width / 2, r.top + r.height / 2).find((el) => !toggle.contains(el));
+        active.clear();
+        if (under && under.closest('[data-theme="dark"]')) active.add(under);
+        update();
+      };
+      window.addEventListener("scroll", () => { if (!queued) { queued = true; requestAnimationFrame(check); } }, { passive: true });
+    }
+    if (intro && "MutationObserver" in window) {
+      new MutationObserver(update).observe(intro, { attributes: true, attributeFilter: ["style", "class", "hidden"] });
+      if (intro.parentNode) new MutationObserver(update).observe(intro.parentNode, { childList: true });
+    }
+    App.on("open", () => [50, 700, 1400, 2200].forEach((t) => setTimeout(update, t)));
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", update);
+    else update();
+    window.addEventListener("load", update);
   }
 
   buildToggle();

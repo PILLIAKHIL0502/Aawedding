@@ -15,6 +15,9 @@
   --gold: #c8a96a;
   --gold-soft: #e4d2a6;
   --gold-deep: #a8874a;
+  /* Text-safe inks for small type on ivory (WCAG AA, 4.5:1+). Use these for anything under ~14px. */
+  --gold-ink: #8a6d36;
+  --sage-ink: #56724f;
   --blush: #e8c4b8;
   --blush-soft: #f3e1da;
   --ink: #2b2a27;
@@ -47,6 +50,11 @@
   /* elevation */
   --shadow-soft: 0 24px 60px -30px rgba(31, 61, 54, .35);
   --shadow-lift: 0 30px 80px -30px rgba(15, 32, 28, .55);
+}
+
+/* large screens (27" and up): wider content, so the page doesn't float in empty ivory */
+@media (min-width: 1800px) {
+  :root { --maxw: min(1440px, 74vw); }
 }
 
 /* ---------------- reset ---------------- */
@@ -91,6 +99,7 @@ h1, h2, h3, h4, p { margin: 0; }
 }
 [data-theme="dark"] .eyebrow { color: var(--gold-soft); }
 .display {
+  font-weight: 400;   /* script fonts have one weight; h1/h2's default bold would be faked */
   font-family: var(--script);
   font-size: clamp(2.8rem, 10vw, 5rem);
   color: var(--emerald);
@@ -156,6 +165,13 @@ h1, h2, h3, h4, p { margin: 0; }
   transition: opacity .3s ease, transform .4s var(--ease-out);
 }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
+/* phones and short screens: show toasts at the top, clear of the music player and the content being tapped */
+@media (max-width: 600px), (max-height: 600px) {
+  .toast {
+    bottom: auto; top: calc(max(10px, env(safe-area-inset-top)) + 44px);
+    transform: translate(-50%, -16px);
+  }
+}
 
 /* ---------------- reveal helpers (driven by core.js) ---------------- */
 /* Elements are hidden only once JS confirms it will animate them (html.js-anim). */
@@ -209,7 +225,7 @@ html.lang-te .eyebrow { letter-spacing: .04em; font-size: .86rem; }
 .lang-toggle button {
   position: relative;
   display: inline-flex; align-items: center; justify-content: center;
-  min-width: 40px; min-height: 40px; padding: 0 8px;
+  min-width: 44px; min-height: 44px; padding: 0 8px;
   font-family: "AA Toggle", "Anek Telugu", system-ui, sans-serif;
   font-size: 13px; font-weight: 600; line-height: 1; letter-spacing: .08em;
   color: var(--lt-off);
@@ -232,8 +248,13 @@ html.lang-te .eyebrow { letter-spacing: .04em; font-size: .86rem; }
 .lang-toggle button[aria-pressed="true"]::after { transform: scaleX(1); }
 .lang-toggle__sep { width: 1px; height: 13px; background: var(--lt-sep); }
 
+@media (min-width: 1800px) {
+  .lang-toggle button { font-size: 15px; padding: 0 10px; }
+  .lang-toggle button[lang="te"] { font-size: 16px; }
+  .lang-toggle__sep { height: 15px; }
+}
 @media (max-width: 600px), (max-height: 500px) {
-  .lang-toggle button { min-width: 36px; min-height: 40px; padding: 0 7px; font-size: 12px; }
+  .lang-toggle button { min-width: 44px; min-height: 44px; padding: 0 7px; font-size: 12px; }
   .lang-toggle button[lang="te"] { font-size: 13px; }
 }
 
