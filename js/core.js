@@ -166,15 +166,19 @@
         ]);
       } catch (_) {}
 
+      const ready = new Set();
       for (const m of modules) {
-        try { m.init(App); }
+        try { m.init(App); ready.add(m.name); }
         catch (e) { console.error(`[App] module "${m.name}" failed to init`, e); }
       }
 
       setupReveals();
 
       const intro = document.getElementById("intro");
-      if (App.skipIntro || !intro) {
+      // If the intro's script is missing or crashed, never leave guests stuck behind the overlay.
+      const introBroken = intro && !ready.has("intro");
+      if (introBroken) console.warn("[App] intro module unavailable; opening the page directly");
+      if (App.skipIntro || !intro || introBroken) {
         if (intro) intro.remove();
         App.open();
       } else {
