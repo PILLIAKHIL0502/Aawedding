@@ -177,35 +177,61 @@ html.lang-te [data-te-html] {
 }
 html.lang-te .eyebrow { letter-spacing: .04em; font-size: .86rem; }
 
-/* ---------------- language toggle (built by js/i18n.js) ---------------- */
+/* ---------------- language toggle (built by js/i18n.js) ----------------
+   The labels use a bundled 2 KB subset of Anek Telugu ("EN" + "తెలుగు"), so the toggle renders
+   identically on every phone, even before the full Telugu fonts are downloaded. */
+@font-face {
+  font-family: "AA Toggle";
+  src: url("../assets/fonts/anek-telugu-toggle.woff2") format("woff2");
+  font-weight: 600;
+  font-display: block;
+  unicode-range: U+45, U+4E, U+C17, U+C24, U+C32, U+C41, U+C46;
+}
 .lang-toggle {
+  --lt-h: 30px;
   position: fixed; z-index: 85;
-  top: max(12px, env(safe-area-inset-top)); left: max(12px, env(safe-area-inset-left));
-  display: inline-grid; grid-template-columns: 1fr 1fr; align-items: center;
+  top: max(14px, env(safe-area-inset-top)); left: max(14px, env(safe-area-inset-left));
+  display: inline-grid; grid-template-columns: 1fr 1fr; align-items: stretch;
   padding: 3px; border-radius: 999px;
-  background: rgba(21, 43, 38, .78);
-  border: 1px solid rgba(200, 169, 106, .55);
+  background: rgba(21, 43, 38, .72);
+  border: 1px solid rgba(200, 169, 106, .5);
   -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
-  box-shadow: 0 8px 24px -10px rgba(15, 32, 28, .5);
+  box-shadow: 0 6px 18px -10px rgba(15, 32, 28, .55);
 }
 .lang-toggle button {
   position: relative; z-index: 1;
-  min-width: 52px; min-height: 36px; padding: 0 .8rem;
-  font-family: "Manrope", system-ui, sans-serif; font-size: .74rem; font-weight: 600; letter-spacing: .08em;
+  display: flex; align-items: center; justify-content: center;
+  height: var(--lt-h); min-width: 44px; padding: 0 .7rem;
+  font-family: "AA Toggle", "Anek Telugu", system-ui, sans-serif;
+  font-size: 13px; font-weight: 600; line-height: 1; letter-spacing: .06em;
   color: var(--gold-soft); border-radius: 999px;
   transition: color .35s ease;
 }
-.lang-toggle button[lang="te"] { font-family: "Anek Telugu", "Noto Sans Telugu", system-ui, sans-serif; letter-spacing: 0; font-size: .82rem; }
+/* Telugu: no tracking, and nudge down 1px to centre it optically (its vowel signs sit above the line) */
+.lang-toggle button[lang="te"] { letter-spacing: 0; font-size: 13.5px; padding-top: 1px; }
 .lang-toggle button[aria-pressed="true"] { color: var(--emerald-deep); }
 .lang-toggle button:focus-visible { outline: 2px solid var(--gold-soft); outline-offset: 2px; }
-/* expand the hit area to 44px without growing the pill */
-.lang-toggle button::after { content: ""; position: absolute; inset: -4px -2px; }
+/* expand the hit area to at least 44px without growing the pill */
+.lang-toggle button::after { content: ""; position: absolute; inset: -9px -2px; }
 .lang-toggle__thumb {
   position: absolute; top: 3px; bottom: 3px; left: 3px; width: calc(50% - 3px);
   border-radius: 999px; background: var(--foil); background-size: 200% 100%;
   transition: transform .5s var(--ease-spring);
 }
 .lang-toggle[data-active="te"] .lang-toggle__thumb { transform: translateX(100%); }
+
+/* phones: a smaller, quieter pill */
+@media (max-width: 600px), (max-height: 500px) {
+  .lang-toggle {
+    --lt-h: 24px;
+    top: max(10px, env(safe-area-inset-top)); left: max(10px, env(safe-area-inset-left));
+    padding: 2px; background: rgba(21, 43, 38, .66);
+  }
+  .lang-toggle__thumb { top: 2px; bottom: 2px; left: 2px; width: calc(50% - 2px); }
+  .lang-toggle button { min-width: 32px; padding: 0 .45rem; font-size: 10px; letter-spacing: .05em; }
+  .lang-toggle button[lang="te"] { font-size: 10.5px; }
+  .lang-toggle button::after { inset: -10px -2px; }
+}
 
 /* ---------------- a11y ---------------- */
 .sr-only {

@@ -9,8 +9,8 @@ nothing religious. **Family: please check the names and phrasing, and edit freel
 | English | తెలుగు |
 |---|---|
 | Akhil | అఖిల్ |
-| Alekhya | అలేఖ్య |
-| Akhil & Alekhya | అఖిల్ & అలేఖ్య |
+| Alekhya Sree | అలేఖ్య శ్రీ |
+| Akhil & Alekhya Sree | అఖిల్ & అలేఖ్య శ్రీ |
 | Mr. Pilli Mareswara Rao & Mrs. Arunasri | శ్రీ పిల్లి మారేశ్వర రావు & శ్రీమతి అరుణశ్రీ |
 | Mr. Tappetla Ganesh Kumar & Mrs. Swarnalatha | శ్రీ తప్పెట్ల గణేష్ కుమార్ & శ్రీమతి స్వర్ణలత |
 | Elder son of {parents} | {parents} గార్ల జ్యేష్ఠ పుత్రుడు (the parents come first in Telugu) |
@@ -78,7 +78,7 @@ nothing religious. **Family: please check the names and phrasing, and edit freel
 | Share location | లొకేషన్ షేర్ చేయండి |
 | Add to calendar | క్యాలెండర్‌లో చేర్చండి |
 | Interact with map | మ్యాప్‌ను ఉపయోగించండి |
-| Wedding of Akhil & Alekhya (calendar title) | అఖిల్ & అలేఖ్య వివాహం |
+| Wedding of Akhil & Alekhya Sree (calendar title) | అఖిల్ & అలేఖ్య శ్రీ వివాహం |
 
 ## Blessings, sharing, footer
 

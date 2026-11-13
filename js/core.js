@@ -29,16 +29,16 @@
   const venueQuery = "Royal Regency Gardens, Asif Nagar, Hyderabad";
   const enc = encodeURIComponent;
   const WEDDING = {
-    // The couple are shown by first name only; surnames appear only with the parents.
+    // The couple are shown without surnames ("Akhil", "Alekhya Sree"); surnames appear only with the parents.
     groom: {
       first: "Akhil", full: "Akhil", family: "Pilli",
       relation: "Elder son of", parents: ["Mr. Pilli Mareswara Rao", "Mrs. Arunasri"],
     },
     bride: {
-      first: "Alekhya", full: "Alekhya", family: "Tappetla",
+      first: "Alekhya Sree", full: "Alekhya Sree", family: "Tappetla",
       relation: "Elder daughter of", parents: ["Mr. Tappetla Ganesh Kumar", "Mrs. Swarnalatha"],
     },
-    couple: "Akhil & Alekhya",
+    couple: "Akhil & Alekhya Sree",
     families: "the Pilli & Tappetla families",
     hashtag: "#AkhilWedsAlekhya",
     start: new Date("2026-11-29T09:05:00+05:30"),

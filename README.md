@@ -1,4 +1,4 @@
-# Akhil & Alekhya · 29.11.2026
+# Akhil & Alekhya Sree · 29.11.2026
 
 An interactive web wedding invitation built with vanilla JS, GSAP, ScrollTrigger and Lenis. There's no framework, and it deploys as a static site on Vercel.
 

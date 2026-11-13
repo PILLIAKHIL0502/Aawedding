@@ -47,8 +47,8 @@
   /* ---------- Telugu copy for shared data (names, venue, date) ---------- */
   App.WEDDING.te = {
     groom: "అఖిల్",
-    bride: "అలేఖ్య",
-    couple: "అఖిల్ & అలేఖ్య",
+    bride: "అలేఖ్య శ్రీ",
+    couple: "అఖిల్ & అలేఖ్య శ్రీ",
     groomParents: ["శ్రీ పిల్లి మారేశ్వర రావు", "శ్రీమతి అరుణశ్రీ"],
     brideParents: ["శ్రీ తప్పెట్ల గణేష్ కుమార్", "శ్రీమతి స్వర్ణలత"],
     groomRelation: "గార్ల జ్యేష్ఠ పుత్రుడు",   // follows the parents' names in Telugu
