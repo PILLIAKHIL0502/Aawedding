@@ -69,3 +69,14 @@ The Telugu versions live in **`js/i18n.js` → `WEDDING.te`**, and each section 
   load, a built-in music-box melody plays instead.
 - **Photos:** each arch frame in `src/partials/30-couple.html` has a comment showing where an `<img>` goes.
 - **Colours:** change the tokens at the top of `css/base.css`.
+
+## Instagram reel
+
+`tools/reel/` renders the invitation itself into a 9:16 video, frame by frame on a virtual clock, so every
+animation is perfectly smooth:
+
+```bash
+tools/reel/render-parallel.sh reel/frames 60 5 en     # 4K (2160x3840) frames at 60 fps, en or te
+tools/reel/encode.sh reel/frames/all 60 reel/akhil-alekhya-reel
+# -> reel/akhil-alekhya-reel-4k.mp4, -instagram.mp4 (1080x1920), -cover.jpg
+```
