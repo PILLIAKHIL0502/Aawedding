@@ -23,7 +23,25 @@ createServer(async (req, res) => {
     const file = normalize(join(ROOT, path));
     if (!file.startsWith(ROOT)) throw new Error("outside root");
     const body = await readFile(file);
-    res.writeHead(200, { "content-type": TYPES[extname(file)] || "application/octet-stream", "cache-control": "no-store" });
+    const type = TYPES[extname(file)] || "application/octet-stream";
+    // Range requests let the browser seek in audio/video, as it can on Vercel.
+    const range = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || "");
+    if (range) {
+      const size = body.length;
+      let start = range[1] === "" ? size - Number(range[2]) : Number(range[1]);
+      let end = range[1] !== "" && range[2] !== "" ? Number(range[2]) : size - 1;
+      if (start >= size || start < 0 || end < start) {
+        res.writeHead(416, { "content-range": `bytes */${size}` });
+        return res.end();
+      }
+      end = Math.min(end, size - 1);
+      res.writeHead(206, {
+        "content-type": type, "cache-control": "no-store", "accept-ranges": "bytes",
+        "content-range": `bytes ${start}-${end}/${size}`, "content-length": end - start + 1,
+      });
+      return res.end(body.subarray(start, end + 1));
+    }
+    res.writeHead(200, { "content-type": type, "cache-control": "no-store", "accept-ranges": "bytes" });
     res.end(body);
   } catch {
     res.writeHead(404); res.end("not found");

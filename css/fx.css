@@ -266,6 +266,15 @@ html:not(.is-open) .fx-nav--rail.is-awake { opacity: 0; }
 html.fx-on-dark .fx-nav--rail .fx-nav__dot { background: rgba(228, 210, 166, .5); }
 html.fx-on-dark .fx-nav--rail .fx-nav__item.is-active .fx-nav__dot { background: var(--gold-soft); }
 
+/* narrower desktop windows: a tighter rail that stays inside the page gutter */
+@media (max-width: 1040px) {
+  .fx-nav:not(.fx-nav--rail) { right: max(3px, env(safe-area-inset-right, 0px)); }
+  .fx-nav:not(.fx-nav--rail) .fx-nav__item { width: 22px; height: 26px; }
+  .fx-nav:not(.fx-nav--rail) .fx-nav__list::before { right: 10.5px; top: 13px; bottom: 13px; }
+  .fx-nav:not(.fx-nav--rail) .fx-nav__dot { width: 6px; height: 6px; }
+  .fx-nav:not(.fx-nav--rail) .fx-nav__label { right: 26px; }
+}
+
 /* phones and short landscape screens: no gutter for a side nav (it would sit on cards);
    the top progress bar is enough there */
 @media (max-width: 600px), (max-height: 500px) {

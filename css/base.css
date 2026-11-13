@@ -24,6 +24,10 @@
   --foil: linear-gradient(110deg, #a8874a 0%, #e9d5a4 22%, #c8a96a 40%, #f4e7c4 55%, #b8955a 75%, #e4d2a6 100%);
 
   /* type */
+  /* --serif-en / --sans-en never switch with the language: use them for Latin-only text
+     (song titles, numerals you want in Cormorant) that should stay English-styled in Telugu mode. */
+  --serif-en: "Cormorant Garamond", "Times New Roman", serif;
+  --sans-en: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
   --serif: "Cormorant Garamond", "Times New Roman", serif;
   --script: "Pinyon Script", "Brush Script MT", cursive;
   --sans: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
