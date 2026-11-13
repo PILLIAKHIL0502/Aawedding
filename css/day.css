@@ -214,7 +214,11 @@
 }
 .day__cal-dow li:first-child { color: var(--gold-ink); }
 .day__dow-s { display: none; }
-@container daycal (max-width: 299.98px) { .day__cal-dow li { letter-spacing: .04em; } }
+/* very narrow cards (landscape phones): two-letter forms, SU MO TU … */
+@container daycal (max-width: 259.98px) {
+  html:not(.lang-te) .day__dow-l { display: none; }
+  html:not(.lang-te) .day__dow-s { display: inline; }
+}
 .day__cal-days li {
   display: grid; place-items: center; aspect-ratio: 1 / .92;
   font-family: var(--serif-en); font-weight: 500; color: var(--ink);

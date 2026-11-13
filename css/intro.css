@@ -392,7 +392,7 @@
   white-space: nowrap;
   color: var(--gold-deep);
 }
-html.lang-te #intro .intro__crest-mono { font-style: normal; }
+html.lang-te #intro .intro__crest-mono { font-style: normal; padding-top: .4em; }   /* NTR sits higher in its line box */
 @container intro-sheet (max-height: 470px) {
   #intro .intro__crest { display: none; }
 }
@@ -877,7 +877,7 @@ html.lang-te #intro .intro__enter-in { font-size: calc(.92rem * var(--k)); lette
 
   /* Telugu: larger across the board (readable for elders); the long invite line wraps to two or three lines */
   html.lang-te #intro .intro__together { font-size: clamp(.8rem, min(5.2cqw, 2.6cqh), calc(1.2rem * var(--k))); }
-  html.lang-te #intro .intro__names { --name-fs: clamp(1.8rem, min(13.5cqw, 8.4cqh), calc(4.2rem * var(--k))); }
+  html.lang-te #intro .intro__names { --name-fs: clamp(1.8rem, min(17cqw, 8.4cqh), calc(4.2rem * var(--k))); }   /* short words: room to grow */
   html.lang-te #intro .intro__invite { font-size: clamp(.92rem, min(6cqw, 3cqh), calc(1.4rem * var(--k))); line-height: 1.55; }
   html.lang-te #intro .intro__date { font-size: clamp(.92rem, min(5.8cqw, 2.9cqh), calc(1.36rem * var(--k))); line-height: 1.55; }
   html.lang-te #intro .intro__venue { font-size: clamp(.88rem, min(5.4cqw, 2.7cqh), calc(1.26rem * var(--k))); line-height: 1.55; }
