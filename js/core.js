@@ -180,6 +180,12 @@
     },
 
     scrollTo(target, opts = {}) {
+      // Lenis cancels a scrollTo started in the same moment a finger lifts (its touchend
+      // handler stops running animations), so defer one frame right after a touch ends.
+      if (App.lenis && performance.now() - lastTouchEnd < 80 && !opts._deferred) {
+        requestAnimationFrame(() => App.scrollTo(target, { ...opts, _deferred: true }));
+        return;
+      }
       if (App.lenis) App.lenis.scrollTo(target, { duration: 1.6, ...opts });
       else {
         const el = typeof target === "string" ? document.querySelector(target) : target;
@@ -268,6 +274,9 @@
       window.addEventListener("load", () => ScrollTrigger && ScrollTrigger.refresh());
     },
   };
+
+  let lastTouchEnd = -1e9;
+  window.addEventListener("touchend", () => { lastTouchEnd = performance.now(); }, { passive: true, capture: true });
 
   /* ---------- smooth scroll (Lenis) wired into GSAP's ticker ---------- */
   function setupSmoothScroll() {

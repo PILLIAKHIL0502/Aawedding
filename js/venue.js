@@ -462,9 +462,9 @@
       let len = 0;
       try { len = roadText.getComputedTextLength() / ROAD_SLOPE; } catch (_) {}
       if (!len) return;
-      const minX = Math.max(view.left + 10, 4 * (483 - view.bottom));   // keep the text above the frame's bottom edge
+      const minX = Math.max(view.left + 18, 4 * (483 - view.bottom));   // clear of the frame edge, above its bottom
       const before = [minX, ROUTE_X[0]];
-      const after = [Math.max(minX, ROUTE_X[1]), view.right - 14];
+      const after = [Math.max(minX, ROUTE_X[1]), view.right - 16];
       const size = (p) => p[1] - p[0];
       const [a, b] = len <= size(before) || size(before) >= size(after) ? before : after;
       const room = b - a;
