@@ -433,7 +433,8 @@
         root.classList.toggle("is-live", on && !document.hidden);
       };
       if ("IntersectionObserver" in window) {
-        new IntersectionObserver((entries) => set(entries[0].isIntersecting), { rootMargin: "0px" }).observe(root);
+        // the stage holds everything that loops (chip pulse, sparks) and tilts; the lede above it doesn't
+        new IntersectionObserver((entries) => set(entries[0].isIntersecting), { rootMargin: "0px" }).observe(stage || root);
       } else set(true);
       document.addEventListener("visibilitychange", () => set(state.inView));
     }
