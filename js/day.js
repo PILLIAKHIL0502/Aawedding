@@ -137,7 +137,6 @@
       });
 
       /* ===== 01 · Sunday: the outline fills with gold as the section rises into view ===== */
-      const word = q(".day__word", pSun);
       const fillTL = gsap.timeline({
         scrollTrigger: { trigger: root, start: "top 55%", end: "top top", scrub: true },
       });

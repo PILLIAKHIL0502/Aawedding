@@ -8,7 +8,8 @@
      [data-cursor] / [data-te-cursor], tiny sparkles on click
    - touch ripple: a gold ring at each tap (pooled nodes)
    - magnetic: [data-magnetic] (optional strength, e.g. data-magnetic="0.4") follows the pointer
-   - App.fx.burst(x, y, opts): sparkle burst in viewport coordinates, for any module
+   - App.fx.sparkle(x, y, opts): small DOM sparkle burst in viewport coordinates.
+     (App.fx.burst({x, y, kind}) is the physics confetti/hearts burst owned by particles.js.)
    ========================================================== */
 (function () {
   const App = window.App;
@@ -26,7 +27,7 @@
     document.body.appendChild(root);
 
     App.fx = App.fx || {};
-    App.fx.burst = burst;
+    App.fx.sparkle = burst;   // App.fx.burst belongs to particles.js; don't overwrite it
 
     setupProgress();
     setupNav();

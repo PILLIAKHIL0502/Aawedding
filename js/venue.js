@@ -426,14 +426,28 @@
     /* keep the illustration at a comfortable zoom on any frame size, centred on the venue */
     const svg = $(".venue-map__svg");
     const roadText = $(".vm-road-label textPath");
-    const ROAD_SLOPE = 1.0308;   // path length per x unit along Mehdipatnam Road (-240,520 → 1040,200)
-    const ROUTE_X = 372;         // the label must end before the route turns up to the venue
-    function placeRoadLabel(visibleLeft) {
+    // Mehdipatnam Road runs from (-240,520) to (1040,200); its label's baseline sits at y = 475 - x/4.
+    // The label goes in whichever visible stretch is longer: left of the route, or right of the petrol pump.
+    const ROAD_SLOPE = 1.0308;   // path length per x unit
+    function placeRoadLabel(view) {
       if (!roadText) return;
+      roadText.style.letterSpacing = "";
       let len = 0;
       try { len = roadText.getComputedTextLength() / ROAD_SLOPE; } catch (_) {}
-      let x = Math.max(visibleLeft + 18, 60);
-      if (len && x + len > ROUTE_X) x = Math.max(visibleLeft + 6, ROUTE_X - len);
+      if (!len) return;
+      const minX = Math.max(view.left + 16, 4 * (483 - view.bottom));   // keep the text above the frame's bottom edge
+      const slots = [[minX, 370], [Math.max(minX, 600), view.right - 16]];
+      const [a, b] = slots.sort((p, q) => (q[1] - q[0]) - (p[1] - p[0]))[0];
+      const room = b - a;
+      let x = a;
+      if (len > room) {
+        // tighten the tracking just enough to fit
+        const chars = Math.max(1, (roadText.textContent || "").length);
+        const ls = parseFloat(getComputedStyle(roadText).letterSpacing) || 0;
+        roadText.style.letterSpacing = `${Math.max(0.5, ls - (len - room) * ROAD_SLOPE / chars).toFixed(2)}px`;
+      } else if (a < 370 && b === 370) {
+        x = Math.max(a, 370 - len - 30);   // sit close to the venue rather than at the frame edge
+      }
       roadText.setAttribute("startOffset", ((x + 240) * ROAD_SLOPE).toFixed(1));
     }
     function fitMapArt() {
@@ -444,7 +458,9 @@
       const vw = r.width / s;
       const vh = r.height / s;
       svg.setAttribute("viewBox", `${(400 - vw / 2).toFixed(1)} ${(300 - vh / 2).toFixed(1)} ${vw.toFixed(1)} ${vh.toFixed(1)}`);
-      placeRoadLabel(400 - stage.clientWidth / 2 / s);
+      const hw = stage.clientWidth / 2 / s;
+      const hh = stage.clientHeight / 2 / s;
+      placeRoadLabel({ left: 400 - hw, right: 400 + hw, top: 300 - hh, bottom: 300 + hh });
     }
     if (svg) {
       fitMapArt();

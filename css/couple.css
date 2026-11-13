@@ -249,9 +249,9 @@ html.lang-te .couple .cpl-initial { font-size: 27cqi; margin-top: -2cqi; padding
   white-space: nowrap;
 }
 .couple .cpl-slot--bride .cpl-name { --name-size: 13.4cqi; }
-html.lang-te .couple .cpl-role { font-size: clamp(10px, 5cqi, 16px); text-indent: 0; line-height: 1.5; margin-top: .6cqi; }
-html.lang-te .couple .cpl-name { --name-size: 12cqi; line-height: 1.5; }
-html.lang-te .couple .cpl-slot--bride .cpl-name { --name-size: 11cqi; }
+html.lang-te .couple .cpl-role { font-size: clamp(11px, 5.8cqi, 19px); font-weight: 500; text-indent: 0; line-height: 1.5; margin-top: .6cqi; }
+html.lang-te .couple .cpl-name { --name-size: 15cqi; line-height: 1.45; }
+html.lang-te .couple .cpl-slot--bride .cpl-name { --name-size: 14cqi; }
 
 /* ----- back ----- */
 .couple .cpl-face--back {
@@ -326,9 +326,9 @@ html.lang-te .couple .cpl-amp { font-style: normal; font-size: 1em; line-height:
   color: var(--gold-soft);
 }
 /* Telugu: parents come first, then the relation; never italic */
-html.lang-te .couple .cpl-relation { font-style: normal; font-size: clamp(11px, 6.4cqi, 21px); line-height: 1.6; }
-html.lang-te .couple .cpl-parents { font-weight: 400; font-size: clamp(11.5px, 7cqi, 24px); line-height: 1.55; }
-html.lang-te .couple .cpl-family { font-size: clamp(10px, 4.8cqi, 15px); text-indent: 0; font-weight: 500; }
+html.lang-te .couple .cpl-relation { font-style: normal; font-size: clamp(12px, 7.2cqi, 23px); line-height: 1.6; }
+html.lang-te .couple .cpl-parents { font-weight: 400; font-size: clamp(12.5px, 8cqi, 26px); line-height: 1.5; }
+html.lang-te .couple .cpl-family { font-size: clamp(11px, 5.6cqi, 17px); text-indent: 0; font-weight: 500; }
 html.lang-te .couple .cpl-face--back { gap: 3.2cqi; }
 
 /* ----- "Tap to flip" chip (part of the button, stays in front while the card turns) ----- */

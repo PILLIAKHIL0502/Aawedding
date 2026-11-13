@@ -431,18 +431,26 @@
 
   // The burst API exists from script load, so the intro can use it before "open".
   const api = {
-    burst,
     petals: {
       start: startAmbient, stop: stopAmbient,
       get on() { return ambientOn; },
       get count() { return petals.length; },
       get scrollVelocity() { return scrollV; },
     },
-    get particleCount() { return alive.length; },
   };
+  /* App.fx.burst({ x, y, kind, count, spread }). A positional call, burst(x, y, opts),
+     degrades gracefully to a small sparkle burst at that point. */
+  function publicBurst(a, b, c) {
+    if (typeof a === "number") {
+      const o = c && typeof c === "object" ? c : {};
+      return burst({ x: a, y: b, kind: KINDS[o.kind] ? o.kind : "sparkles", count: Number.isFinite(o.count) ? o.count : 16, spread: 0.6 });
+    }
+    return burst(a);
+  }
+
   function attach() {
-    App.fx = App.fx || {};
-    App.fx.burst = burst;
+    if (!App.fx || typeof App.fx !== "object") App.fx = {};
+    App.fx.burst = publicBurst;
     App.fx.petals = api.petals;
     if (!Object.getOwnPropertyDescriptor(App.fx, "particleCount")) {
       Object.defineProperty(App.fx, "particleCount", { get: () => alive.length, configurable: true });
@@ -451,7 +459,7 @@
   attach();
 
   App.module("particles", () => {
-    attach();   // in case another script replaced App.fx after this one loaded
+    attach();   // in case another script replaced App.fx wholesale after this one loaded
     const go = () => { attach(); startAmbient(); };
     if (App.state.opened) go();
     else App.on("open", go);
