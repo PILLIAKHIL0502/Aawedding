@@ -9,7 +9,7 @@ Royal Regency Gardens, Opp. Indian Oil Petrol Pump, Mehdipatnam Road, Asif Nagar
 
 1. Go to **vercel.com → Add New… → Project → Import Git Repository**, and pick `PILLIAKHIL0502/Aawedding`.
    If the repo isn't listed, click "Adjust GitHub App Permissions" and give Vercel access to it.
-2. **Live URL:** https://aawedding-rosy.vercel.app. The link-preview image (`og:image` in `src/partials/00-head.html`)
+2. **Live URL:** https://akhilwedsalekhya.vercel.app. The link-preview image (`og:image` in `src/partials/00-head.html`)
    points to this domain. If you add a custom domain, update it there.
 3. **Framework preset:** *Other*. Leave the build settings alone, because `vercel.json` already sets them
    (`npm run build` → `dist/`).
