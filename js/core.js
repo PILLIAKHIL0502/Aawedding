@@ -22,6 +22,9 @@
     gsap.registerPlugin(...plugins);
   }
 
+  // Each visit starts at the top (with the intro); don't restore an old scroll position on reload.
+  try { if ("scrollRestoration" in history) history.scrollRestoration = "manual"; } catch (_) {}
+
   const params = new URLSearchParams(location.search);
   const mq = (q) => window.matchMedia(q).matches;
 
