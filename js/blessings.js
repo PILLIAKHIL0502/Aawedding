@@ -722,16 +722,23 @@
         },
       ];
 
+      const perf = App.params.has("debugperf");
+      const runGroup = (fn, i) => {
+        const t0 = performance.now();
+        fn();
+        if (perf) console.log(`[perf] blessings:build#${i} ${(performance.now() - t0).toFixed(1)}ms`);
+      };
       function build() {
         if (built) return;
         built = true;
         const r = root.getBoundingClientRect();
         // Already on screen (e.g. reloaded further down): build everything now, so nothing
         // shows for a frame and then hides again. Otherwise one group per frame.
-        if (r.top < window.innerHeight && r.bottom > 0) { groups.forEach((fn) => fn()); return; }
+        if (r.top < window.innerHeight && r.bottom > 0) { groups.forEach(runGroup); return; }
+        let i = 0;
         const next = () => {
-          groups.shift()();
-          if (groups.length) requestAnimationFrame(next);
+          runGroup(groups[i], i);
+          if (++i < groups.length) requestAnimationFrame(next);
         };
         next();
       }

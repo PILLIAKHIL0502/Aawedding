@@ -669,8 +669,8 @@ html.lang-te #intro .intro__crest-mono { font-style: normal; padding-top: .4em; 
   -webkit-tap-highlight-color: transparent;
 }
 #intro .intro__seal:focus { outline: none; }
-/* keyboard focus: a clear gold ring on the dark curtain (the button is round, so the outline is too) */
-#intro .intro__seal:focus-visible { outline: 2px solid var(--gold-soft); outline-offset: 5px; }
+/* keyboard focus: a two-tone ring (dark band, then gold) that reads on the emerald and on the ivory roll */
+#intro .intro__seal:focus-visible { box-shadow: 0 0 0 3px var(--emerald-ink), 0 0 0 5.5px var(--gold-soft); }
 #intro .intro__seal:focus-visible .intro__seal-ring { stroke: var(--gold-soft); stroke-width: 1.5; stroke-dasharray: none; opacity: 1; }
 #intro .intro__seal-mag { position: absolute; inset: 0; display: block; }
 #intro .intro__seal-glow {

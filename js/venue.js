@@ -486,7 +486,7 @@
       const width = () => { try { return areaText.getComputedTextLength(); } catch (_) { return 0; } };
       let w = width();
       if (!w) return;
-      const lo = view.left + 10;   // frame edge
+      const lo = view.left + 18;   // frame edge
       const hi = 345;              // the venue plot
       if (w > hi - lo) {
         const chars = Math.max(1, (areaText.textContent || "").length);
@@ -548,9 +548,9 @@
 
     // SplitText registers itself with an active gsap.context, and reverting that context would
     // restore the English markup over i18n's Telugu. So the split lives outside the context.
+    const fontsLoading = () => !!(document.fonts && document.fonts.status === "loading");
     function splitTitle() {
-      if (!title || !window.SplitText || !fontsOk) return null;
-      if (document.fonts && document.fonts.status === "loading") return null;   // animate it whole
+      if (!title || !window.SplitText || !fontsOk || fontsLoading()) return null;   // animate it whole
       try {
         if (title._split) { title._split.revert(); title._split = null; }
         const split = new window.SplitText(title, { type: "words", wordsClass: "split-word" });
@@ -562,6 +562,7 @@
     const BLOCKS = [
       {
         name: "head",
+        splits: true,
         watch: $(".venue__head"),
         margin: "0px 0px -12% 0px",   // like ScrollTrigger's start: "top 88%"
         build(tl) {
@@ -643,17 +644,35 @@
     // build whatever hasn't played yet, one block per idle slot
     function buildPending() {
       const next = BLOCKS.find(needsBuild);
-      if (next) idle(() => { buildBlock(next); buildPending(); });
+      if (!next) return;
+      idle(() => {
+        // a font started loading: split once it's in (only a block that is scrolling in can't wait)
+        if (next.splits && fontsLoading()) { document.fonts.ready.then(buildPending, buildPending); return; }
+        buildBlock(next);
+        buildPending();
+      });
+    }
+    // App.fontsReady() can resolve before the Telugu stylesheet has even arrived (nothing is loading
+    // yet), so for Telugu also wait, up to 4 s, until a Telugu face has actually loaded.
+    function fontsSettled() {
+      if (fontsLoading()) return false;
+      if (App.lang !== "te" || !document.fonts) return true;
+      try {
+        for (const f of document.fonts) if (/NTR|Anek Telugu/.test(f.family) && f.status === "loaded") return true;
+      } catch (_) { return true; }
+      return false;
     }
     // fn runs once the current language's fonts are in, unless the language changes first
     function whenFontsReady(fn) {
       const gen = langGen;
-      const done = () => {
+      const t0 = Date.now();
+      const check = () => {
         if (gen !== langGen) return;
+        if (!fontsSettled() && Date.now() - t0 < 4000) { setTimeout(check, 250); return; }
         fontsOk = true;
         if (fn) fn();
       };
-      (App.fontsReady ? App.fontsReady() : Promise.resolve()).then(done, done);
+      (App.fontsReady ? App.fontsReady() : Promise.resolve()).then(check, check);
     }
 
     function startEntrance() {

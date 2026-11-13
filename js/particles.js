@@ -206,12 +206,16 @@
     if (petals.length > n) petals.length = n;
   }
 
+  // Reading window.scrollY inside the frame forces a synchronous style + layout right after GSAP
+  // has written its styles (the single biggest JS cost while scrolling on a slow phone). Lenis
+  // already knows the velocity; without Lenis, the position comes from a passive scroll listener.
+  let seenScrollY = window.scrollY || 0;
+  window.addEventListener("scroll", () => { seenScrollY = window.scrollY || 0; }, { passive: true });
+
   function readScrollVelocity() {
-    const y = window.scrollY || 0;
     let raw;
     if (App.lenis && typeof App.lenis.velocity === "number") raw = App.lenis.velocity;
-    else raw = y - lastScrollY;
-    lastScrollY = y;
+    else { raw = seenScrollY - lastScrollY; lastScrollY = seenScrollY; }
     raw = App.clamp(raw || 0, -90, 90);
     scrollV += (raw - scrollV) * 0.14;
     if (Math.abs(scrollV) < 0.01) scrollV = 0;
@@ -373,7 +377,7 @@
   function kick() {
     if (raf || !canvas || !needsLoop()) return;
     last = performance.now();
-    lastScrollY = window.scrollY || 0;
+    lastScrollY = seenScrollY;
     raf = requestAnimationFrame(frame);
   }
 
