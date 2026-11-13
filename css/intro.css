@@ -814,8 +814,8 @@ html.lang-te #intro .intro__mono { font-style: normal; }
 /* ---------------- exit (data-state="leaving") ----------------
    Only transform and opacity move. The two moving layers are promoted just for the exit,
    and the ambient loops hold still so no frame of the lift spends time on them. */
-#intro[data-state="leaving"] .intro__zoom,
-#intro[data-state="leaving"] .intro__curtain { will-change: transform, opacity; }
+#intro[data-state="leaving"] :is(.intro__zoom, .intro__curtain, .intro__enter) { will-change: transform, opacity; }
+#intro[data-state="leaving"] :is(.intro__halo, .intro__dust, .intro__label) { will-change: opacity; }
 #intro[data-state="leaving"] :is(.intro__glow, .intro__branch img, .intro__halo-spin, .intro__chev),
 #intro[data-state="leaving"] .intro__enter::before { animation-play-state: paused; }
 

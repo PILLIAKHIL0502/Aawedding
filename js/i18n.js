@@ -110,13 +110,13 @@
     if (reset.length && window.gsap) window.gsap.set(reset, { clearProps: "opacity,transform" });
   }
 
-  let fontsLinked = false;
+  // One shared promise: every caller waits for the same download, however many times it's asked.
+  let teFontsPromise = null;
   function loadTeluguFonts() {
-    if (fontsLinked) return Promise.resolve();
-    fontsLinked = true;
+    if (teFontsPromise) return teFontsPromise;
     const link = Object.assign(document.createElement("link"), { rel: "stylesheet", href: TE_FONTS });
     document.head.appendChild(link);
-    return new Promise((resolve) => {
+    return (teFontsPromise = new Promise((resolve) => {
       link.onload = () => {
         Promise.all(["NTR", "Anek Telugu"].map((f) => document.fonts.load(`1em "${f}"`, "అ")))
           .catch(() => {})
@@ -124,7 +124,7 @@
       };
       link.onerror = resolve;
       setTimeout(resolve, 3000);
-    });
+    }));
   }
 
   function setLang(lang, { silent = false } = {}) {
